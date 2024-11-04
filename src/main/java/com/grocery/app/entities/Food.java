@@ -1,22 +1,18 @@
 package com.grocery.app.entities;
 
-import com.grocery.app.config.StatusConfig;
-
 import java.sql.Date;
-import java.util.ArrayList;
 
-public class ShoppingList {
+public class Food {
     private long id;
     private long ownerId;
-    private long familyId;
     private String name;
     private String description;
-    private ArrayList<Task> taskArrayList = new ArrayList<>();
+    private Category category;
+    private MeasureUnit measureUnit;
     private Date createdAt;
     private Date updatedAt;
-    private String status;
-    ShoppingList(){
-        status = StatusConfig.AVAILABLE.getStatus();
+    public Food(){
+
     }
 
     public long getId() {
@@ -35,14 +31,6 @@ public class ShoppingList {
         this.ownerId = ownerId;
     }
 
-    public long getFamilyId() {
-        return familyId;
-    }
-
-    public void setFamilyId(long familyId) {
-        this.familyId = familyId;
-    }
-
     public String getName() {
         return name;
     }
@@ -59,12 +47,20 @@ public class ShoppingList {
         this.description = description;
     }
 
-    public ArrayList<Task> getTaskArrayList() {
-        return taskArrayList;
+    public Category getCategory() {
+        return category;
     }
 
-    public void setTaskArrayList(ArrayList<Task> taskArrayList) {
-        this.taskArrayList = taskArrayList;
+    public void setCategory(Category category) {
+        this.category = category;
+    }
+
+    public MeasureUnit getMeasureUnit() {
+        return measureUnit;
+    }
+
+    public void setMeasureUnit(MeasureUnit measureUnit) {
+        this.measureUnit = measureUnit;
     }
 
     public Date getCreatedAt() {
@@ -81,13 +77,5 @@ public class ShoppingList {
 
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(StatusConfig status) {
-        this.status = status.getStatus();
     }
 }

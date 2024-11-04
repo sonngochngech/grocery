@@ -1,23 +1,19 @@
-package com.grocery.app.entities;
+package com.grocery.app.dto;
 
-import com.grocery.app.config.StatusConfig;
+import com.grocery.app.entities.Category;
+import com.grocery.app.entities.MeasureUnit;
 
 import java.sql.Date;
-import java.util.ArrayList;
 
-public class ShoppingList {
+public class FoodDTO {
     private long id;
     private long ownerId;
-    private long familyId;
     private String name;
     private String description;
-    private ArrayList<Task> taskArrayList = new ArrayList<>();
+    private CategoryDTO categoryDTO;
+    private MeasureUnitDTO measureUnitDTO;
     private Date createdAt;
     private Date updatedAt;
-    private String status;
-    ShoppingList(){
-        status = StatusConfig.AVAILABLE.getStatus();
-    }
 
     public long getId() {
         return id;
@@ -33,14 +29,6 @@ public class ShoppingList {
 
     public void setOwnerId(long ownerId) {
         this.ownerId = ownerId;
-    }
-
-    public long getFamilyId() {
-        return familyId;
-    }
-
-    public void setFamilyId(long familyId) {
-        this.familyId = familyId;
     }
 
     public String getName() {
@@ -59,12 +47,20 @@ public class ShoppingList {
         this.description = description;
     }
 
-    public ArrayList<Task> getTaskArrayList() {
-        return taskArrayList;
+    public CategoryDTO getCategoryDTO() {
+        return categoryDTO;
     }
 
-    public void setTaskArrayList(ArrayList<Task> taskArrayList) {
-        this.taskArrayList = taskArrayList;
+    public void setCategoryDTO(CategoryDTO categoryDTO) {
+        this.categoryDTO = categoryDTO;
+    }
+
+    public MeasureUnitDTO getMeasureUnitDTO() {
+        return measureUnitDTO;
+    }
+
+    public void setMeasureUnitDTO(MeasureUnitDTO measureUnitDTO) {
+        this.measureUnitDTO = measureUnitDTO;
     }
 
     public Date getCreatedAt() {
@@ -81,13 +77,5 @@ public class ShoppingList {
 
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(StatusConfig status) {
-        this.status = status.getStatus();
     }
 }

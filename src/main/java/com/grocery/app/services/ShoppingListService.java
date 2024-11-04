@@ -3,11 +3,12 @@ package com.grocery.app.services;
 import com.grocery.app.dto.ShoppingListDTO;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 public interface ShoppingListService {
     ShoppingListDTO createShoppingList(ShoppingListDTO shoppingListDTO);
 
-    ShoppingListDTO getShoppingListById(long userId, long id);
+    Optional<ShoppingListDTO> getShoppingListById(long userId, long id);
 
     ArrayList<ShoppingListDTO> getAllShoppingList(long userId, int from, int to);
 
