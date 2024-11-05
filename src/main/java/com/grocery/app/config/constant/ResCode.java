@@ -14,14 +14,31 @@ public enum ResCode {
     VALIDATION_ERROR_FIELD("0007", "Validation error field"),
 
 //    User code
-    REGISTER_SUCCESSFULLY("0008", "Register successfully"),
-    LOGIN_SUCCESSFULLY("0009", "Login successfully"),
-    WRONG_LOGIN_CREDENTIAL("0010", "Wrong login credential"),
-    INVALID_REFRESH_TOKEN("0011", "Invalid refresh token"),
-    GET_ACCESS_TOKEN_SUCCESSFULLY("0012", "Get access token error"),
-    ROLE_NOT_FOUND("0013", "Role not found"),
-    USERNAME_NOT_FOUND("0014", "Username not found"),
-    INACTIVATED_ACCOUNT("00015", "Inactivated account"),
+    REGISTER_SUCCESSFULLY("00101", "Register successfully"),
+    LOGIN_SUCCESSFULLY("00102", "Login successfully"),
+    WRONG_LOGIN_CREDENTIAL("00103", "Wrong login credential"),
+    INVALID_REFRESH_TOKEN("00104", "Invalid refresh token"),
+    GET_ACCESS_TOKEN_SUCCESSFULLY("00105", "Get access token error"),
+    ROLE_NOT_FOUND("00106", "Role not found"),
+    USERNAME_NOT_FOUND("00106", "Username not found"),
+    INACTIVATED_ACCOUNT("00107", "Inactivated account"),
+    GET_USER_SUCCESSFULLY("00108", "Get user successfully"),
+    UPDATE_USER_SUCCESSFULLY("00109", "Update user successfully"),
+    LOCK_USER_SUCCESSFULLY("00110", "Lock user successfully"),
+    USER_NOT_FOUND("00111", "User not found"),
+    EXISTED_USER("00112", "Existed user"),
+
+//    Family Code
+    CREATE_FAMILY_SUCCESSFULLY("00201", "Create family successfully"),
+    GET_FAMILIES_SUCCESSFULLY("00202", "Get families successfully"),
+    DELETE_FAMILY_SUCCESSFULLY("00203", "Delete family successfully"),
+    DELETE_FAMILY_MEMBER_SUCCESSFULLY("00204", "Delete family member successfully"),
+    GET_FAMILY_SUCCESSFULLY("00205", "Get family successfully"),
+    NOT_BELONG_TO_FAMILY("00206", "Not belong to family"),
+    NOT_OWNER_OF_FAMILY("00207", "Not owner of family"),
+    FAMILY_NOT_FOUND("00208", "Family not found"),
+    NOT_REMOVED_OWNER("00209", "Not removed owner"),
+
 
     ;
 
