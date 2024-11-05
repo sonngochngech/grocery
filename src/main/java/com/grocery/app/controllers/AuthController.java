@@ -9,11 +9,13 @@ import com.grocery.app.exceptions.ServiceException;
 import com.grocery.app.payloads.loginCredentials.DefaultCredentials;
 import com.grocery.app.payloads.loginCredentials.SocialCredentials;
 import com.grocery.app.payloads.responses.AuthResponse;
+import com.grocery.app.payloads.users.RegisterUserDTO;
 import com.grocery.app.security.JWTUtil;
 import com.grocery.app.services.UserService;
 import com.grocery.app.utils.RedisService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,17 +41,21 @@ public class AuthController {
     @Autowired
     private RedisService redisService;
 
+    @Autowired
+    private ModelMapper modelMapper;
+
 
 
     @PostMapping("register")
-    public ResponseEntity<AuthResponse> register(@RequestBody  @Valid UserDetailDTO userDTO , @RequestParam String verifyCode) {
+    public ResponseEntity<AuthResponse> register(@RequestBody  @Valid RegisterUserDTO userDTO ) {
         userDTO.setPassword(passwordEncoder.encode(userDTO.getPassword()));
-        UserDetailDTO user = userService.registerUser(userDTO);
-        log.info("User registered successfully");
+        UserDetailDTO userDetailDTO=modelMapper.map(userDTO,UserDetailDTO.class);
+
+        UserDetailDTO user = userService.registerUser(userDetailDTO);
         String accessToken = jwtUtil.generateToken(user.getUsername(), AppConstants.ACCESS_TOKEN_LIFETIME);
         String userHash=jwtUtil.generateToken(user.getUsername(),AppConstants.REFRESH_TOKEN_LIFETIME);
-        log.info("Access token generated successfully:{}",userHash);
         String refreshToken = UUID.randomUUID().toString();
+
         redisService.saveData(refreshToken,userHash);
         AuthResponse authResponse = new AuthResponse(
                 ResCode.REGISTER_SUCCESSFULLY.getMessage(),
@@ -62,8 +68,9 @@ public class AuthController {
 
     @PostMapping("default-login")
     public ResponseEntity<AuthResponse> defaultLogin(@RequestBody @Valid DefaultCredentials loginCredentials){
-        loginCredentials.setPassword(passwordEncoder.encode(loginCredentials.getPassword()));
+        log.info("Login request received: {}",loginCredentials);
         UserDetailDTO user=userService.loginUser(loginCredentials);
+        log.info("User logged in successfully:{} ",user);
         String accessToken = jwtUtil.generateToken(user.getUsername(),AppConstants.ACCESS_TOKEN_LIFETIME);
         String userHash=jwtUtil.generateToken(user.getUsername(),AppConstants.REFRESH_TOKEN_LIFETIME);
 
@@ -87,9 +94,8 @@ public class AuthController {
     }
 
 
-    @PostMapping("verify-code")
-    public ResponseEntity<AuthResponse> verifyCode(@RequestBody String token){
-        log.info("Verifying code: "+token);
+    @PostMapping("get-access-token")
+    public ResponseEntity<AuthResponse> getAccessToken(@RequestBody String token){
         Object data;
         try{
              data = redisService.getData(token);
@@ -97,7 +103,6 @@ public class AuthController {
              if(jwtUtil.isExpired((String) data)){
                  throw new ResourceException();
              }
-             log.info("Code verified successfully");
              String access_token=jwtUtil.generateToken(jwtUtil.getUsername((String) data),AppConstants.ACCESS_TOKEN_LIFETIME);
              return new ResponseEntity<>(new AuthResponse(ResCode.GET_ACCESS_TOKEN_SUCCESSFULLY.getMessage(),ResCode.GET_ACCESS_TOKEN_SUCCESSFULLY.getCode(),null,access_token,null),HttpStatus.OK);
         }catch (ResourceException e){

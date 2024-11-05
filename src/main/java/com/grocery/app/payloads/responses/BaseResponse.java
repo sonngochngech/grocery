@@ -1,5 +1,6 @@
 package com.grocery.app.payloads.responses;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,12 +11,11 @@ import java.util.Map;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class BaseResponse {
-    @JsonProperty(value="Resultmessage")
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class BaseResponse<T> {
     private String message;
-
-    @JsonProperty(value="Resultcode")
     private String code;
+    private T data;
 
 
 }
