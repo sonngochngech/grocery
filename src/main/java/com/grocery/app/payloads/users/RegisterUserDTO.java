@@ -1,23 +1,17 @@
-package com.grocery.app.dto;
+package com.grocery.app.payloads.users;
 
-import com.grocery.app.entities.Role;
+import com.grocery.app.dto.DeviceDTO;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.HashSet;
-import java.util.Set;
-
+import java.util.Date;
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class UserDetailDTO {
-    private  Long  id;
-
+@NoArgsConstructor
+public class RegisterUserDTO {
     @NotNull(message = "First name is required")
     @Size(min = 3, max = 50, message = "First name must be between 3 and 50 characters")
     private String  firstName;
@@ -30,17 +24,20 @@ public class UserDetailDTO {
     @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
     private String username;
 
+
     private  String  phoneNumber;
 
     private  String  email;
 
-
+    @NotNull(message = "Password is required")
+    @Size(min = 8, message = "Password must be at least 8 characters long")
     private  String password;
 
+    private Date birthday;
 
-    private Role role;
+    private String sexType;
 
-    private Set<DeviceDTO> devices=new HashSet<>();
+    private DeviceDTO deviceDTO;
 
-    private Boolean isActivated;
+    private String verifyCode;
 }
