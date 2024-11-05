@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class ErrorResponse {
+public class ErrorResponse  extends  BaseResponse<Void>{
     private String code;
     private String message;
 

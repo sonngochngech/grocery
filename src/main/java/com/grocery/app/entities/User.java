@@ -1,9 +1,6 @@
 package com.grocery.app.entities;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import com.grocery.app.config.constant.AppConstants;
 import jakarta.persistence.*;
@@ -12,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.checkerframework.common.aliasing.qual.Unique;
 
 @Entity
 @Table(name="users")
@@ -25,9 +23,9 @@ public  class User{
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
 
-    
+    @Unique
     private String username;
-    
+
     @Size(min=3,max=20,message="First name must be between 5 and 20 characters")
     private String firstName;
 
@@ -38,8 +36,10 @@ public  class User{
 
     private String phoneNumber;
 
-    @Enumerated(EnumType.STRING)
-    private AppConstants.SexType sex;
+
+    private String sex;
+
+    private Date birthday;
 
 
     @ManyToOne(fetch=FetchType.EAGER)
@@ -69,9 +69,7 @@ public  class User{
     @OneToMany(mappedBy = "sender")
     private List<Notification> sentNotifications=new ArrayList<>();
 
-    public void addDevice(Device device){
-        this.devices.add(device);
-    }
+
 
 
 

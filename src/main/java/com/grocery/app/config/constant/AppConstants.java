@@ -19,6 +19,7 @@ public class AppConstants {
     public static  final String EN="en";
     public static  final Long ACCESS_TOKEN_LIFETIME= 86400000L;
     public static final Long REFRESH_TOKEN_LIFETIME= 2592000000L;
+    public  static final String DATE_FORMAT= "yyyy-MM-dd";
 
 
 

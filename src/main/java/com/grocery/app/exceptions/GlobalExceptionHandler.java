@@ -21,7 +21,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGlobalException(Exception e) {
         ResCode errorCode = ResCode.INTERNAl_SERVER_ERROR;
-        ErrorResponse errorResponse=new ErrorResponse(errorCode.getCode(),errorCode.getMessage());
+        ErrorResponse errorResponse=new ErrorResponse(errorCode.getCode(),e.getMessage());
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -42,6 +42,17 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse=new ErrorResponse(e.getCode(),e.getMessage());
         return new ResponseEntity<>(errorResponse,HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(ServiceException.class)
+    public ResponseEntity<ErrorResponse> handleServiceException(ServiceException e) {
+        ErrorResponse errorResponse=new ErrorResponse(e.getCode(),e.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+
+
+
+
 
     
 

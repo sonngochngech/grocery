@@ -5,8 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.grocery.app.mapper.MapperFactory;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.modelmapper.ModelMapper;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 
 @Configuration
 public class ApplicationConfig {
@@ -15,6 +17,7 @@ public class ApplicationConfig {
     public ModelMapper modelMapper() {
         ModelMapper modelMapper= new ModelMapper();
         modelMapper.getConfiguration().setSkipNullEnabled(true);
+        modelMapper.getConfiguration().setFieldAccessLevel(org.modelmapper.config.Configuration.AccessLevel.PRIVATE);
         return modelMapper;
     }
 

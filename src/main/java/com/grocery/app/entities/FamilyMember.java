@@ -1,12 +1,7 @@
 package com.grocery.app.entities;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,6 +9,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Table(name="family_members")
 public class FamilyMember {
 
@@ -23,11 +19,11 @@ public class FamilyMember {
     
     private String name;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name="family_id")
     private Family family;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name="user_id")
     private User user;
     

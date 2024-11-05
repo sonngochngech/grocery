@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 public class UserInfoConfig implements UserDetails {
 
     private static final long serialVersionUID = 1L;
+    private Long id;
     private String username;
     private String password;
     private String role;
@@ -29,6 +30,7 @@ public class UserInfoConfig implements UserDetails {
         this.password = user.getPassword();
         this.role = user.getRole().getName();
         this.isActive = user.getIsActivated();
+        this.id = user.getId();
 
     }
     @Override
