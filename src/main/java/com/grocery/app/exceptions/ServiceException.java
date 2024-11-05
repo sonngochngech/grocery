@@ -1,5 +1,8 @@
 package com.grocery.app.exceptions;
 
+import lombok.Data;
+
+@Data
 public class ServiceException extends  RuntimeException {
     private static final long serialVersionUID = 1L;
 
