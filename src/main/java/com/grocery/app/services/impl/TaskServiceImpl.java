@@ -55,13 +55,17 @@ public class TaskServiceImpl implements TaskService {
     public ArrayList<TaskDTO> getAllTask(long userId, int from, int to) {
         List<Task> tasks = taskRepository.findAllByUserId(userId);
 
+        // Clamp "to" parameter
+        to = Math.min(to, tasks.size());
+
         // Validate pagination bounds
-        if (from < 0 || to > tasks.size() || from > to) {
+        if (from < 0 || from > to) {
             throw new IndexOutOfBoundsException("Invalid pagination parameters.");
         }
 
         // Paginate and map tasks to DTOs
         List<Task> paginatedTasks = tasks.subList(from, to);
+
         return paginatedTasks.stream()
                 .map(task -> modelMapper.map(task, TaskDTO.class))
                 .collect(Collectors.toCollection(ArrayList::new));
@@ -69,17 +73,12 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public TaskDTO updateTask(TaskDTO taskDTO) {
-        Optional<Task> existingTaskOpt = taskRepository.findById(taskDTO.getId());
+        Task existingTask = taskRepository.findById(taskDTO.getId()).orElse(null);
 
-        if (existingTaskOpt.isPresent()) {
-            Task existingTask = existingTaskOpt.get();
-
-            // Ensure user ownership and update fields
-            if (existingTask.getUser().getId() == userId) {
-                modelMapper.map(taskDTO, existingTask);
-                Task updatedTask = taskRepository.save(existingTask);
-                return modelMapper.map(updatedTask, TaskDTO.class);
-            }
+        if (existingTask != null) {
+            modelMapper.map(taskDTO, existingTask);
+            Task updatedTask = taskRepository.save(existingTask);
+            return modelMapper.map(updatedTask, TaskDTO.class);
         }
 
         return null;

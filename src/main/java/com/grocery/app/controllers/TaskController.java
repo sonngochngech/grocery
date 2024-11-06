@@ -4,22 +4,18 @@ import com.grocery.app.config.StatusConfig;
 import com.grocery.app.config.UserInfoConfig;
 import com.grocery.app.config.constant.ResCode;
 import com.grocery.app.dto.*;
-import com.grocery.app.dto.family.FamilyDTO;
 import com.grocery.app.dto.request.createRequest.CreateTaskRequest;
 import com.grocery.app.dto.request.updateRequest.UpdateTaskRequest;
-import com.grocery.app.entities.User;
 import com.grocery.app.exceptions.ServiceException;
 import com.grocery.app.services.*;
-import com.grocery.app.services.impl.TaskServiceImpl;
-import com.grocery.app.services.impl.UserServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Optional;
 
 @RestController
@@ -45,7 +41,7 @@ public class TaskController {
     @Autowired
     private FamilyService familyService;
 
-    @PostMapping
+    @PostMapping("/add")
     public ResponseEntity<TaskDTO> createTask(@RequestBody CreateTaskRequest createTaskRequest) {
         // Get the currently authenticated user who is assigning the task
         UserInfoConfig assigner = authenticationService.getCurrentUser();
@@ -105,9 +101,7 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdTask);
     }
 
-
-
-    @GetMapping("/{taskId}")
+    @GetMapping("/get/{taskId}")
     public ResponseEntity<TaskDTO> getTaskById(@PathVariable long taskId) {
         // Get the currently authorized user
         UserInfoConfig user = authenticationService.getCurrentUser();
@@ -123,31 +117,110 @@ public class TaskController {
         return ResponseEntity.ok(taskDTO);
     }
 
-
-    @GetMapping("/{userId}")
+    @GetMapping("/getAll")
     public ResponseEntity<ArrayList<TaskDTO>> getAllTask(
-            @PathVariable long userId,
             @RequestParam(defaultValue = "0") int from,
             @RequestParam(defaultValue = "10") int to) {
 
-        ArrayList<TaskDTO> tasks = taskService.getAllTask(userId, from, to);
+        UserInfoConfig userInfoConfig = authenticationService.getCurrentUser();
+
+        ArrayList<TaskDTO> tasks = taskService.getAllTask(userInfoConfig.getId(), from, to);
         return ResponseEntity.ok(tasks);
     }
 
-    @PutMapping
+    @PutMapping("/update")
     public ResponseEntity<TaskDTO> updateTask(@RequestBody UpdateTaskRequest updateTaskRequest) {
-        Optional<TaskDTO> updatedTask = Optional.ofNullable(taskService.updateTask(
-                updateTaskRequest.getUserId(), updateTaskRequest.toTaskDTO()));
+        UserInfoConfig assigner = authenticationService.getCurrentUser();
 
-        return updatedTask.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
+        // Retrieve the task by ID and validate existence
+        TaskDTO taskDTO = taskService.getTaskById(
+                updateTaskRequest.getUserId(),
+                updateTaskRequest.getTaskId()
+        ).orElseThrow(() -> new ServiceException(
+                ResCode.TASK_NOT_FOUND.getMessage(),
+                ResCode.TASK_NOT_FOUND.getCode()
+        ));
+
+        // Validate shopping list association
+        if (!Objects.equals(taskDTO.getShoppingListDTO().getId(), updateTaskRequest.getShoppingListId())) {
+            throw new ServiceException(
+                    ResCode.TASK_NOT_IN_SHOPPING_LIST.getMessage(),
+                    ResCode.TASK_NOT_IN_SHOPPING_LIST.getCode()
+            );
+        }
+
+        // Update food if it's changed
+        if (updateTaskRequest.getFoodId() != taskDTO.getFoodDTO().getId()) {
+            FoodDTO foodDTO = foodService.getFoodById(assigner.getId(), updateTaskRequest.getFoodId())
+                    .orElseThrow(() -> new ServiceException(
+                            ResCode.FOOD_NOT_FOUND.getMessage(),
+                            ResCode.FOOD_NOT_FOUND.getCode()
+                    ));
+            taskDTO.setFoodDTO(foodDTO);
+        }
+
+        // Update assignee if it's changed
+        if (!Objects.equals(updateTaskRequest.getUserId(), taskDTO.getUser().getId())) {
+            UserDetailDTO newAssignee = userService.getUser(updateTaskRequest.getUserId());
+            if (newAssignee == null) {
+                throw new ServiceException(
+                        ResCode.USER_NOT_FOUND.getMessage(),
+                        ResCode.USER_NOT_FOUND.getCode()
+                );
+            }
+            taskDTO.setUser(newAssignee);
+        }
+
+        // Update quantity if it's changed
+        if (updateTaskRequest.getQuantity() != taskDTO.getQuantity()) {
+            taskDTO.setQuantity(updateTaskRequest.getQuantity());
+        }
+
+        // Ensure the assigner is the owner of the family in the shopping list
+        boolean isOwner = familyService.verifyOwner(
+                taskDTO.getShoppingListDTO().getFamilyId(),
+                assigner.getId()
+        );
+        if (!isOwner) {
+            throw new ServiceException(
+                    ResCode.NOT_OWNER_OF_FAMILY.getMessage(),
+                    ResCode.NOT_OWNER_OF_FAMILY.getCode()
+            );
+        }
+
+        // Validate if the assignee belongs to the family
+        boolean isMember = familyService.verifyMember(
+                taskDTO.getShoppingListDTO().getFamilyId(),
+                updateTaskRequest.getUserId()
+        );
+        if (!isMember) {
+            throw new ServiceException(
+                    ResCode.NOT_BELONG_TO_FAMILY.getMessage(),
+                    ResCode.NOT_BELONG_TO_FAMILY.getCode()
+            );
+        }
+
+        // Persist the updated task and return the response
+        TaskDTO updatedTaskDTO = taskService.updateTask(taskDTO);
+
+        // Return the updated task
+        return ResponseEntity.ok(updatedTaskDTO);
     }
 
-    @DeleteMapping("/{userId}/{taskId}")
-    public ResponseEntity<TaskDTO> deleteTask(@PathVariable long userId, @PathVariable long taskId) {
-        Optional<TaskDTO> deletedTask = Optional.ofNullable(taskService.deleteTask(userId, taskId));
+    @DeleteMapping("/delete/{taskId}")
+    public ResponseEntity<TaskDTO> deleteTask(@PathVariable long taskId) {
+        UserInfoConfig userInfoConfig = authenticationService.getCurrentUser();
 
-        return deletedTask.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
+        TaskDTO deletedTask = taskService.deleteTask(userInfoConfig.getId(), taskId);
+
+        // Validate if task was deleted
+        if (deletedTask == null) {
+            throw new ServiceException(
+                    ResCode.TASK_NOT_DELETED.getMessage(),
+                    ResCode.TASK_NOT_DELETED.getCode()
+            );
+        }
+
+        return ResponseEntity.ok(deletedTask);
     }
 }
