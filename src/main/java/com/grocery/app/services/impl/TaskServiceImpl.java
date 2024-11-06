@@ -1,9 +1,13 @@
 package com.grocery.app.services.impl;
 
 import com.grocery.app.config.StatusConfig;
+import com.grocery.app.config.constant.ResCode;
 import com.grocery.app.dto.TaskDTO;
 import com.grocery.app.entities.Task;
+import com.grocery.app.entities.User;
+import com.grocery.app.exceptions.ServiceException;
 import com.grocery.app.repositories.TaskRepository;
+import com.grocery.app.repositories.UserRepo;
 import com.grocery.app.services.TaskService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,11 +28,13 @@ public class TaskServiceImpl implements TaskService {
     @Autowired
     private TaskRepository taskRepository;
 
+    @Autowired
+    private UserRepo userRepository;
+
     @Override
-    public TaskDTO createTask(long userId, TaskDTO taskDTO) {
+    public TaskDTO createTask(TaskDTO taskDTO) {
         // Map DTO to entity
         Task task = modelMapper.map(taskDTO, Task.class);
-        task.setBuyerId(userId); // Ensure the task is associated with the correct user
 
         // Save the entity
         Task savedTask = taskRepository.save(task);
@@ -41,7 +47,7 @@ public class TaskServiceImpl implements TaskService {
     public Optional<TaskDTO> getTaskById(long userId, long id) {
         // Retrieve task and check user ownership
         return taskRepository.findById(id)
-                .filter(task -> task.getBuyerId() == userId)
+                .filter(task -> task.getUser().getId() == userId)
                 .map(task -> modelMapper.map(task, TaskDTO.class));
     }
 
@@ -62,14 +68,14 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public TaskDTO updateTask(long userId, TaskDTO taskDTO) {
+    public TaskDTO updateTask(TaskDTO taskDTO) {
         Optional<Task> existingTaskOpt = taskRepository.findById(taskDTO.getId());
 
         if (existingTaskOpt.isPresent()) {
             Task existingTask = existingTaskOpt.get();
 
             // Ensure user ownership and update fields
-            if (existingTask.getBuyerId() == userId) {
+            if (existingTask.getUser().getId() == userId) {
                 modelMapper.map(taskDTO, existingTask);
                 Task updatedTask = taskRepository.save(existingTask);
                 return modelMapper.map(updatedTask, TaskDTO.class);
@@ -87,8 +93,8 @@ public class TaskServiceImpl implements TaskService {
             Task task = taskOpt.get();
 
             // Check ownership and set status if applicable
-            if (task.getBuyerId() == userId && !Objects.equals(task.getStatus(), StatusConfig.DELETED.getStatus())) {
-                task.setStatus(StatusConfig.DELETED); // Assume DELETED is the status to mark as deleted
+            if (task.getUser().getId() == userId && !Objects.equals(task.getStatus(), StatusConfig.DELETED.getStatus())) {
+                task.setStatus(StatusConfig.DELETED.getStatus()); // Assume DELETED is the status to mark as deleted
                 Task deletedTask = taskRepository.save(task);
                 return modelMapper.map(deletedTask, TaskDTO.class);
             }

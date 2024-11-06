@@ -39,6 +39,12 @@ public enum ResCode {
     FAMILY_NOT_FOUND("00208", "Family not found"),
     NOT_REMOVED_OWNER("00209", "Not removed owner"),
 
+// Food code
+    FOOD_NOT_FOUND("00301", "Food is not found"),
+
+// Shopping list code
+    SHOPPING_LIST_NOT_FOUND("00401", "Shopping list is not found"),
+
 
     ;
 
