@@ -109,13 +109,20 @@ public class TaskController {
 
     @GetMapping("/{taskId}")
     public ResponseEntity<TaskDTO> getTaskById(@PathVariable long taskId) {
-        // Get currently authorized user
+        // Get the currently authorized user
         UserInfoConfig user = authenticationService.getCurrentUser();
-        // Get task matching assignee and taskId
-        Optional<TaskDTO> task = taskService.getTaskById(user.getId(), taskId);
-        return task.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
+
+        // Retrieve the task based on the user and taskId
+        TaskDTO taskDTO = taskService.getTaskById(user.getId(), taskId)
+                .orElseThrow(() -> new ServiceException(
+                        ResCode.TASK_NOT_FOUND.getMessage(),
+                        ResCode.TASK_NOT_FOUND.getCode()
+                ));
+
+        // Return the found task
+        return ResponseEntity.ok(taskDTO);
     }
+
 
     @GetMapping("/{userId}")
     public ResponseEntity<ArrayList<TaskDTO>> getAllTask(

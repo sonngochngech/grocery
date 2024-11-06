@@ -45,7 +45,8 @@ public enum ResCode {
 // Shopping list code
     SHOPPING_LIST_NOT_FOUND("00401", "Shopping list is not found"),
 
-
+    // Task code
+    TASK_NOT_FOUND("00501", "Task is not found"),
     ;
 
     private final String code;
