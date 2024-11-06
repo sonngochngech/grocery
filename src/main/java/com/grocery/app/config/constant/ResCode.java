@@ -44,8 +44,10 @@ public enum ResCode {
 
 // Shopping list code
     SHOPPING_LIST_NOT_FOUND("00401", "Shopping list is not found"),
-
-    // Task code
+    SHOPPING_LIST_CREATION_FAILED("00402", "Create shopping list fail"),
+    SHOPPING_LIST_NOT_DELETED("00403", "Shopping list is not deleted"),
+    NOT_SHOPPING_LIST_OWNER("00404", "User is not shopping list owner"),
+// Task code
     TASK_NOT_FOUND("00501", "Task is not found"),
     TASK_NOT_IN_SHOPPING_LIST("00502", "Task is not in shopping list"),
     TASK_NOT_DELETED("00503", "Task is not deleted")

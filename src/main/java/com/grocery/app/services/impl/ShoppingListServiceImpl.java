@@ -34,14 +34,17 @@ public class ShoppingListServiceImpl implements ShoppingListService {
     @Override
     public Optional<ShoppingListDTO> getShoppingListById(long userId, long id) {
         return shoppingListRepository.findById(id)
-                .filter(shoppingList -> shoppingList.getOwnerId() == userId)
+                .filter(shoppingList -> shoppingList.getOwner().getId() == userId)
                 .map(shoppingList -> modelMapper.map(shoppingList, ShoppingListDTO.class));
     }
 
     @Override
     public ArrayList<ShoppingListDTO> getAllShoppingList(long userId, int from, int to) {
         List<ShoppingList> shoppingLists = shoppingListRepository.findAllByUserId(userId);
-        if (from < 0 || to > shoppingLists.size() || from > to) {
+
+        // Clamp "to" variable
+        to = Math.min(to, shoppingLists.size());
+        if (from < 0 || from > to) {
             throw new IndexOutOfBoundsException("Invalid pagination parameters.");
         }
 
@@ -70,10 +73,10 @@ public class ShoppingListServiceImpl implements ShoppingListService {
         ShoppingList shoppingList = shoppingListRepository.findById(id).orElse(null);
 
         if (shoppingList != null &&
-                shoppingList.getOwnerId() == userId &&
+                shoppingList.getOwner().getId() == userId &&
                 !Objects.equals(shoppingList.getStatus(), StatusConfig.DELETED.getStatus())) {
 
-            shoppingList.setStatus(StatusConfig.DELETED);
+            shoppingList.setStatus(StatusConfig.DELETED.getStatus());
             ShoppingList updatedShoppingList = shoppingListRepository.save(shoppingList);
             return modelMapper.map(updatedShoppingList, ShoppingListDTO.class);
         }
