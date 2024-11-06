@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,6 +17,8 @@ public class TaskDTO {
     private UserDetailDTO user;
     private FoodDTO foodDTO;
     private float quantity;
+    private LocalDate createdAt;
+    private LocalDate updatedAt;
     private String status;
 }
 
