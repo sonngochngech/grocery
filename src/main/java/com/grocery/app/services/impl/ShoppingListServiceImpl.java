@@ -1,6 +1,6 @@
 package com.grocery.app.services.impl;
 
-import com.grocery.app.config.StatusConfig;
+import com.grocery.app.config.constant.StatusConfig;
 import com.grocery.app.dto.ShoppingListDTO;
 import com.grocery.app.entities.ShoppingList;
 import com.grocery.app.repositories.ShoppingListRepository;

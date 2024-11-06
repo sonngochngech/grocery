@@ -1,11 +1,8 @@
 package com.grocery.app.services.impl;
 
-import com.grocery.app.config.StatusConfig;
-import com.grocery.app.config.constant.ResCode;
+import com.grocery.app.config.constant.StatusConfig;
 import com.grocery.app.dto.TaskDTO;
 import com.grocery.app.entities.Task;
-import com.grocery.app.entities.User;
-import com.grocery.app.exceptions.ServiceException;
 import com.grocery.app.repositories.TaskRepository;
 import com.grocery.app.repositories.UserRepo;
 import com.grocery.app.services.TaskService;

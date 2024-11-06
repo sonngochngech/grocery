@@ -1,6 +1,6 @@
 package com.grocery.app.controllers;
 
-import com.grocery.app.config.StatusConfig;
+import com.grocery.app.config.constant.StatusConfig;
 import com.grocery.app.config.UserInfoConfig;
 import com.grocery.app.config.constant.ResCode;
 import com.grocery.app.dto.*;
@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Objects;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("api/task")

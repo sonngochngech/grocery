@@ -1,4 +1,4 @@
-package com.grocery.app.config;
+package com.grocery.app.config.constant;
 
 public enum StatusConfig {
     DELETED("deleted"),

@@ -1,6 +1,6 @@
 package com.grocery.app.entities;
 
-import com.grocery.app.config.StatusConfig;
+import com.grocery.app.config.constant.StatusConfig;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

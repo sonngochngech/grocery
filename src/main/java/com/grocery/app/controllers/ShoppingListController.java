@@ -1,6 +1,6 @@
 package com.grocery.app.controllers;
 
-import com.grocery.app.config.StatusConfig;
+import com.grocery.app.config.constant.StatusConfig;
 import com.grocery.app.config.UserInfoConfig;
 import com.grocery.app.config.constant.ResCode;
 import com.grocery.app.dto.ShoppingListDTO;
