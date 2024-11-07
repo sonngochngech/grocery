@@ -59,7 +59,10 @@ public enum ResCode {
     MEAL_NOT_FOUND("00701", "Meal is not found"),
     MEAL_CREATION_FAILED("00702", "Create meal fail"),
     MEAL_UPDATE_FAILED("00703", "Update meal fail"),
-    MEAL_DELETE_FAILED("00704", "Delete meal fail")
+    MEAL_DELETE_FAILED("00704", "Delete meal fail"),
+
+// Enum code
+    INVALID_TERM("99901", "Invalid term"),
     ;
 
     private final String code;

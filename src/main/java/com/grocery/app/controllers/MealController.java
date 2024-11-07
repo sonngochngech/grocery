@@ -30,11 +30,12 @@ public class MealController {
     private FamilyService familyService;
     private RecipeService recipeService;
     private UserService userService;
+
     @PostMapping("/add")
     public ResponseEntity<MealDTO> createMeal(CreateMealRequest createMealRequest){
         UserInfoConfig currentUser = authenticationService.getCurrentUser();
 
-        // Validate user
+        // Kiểm tra người dùng
         UserDetailDTO user = userService.getUser(currentUser.getId());
 
         if(user == null){
@@ -44,7 +45,7 @@ public class MealController {
             );
         }
 
-        // Validate ownership of family
+        // Kiểm tra quyền sở hữu của gia đình
         boolean isOwner = familyService.verifyOwner(
                 createMealRequest.getFamilyId(),
                 currentUser.getId()
@@ -59,7 +60,7 @@ public class MealController {
 
         FamilyDetailDTO family = familyService.getFamilyInformation(createMealRequest.getFamilyId());
 
-        // Validate recipes in meal
+        // Kiểm tra danh sách công thức trong bữa ăn
         ArrayList<RecipeDTO> recipesList = new ArrayList<>();
         for (Long recipeId : createMealRequest.getRecipeList()) {
             RecipeDTO recipeDTO = recipeService.getRecipeById(
@@ -77,7 +78,7 @@ public class MealController {
             recipesList.add(recipeDTO);
         }
 
-        // Build temporary meal from request
+        // Tạo bữa ăn tạm thời từ yêu cầu
         MealDTO newMeal = MealDTO
                 .builder()
                 .userDetailDTO(user)
@@ -91,7 +92,7 @@ public class MealController {
                 .status(StatusConfig.AVAILABLE.getStatus())
                 .build();
 
-        // Validate created meal
+        // Tạo bữa ăn mới
         MealDTO createdMeal = mealService.createMeal(newMeal);
 
         if(createdMeal == null){
@@ -101,20 +102,21 @@ public class MealController {
             );
         }
 
-        // Create response of recently created meal
+        // Trả về bữa ăn mới tạo
         return ResponseEntity.status(HttpStatus.CREATED).body(createdMeal);
     }
+
     @GetMapping("/get/{mealId}")
     public ResponseEntity<MealDTO> getMealById(@PathVariable Long mealId){
         UserInfoConfig currentUser = authenticationService.getCurrentUser();
 
-        // Get meal by meal id and user id
+        // Lấy bữa ăn theo ID và người dùng hiện tại
         MealDTO meal = mealService.getMealById(
                 currentUser.getId(),
                 mealId
         );
 
-        // Validate meal existence
+        // Kiểm tra tồn tại của bữa ăn
         if(meal == null){
             throw new ServiceException(
                     ResCode.MEAL_NOT_FOUND.getMessage(),
@@ -122,20 +124,22 @@ public class MealController {
             );
         }
 
-        // Create response
+        // Trả về thông tin bữa ăn
         return ResponseEntity.ok(meal);
     }
+
     @GetMapping("/getAll")
     public ResponseEntity<ArrayList<MealDTO>> getAllMeal(@RequestParam int from, @RequestParam int to){
         UserInfoConfig currentUser = authenticationService.getCurrentUser();
 
+        // Lấy tất cả bữa ăn trong khoảng từ `from` đến `to`
         ArrayList<MealDTO> meals = mealService.getAllMeal(
                 currentUser.getId(),
                 from,
                 to
         );
 
-        // Tạo phản hồi
+        // Trả về danh sách bữa ăn
         return ResponseEntity.ok(meals);
     }
 
@@ -143,8 +147,18 @@ public class MealController {
     public ResponseEntity<ArrayList<RecommendedMealDTO>> recommendMeal(@PathVariable String term){
         UserInfoConfig currentUser = authenticationService.getCurrentUser();
 
-        String validatedTerm = TermConfig.valueOf(term).getTerm();
+        // Kiểm tra và chuyển đổi giá trị `term`
+        String validatedTerm;
+        try {
+            validatedTerm = TermConfig.valueOf(term).getTerm();
+        } catch (IllegalArgumentException e) {
+            throw new ServiceException(
+                    ResCode.INVALID_TERM.getMessage(),
+                    ResCode.INVALID_TERM.getCode()
+            );
+        }
 
+        // Lấy danh sách bữa ăn gợi ý
         ArrayList<RecommendedMealDTO> recommendedMeals = mealService.recommendMeal(
                 currentUser.getId(),
                 validatedTerm
@@ -152,11 +166,12 @@ public class MealController {
 
         return ResponseEntity.ok(recommendedMeals);
     }
+
     @PostMapping("/update")
     public ResponseEntity<MealDTO> updateMeal(UpdateMealRequest updateMealRequest){
         UserInfoConfig currentUser = authenticationService.getCurrentUser();
 
-        // Validate ownership
+        // Kiểm tra quyền sở hữu
         boolean isOwner = familyService.verifyOwner(
                 currentUser.getId(),
                 updateMealRequest.getFamilyId()
@@ -169,8 +184,7 @@ public class MealController {
             );
         }
 
-        // Process update meal
-        // Validate meal existence
+        // Kiểm tra sự tồn tại của bữa ăn
         MealDTO currentMeal = mealService.getMealById(
                 currentUser.getId(),
                 updateMealRequest.getMealId()
@@ -183,12 +197,12 @@ public class MealController {
             );
         }
 
-        // Get new recipe list
+        // Lấy danh sách công thức mới
         ArrayList<RecipeDTO> newRecipes = new ArrayList<>();
         for (Long recipeId : updateMealRequest.getRecipeList()) {
             RecipeDTO newRecipe = recipeService.getRecipeById(
                     currentUser.getId(),
-            recipeId
+                    recipeId
             );
 
             if(newRecipe == null){
@@ -201,12 +215,14 @@ public class MealController {
             newRecipes.add(newRecipe);
         }
 
+        // Cập nhật thông tin bữa ăn
         currentMeal.setName(updateMealRequest.getName());
         currentMeal.setDate(updateMealRequest.getDate());
         currentMeal.setTerm(TermConfig.valueOf(updateMealRequest.getTerm()).getTerm());
         currentMeal.setRecipeDTOS(newRecipes);
         currentMeal.setUpdatedAt(LocalDate.now());
 
+        // Thực hiện cập nhật bữa ăn
         MealDTO updatedMeal = mealService.updateMeal(currentMeal);
 
         if(updatedMeal == null){
@@ -218,10 +234,12 @@ public class MealController {
 
         return ResponseEntity.ok(updatedMeal);
     }
+
     @DeleteMapping("/delete/{mealId}")
     public ResponseEntity<MealDTO> deleteMeal(@PathVariable Long mealId){
         UserInfoConfig currentUser = authenticationService.getCurrentUser();
 
+        // Thực hiện xóa bữa ăn
         MealDTO deletedMeal = mealService.deleteMeal(
                 currentUser.getId(),
                 mealId
