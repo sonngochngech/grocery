@@ -12,7 +12,7 @@ import java.util.ArrayList;
 @Repository
 public interface ShoppingListRepository extends JpaRepository<ShoppingList, Long> {
 
-    @Query("SELECT s FROM ShoppingList s WHERE s.userId = :userId ORDER BY s.createdAt DESC")
-    ArrayList<ShoppingList> findAllByUserId(@Param("userId") long userId);
+    @Query("SELECT s FROM ShoppingList s WHERE s.owner.id = :userId ORDER BY s.createdAt DESC")
+    ArrayList<ShoppingList> findAllByUserId(@Param("userId") Long userId);
 }
 
