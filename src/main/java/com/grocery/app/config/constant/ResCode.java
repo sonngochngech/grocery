@@ -50,7 +50,11 @@ public enum ResCode {
 // Task code
     TASK_NOT_FOUND("00501", "Task is not found"),
     TASK_NOT_IN_SHOPPING_LIST("00502", "Task is not in shopping list"),
-    TASK_NOT_DELETED("00503", "Task is not deleted")
+    TASK_NOT_DELETED("00503", "Task is not deleted"),
+
+// Recipe code
+    RECIPE_NOT_FOUND("00601", "Recipe is not found"),
+    MEAL_CREATION_FAILED("00602", "Create meal fail"),
     ;
 
     private final String code;
