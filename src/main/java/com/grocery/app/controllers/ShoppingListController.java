@@ -110,7 +110,11 @@ public class ShoppingListController {
             @RequestParam(defaultValue = "10") int to) {
 
         UserInfoConfig userInfoConfig = authenticationService.getCurrentUser();
-        ArrayList<ShoppingListDTO> shoppingLists = shoppingListService.getAllShoppingList(userInfoConfig.getId(), from, to);
+        ArrayList<ShoppingListDTO> shoppingLists = shoppingListService.getAllShoppingList(
+                userInfoConfig.getId(),
+                from,
+                to
+        );
 
         return ResponseEntity.ok(shoppingLists); // Trả về danh sách mua sắm trong khoảng
     }

@@ -106,19 +106,55 @@ public class MealController {
     }
     @GetMapping("/get/{mealId}")
     public ResponseEntity<MealDTO> getMealById(@PathVariable Long mealId){
-        return null;
+        UserInfoConfig currentUser = authenticationService.getCurrentUser();
+
+        // Get meal by meal id and user id
+        MealDTO meal = mealService.getMealById(
+                currentUser.getId(),
+                mealId
+        );
+
+        // Validate meal existence
+        if(meal == null){
+            throw new ServiceException(
+                    ResCode.MEAL_NOT_FOUND.getMessage(),
+                    ResCode.MEAL_NOT_FOUND.getCode()
+            );
+        }
+
+        // Create response
+        return ResponseEntity.ok(meal);
     }
     @GetMapping("/getAll")
     public ResponseEntity<ArrayList<MealDTO>> getAllMeal(@RequestParam int from, @RequestParam int to){
-        return null;
+        UserInfoConfig currentUser = authenticationService.getCurrentUser();
+
+        ArrayList<MealDTO> meals = mealService.getAllMeal(
+                currentUser.getId(),
+                from,
+                to
+        );
+
+        // Tạo phản hồi
+        return ResponseEntity.ok(meals);
     }
 
     @GetMapping("/recommend/{term}")
     public ResponseEntity<ArrayList<RecommendedMealDTO>> recommendMeal(@PathVariable String term){
-        return null;
+        UserInfoConfig currentUser = authenticationService.getCurrentUser();
+
+        String validatedTerm = TermConfig.valueOf(term).getTerm();
+
+        ArrayList<RecommendedMealDTO> recommendedMeals = mealService.recommendMeal(
+                currentUser.getId(),
+                validatedTerm
+        );
+
+        return ResponseEntity.ok(recommendedMeals);
     }
     @PostMapping("/update")
     public ResponseEntity<MealDTO> updateMeal(UpdateMealRequest updateMealRequest){
+
         return null;
     }
     @DeleteMapping("/delete/{mealId}")
