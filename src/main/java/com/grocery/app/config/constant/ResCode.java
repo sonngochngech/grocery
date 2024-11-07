@@ -58,6 +58,8 @@ public enum ResCode {
 // Meal code
     MEAL_NOT_FOUND("00701", "Meal is not found"),
     MEAL_CREATION_FAILED("00702", "Create meal fail"),
+    MEAL_UPDATE_FAILED("00703", "Update meal fail"),
+    MEAL_DELETE_FAILED("00704", "Delete meal fail")
     ;
 
     private final String code;

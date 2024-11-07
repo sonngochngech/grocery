@@ -154,11 +154,86 @@ public class MealController {
     }
     @PostMapping("/update")
     public ResponseEntity<MealDTO> updateMeal(UpdateMealRequest updateMealRequest){
+        UserInfoConfig currentUser = authenticationService.getCurrentUser();
 
-        return null;
+        // Validate ownership
+        boolean isOwner = familyService.verifyOwner(
+                currentUser.getId(),
+                updateMealRequest.getFamilyId()
+        );
+
+        if(!isOwner){
+            throw new ServiceException(
+                    ResCode.NOT_OWNER_OF_FAMILY.getMessage(),
+                    ResCode.NOT_OWNER_OF_FAMILY.getCode()
+            );
+        }
+
+        // Process update meal
+        // Validate meal existence
+        MealDTO currentMeal = mealService.getMealById(
+                currentUser.getId(),
+                updateMealRequest.getMealId()
+        );
+
+        if(currentMeal == null){
+            throw new ServiceException(
+                    ResCode.MEAL_NOT_FOUND.getMessage(),
+                    ResCode.MEAL_NOT_FOUND.getCode()
+            );
+        }
+
+        // Get new recipe list
+        ArrayList<RecipeDTO> newRecipes = new ArrayList<>();
+        for (Long recipeId : updateMealRequest.getRecipeList()) {
+            RecipeDTO newRecipe = recipeService.getRecipeById(
+                    currentUser.getId(),
+            recipeId
+            );
+
+            if(newRecipe == null){
+                throw new ServiceException(
+                        ResCode.RECIPE_NOT_FOUND.getMessage(),
+                        ResCode.RECIPE_NOT_FOUND.getCode()
+                );
+            }
+
+            newRecipes.add(newRecipe);
+        }
+
+        currentMeal.setName(updateMealRequest.getName());
+        currentMeal.setDate(updateMealRequest.getDate());
+        currentMeal.setTerm(TermConfig.valueOf(updateMealRequest.getTerm()).getTerm());
+        currentMeal.setRecipeDTOS(newRecipes);
+        currentMeal.setUpdatedAt(LocalDate.now());
+
+        MealDTO updatedMeal = mealService.updateMeal(currentMeal);
+
+        if(updatedMeal == null){
+            throw new ServiceException(
+                    ResCode.MEAL_UPDATE_FAILED.getMessage(),
+                    ResCode.MEAL_UPDATE_FAILED.getCode()
+            );
+        }
+
+        return ResponseEntity.ok(updatedMeal);
     }
     @DeleteMapping("/delete/{mealId}")
     public ResponseEntity<MealDTO> deleteMeal(@PathVariable Long mealId){
-        return null;
+        UserInfoConfig currentUser = authenticationService.getCurrentUser();
+
+        MealDTO deletedMeal = mealService.deleteMeal(
+                currentUser.getId(),
+                mealId
+        );
+
+        if(deletedMeal == null){
+            throw new ServiceException(
+                    ResCode.MEAL_DELETE_FAILED.getMessage(),
+                    ResCode.MEAL_DELETE_FAILED.getCode()
+            );
+        }
+
+        return ResponseEntity.ok(deletedMeal);
     }
 }
