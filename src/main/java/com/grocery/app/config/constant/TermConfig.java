@@ -18,4 +18,13 @@ public enum TermConfig {
     public String getTerm() {
         return term;
     }
+
+    public static boolean contains(String value) {
+        for (TermConfig termConfig : TermConfig.values()) {
+            if (termConfig.name().equals(value)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

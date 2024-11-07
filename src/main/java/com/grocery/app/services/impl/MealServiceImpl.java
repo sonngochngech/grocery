@@ -29,23 +29,22 @@ public class MealServiceImpl implements MealService {
 
     @Override
     public MealDTO createMeal(MealDTO mealDTO) {
-        Meal meal = modelMapper.map(
-                mealDTO,
-                Meal.class
-        );
+        // Chuyển đổi đối tượng MealDTO thành Meal
+        Meal meal = modelMapper.map(mealDTO, Meal.class);
 
+        // Lưu Meal mới vào cơ sở dữ liệu
         Meal createdMeal = mealRepository.save(meal);
-        return modelMapper.map(
-                meal,
-                MealDTO.class
-        );
+
+        // Chuyển đổi đối tượng Meal đã tạo thành MealDTO và trả về
+        return modelMapper.map(createdMeal, MealDTO.class);
     }
 
     @Override
     public MealDTO getMealById(Long userId, Long mealId) {
+        // Tìm kiếm Meal theo mealId
         Meal meal = mealRepository.findById(mealId).orElse(null);
 
-        // Validate meal existence
+        // Kiểm tra xem Meal có tồn tại không
         if(meal == null){
             throw new ServiceException(
                     ResCode.MEAL_NOT_FOUND.getMessage(),
@@ -53,7 +52,7 @@ public class MealServiceImpl implements MealService {
             );
         }
 
-        // Validate meal owner
+        // Kiểm tra xem người dùng hiện tại có phải là chủ sở hữu của Meal không
         boolean isOwner = Objects.equals(meal.getUser().getId(), userId);
         if(!isOwner){
             throw new ServiceException(
@@ -77,6 +76,7 @@ public class MealServiceImpl implements MealService {
         to = Math.min(to, meals.size());
         from = Math.min(from, to);
 
+        // Kiểm tra nếu "from" nhỏ hơn 0, ném ra lỗi
         if (from < 0) {
             throw new IndexOutOfBoundsException("Phạm vi phân trang không hợp lệ.");
         }
@@ -84,24 +84,35 @@ public class MealServiceImpl implements MealService {
         // Lấy danh sách con của các phần tử trong phạm vi từ "from" đến "to"
         List<Meal> paginatedMeals = meals.subList(from, to);
 
-        // Chuyển đổi danh sách Meal thành danh sách MealDTO
+        // Chuyển đổi danh sách Meal thành danh sách MealDTO và trả về
         return paginatedMeals.stream()
                 .map(meal -> modelMapper.map(meal, MealDTO.class))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-
     @Override
     public RecommendedMealDTO recommendMeal(Long userId, String term) {
+        // Validate term
+        if (!TermConfig.contains(term)) {
+            throw new ServiceException(
+                    ResCode.INVALID_TERM.getMessage(),
+                    ResCode.INVALID_TERM.getCode()
+            );
+        }
+        // Lấy tất cả các món ăn của người dùng dựa trên term
         ArrayList<Meal> meals = mealRepository.findAllByTerm(userId, term);
 
+        // Kiểm tra nếu danh sách rỗng, trả về null
         if(meals.size() == 0) return null;
+
+        // Tính trung bình số lượng công thức (recipes) của các bữa ăn
         int avgRecipes = 0;
         for (Meal meal: meals) {
             avgRecipes += meal.getRecipes().size();
         }
         avgRecipes /= meals.size();
 
+        // Khởi tạo danh sách chứa các ID của công thức đã chọn và đối tượng RecommendedMealDTO
         ArrayList<Long> recipeIds = new ArrayList<>();
         RecommendedMealDTO recommendedMealDTO = RecommendedMealDTO
                 .builder()
@@ -109,20 +120,18 @@ public class MealServiceImpl implements MealService {
                 .build();
 
         int index = 0;
+        // Chọn ngẫu nhiên các công thức cho đến khi đạt đến số lượng trung bình
         while(recommendedMealDTO.getRecommendedRecipes().size() < avgRecipes){
-            // Get a random recipe from a meal in the list
+            // Lấy một công thức ngẫu nhiên từ một món ăn trong danh sách
             ArrayList<Recipe> recipes = (ArrayList<Recipe>) meals.get(index).getRecipes();
             Recipe recipe = recipes.get((int) Math.floor(Math.random() * recipes.size()));
 
-            // Check whether recipe is added or not
+            // Kiểm tra xem công thức đã được thêm vào hay chưa
             if(!recipeIds.contains(recipe.getId())){
                 recipeIds.add(recipe.getId());
-                RecipeDTO recipeDTO = modelMapper.map(
-                        recipe,
-                        RecipeDTO.class
-                );
+                RecipeDTO recipeDTO = modelMapper.map(recipe, RecipeDTO.class);
 
-                // If recipe is not in list, add it to the list of recommend meal
+                // Thêm công thức vào danh sách món ăn được đề xuất nếu chưa có trong danh sách
                 recommendedMealDTO.getRecommendedRecipes().add(recipeDTO);
             }
         }
@@ -132,18 +141,24 @@ public class MealServiceImpl implements MealService {
 
     @Override
     public MealDTO updateMeal(MealDTO mealDTO) {
-        Meal meal = modelMapper.map(
-                mealDTO,
-                Meal.class
-        );
-        return mealDTO;
+        Meal meal = mealRepository.findById(mealDTO.getMealId())
+                .orElseThrow(() -> new ServiceException(
+                        ResCode.MEAL_NOT_FOUND.getMessage(),
+                        ResCode.MEAL_NOT_FOUND.getCode())
+                );
+
+        modelMapper.map(mealDTO, meal); // Ghi đè các thuộc tính từ mealDTO sang meal
+        Meal updatedMeal = mealRepository.save(meal);
+
+        return modelMapper.map(updatedMeal, MealDTO.class);
     }
 
     @Override
     public MealDTO deleteMeal(Long userId, Long mealId) {
+        // Tìm kiếm Meal theo mealId
         Meal meal = mealRepository.findById(mealId).orElse(null);
 
-        // Validate meal existence
+        // Kiểm tra xem Meal có tồn tại không
         if(meal == null){
             throw new ServiceException(
                     ResCode.MEAL_NOT_FOUND.getMessage(),
@@ -151,7 +166,7 @@ public class MealServiceImpl implements MealService {
             );
         }
 
-        // Validate meal owner
+        // Kiểm tra xem người dùng hiện tại có phải là chủ sở hữu của Meal không
         boolean isOwner = Objects.equals(meal.getUser().getId(), userId);
         if(!isOwner){
             throw new ServiceException(
@@ -160,8 +175,10 @@ public class MealServiceImpl implements MealService {
             );
         }
 
+        // Đặt trạng thái của Meal thành "DELETED"
         meal.setStatus(StatusConfig.DELETED.getStatus());
 
+        // Lưu Meal đã cập nhật trạng thái vào cơ sở dữ liệu
         meal = mealRepository.save(meal);
 
         return modelMapper.map(
