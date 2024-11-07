@@ -17,6 +17,7 @@ public class MealDTO {
     private Long mealId;
     private UserDetailDTO userDetailDTO;
     private FamilyDetailDTO familyDetailDTO;
+    private String name;
     private String term;
     private String date;
     private ArrayList<RecipeDTO> recipeDTOS;
