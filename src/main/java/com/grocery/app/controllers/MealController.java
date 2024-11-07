@@ -144,7 +144,7 @@ public class MealController {
     }
 
     @GetMapping("/recommend/{term}")
-    public ResponseEntity<ArrayList<RecommendedMealDTO>> recommendMeal(@PathVariable String term){
+    public ResponseEntity<RecommendedMealDTO> recommendMeal(@PathVariable String term){
         UserInfoConfig currentUser = authenticationService.getCurrentUser();
 
         // Kiểm tra và chuyển đổi giá trị `term`
@@ -159,7 +159,7 @@ public class MealController {
         }
 
         // Lấy danh sách bữa ăn gợi ý
-        ArrayList<RecommendedMealDTO> recommendedMeals = mealService.recommendMeal(
+        RecommendedMealDTO recommendedMeals = mealService.recommendMeal(
                 currentUser.getId(),
                 validatedTerm
         );
