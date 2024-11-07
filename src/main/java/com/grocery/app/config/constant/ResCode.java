@@ -60,6 +60,7 @@ public enum ResCode {
     MEAL_CREATION_FAILED("00702", "Create meal fail"),
     MEAL_UPDATE_FAILED("00703", "Update meal fail"),
     MEAL_DELETE_FAILED("00704", "Delete meal fail"),
+    NOT_MEAL_OWNER("00705", "User doesn't own the meal plan"),
 
 // Enum code
     INVALID_TERM("99901", "Invalid term"),
