@@ -1,81 +1,38 @@
 package com.grocery.app.entities;
 
-import java.sql.Date;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
+@Entity
+@Table(name = "food")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Food {
-    private long id;
-    private long ownerId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private Long ownerId;
     private String name;
     private String description;
+
+    @ManyToOne
+    @JoinColumn(name = "category_id")  // Specify the foreign key column name for Category
     private Category category;
+
+    @ManyToOne
+    @JoinColumn(name = "measure_unit_id")  // Specify the foreign key column name for MeasureUnit
     private MeasureUnit measureUnit;
-    private Date createdAt;
-    private Date updatedAt;
-    public Food(){
 
-    }
+    private LocalDate createdAt;
+    private LocalDate updatedAt;
 
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public long getOwnerId() {
-        return ownerId;
-    }
-
-    public void setOwnerId(long ownerId) {
-        this.ownerId = ownerId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public Category getCategory() {
-        return category;
-    }
-
-    public void setCategory(Category category) {
-        this.category = category;
-    }
-
-    public MeasureUnit getMeasureUnit() {
-        return measureUnit;
-    }
-
-    public void setMeasureUnit(MeasureUnit measureUnit) {
-        this.measureUnit = measureUnit;
-    }
-
-    public Date getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public Date getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(Date updatedAt) {
-        this.updatedAt = updatedAt;
-    }
+    // Getters and setters (or use Lombok annotations if preferred)
 }

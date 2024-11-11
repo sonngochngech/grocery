@@ -3,7 +3,7 @@ package com.grocery.app.services.impl;
 import com.grocery.app.config.constant.StatusConfig;
 import com.grocery.app.dto.ShoppingListDTO;
 import com.grocery.app.entities.ShoppingList;
-import com.grocery.app.repositories.ShoppingListRepository;
+import com.grocery.app.repositories.ShoppingListRepo;
 import com.grocery.app.services.ShoppingListService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 public class ShoppingListServiceImpl implements ShoppingListService {
 
     @Autowired
-    private ShoppingListRepository shoppingListRepository;
+    private ShoppingListRepo shoppingListRepository;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -84,11 +84,11 @@ public class ShoppingListServiceImpl implements ShoppingListService {
     }
 
     // Getters and Setters (if required for testing or other purposes)
-    public ShoppingListRepository getShoppingListRepository() {
+    public ShoppingListRepo getShoppingListRepository() {
         return shoppingListRepository;
     }
 
-    public void setShoppingListRepository(ShoppingListRepository shoppingListRepository) {
+    public void setShoppingListRepository(ShoppingListRepo shoppingListRepository) {
         this.shoppingListRepository = shoppingListRepository;
     }
 

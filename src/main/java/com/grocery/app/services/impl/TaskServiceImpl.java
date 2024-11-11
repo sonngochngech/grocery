@@ -3,7 +3,7 @@ package com.grocery.app.services.impl;
 import com.grocery.app.config.constant.StatusConfig;
 import com.grocery.app.dto.TaskDTO;
 import com.grocery.app.entities.Task;
-import com.grocery.app.repositories.TaskRepository;
+import com.grocery.app.repositories.TaskRepo;
 import com.grocery.app.repositories.UserRepo;
 import com.grocery.app.services.TaskService;
 import org.modelmapper.ModelMapper;
@@ -23,7 +23,7 @@ public class TaskServiceImpl implements TaskService {
     private ModelMapper modelMapper;
 
     @Autowired
-    private TaskRepository taskRepository;
+    private TaskRepo taskRepository;
 
     @Autowired
     private UserRepo userRepository;
@@ -100,11 +100,11 @@ public class TaskServiceImpl implements TaskService {
     }
 
     // Getters and Setters for testing purposes (if needed)
-    public TaskRepository getTaskRepository() {
+    public TaskRepo getTaskRepository() {
         return taskRepository;
     }
 
-    public void setTaskRepository(TaskRepository taskRepository) {
+    public void setTaskRepository(TaskRepo taskRepository) {
         this.taskRepository = taskRepository;
     }
 

@@ -9,7 +9,7 @@ import com.grocery.app.dto.request.RecommendedMealDTO;
 import com.grocery.app.entities.Meal;
 import com.grocery.app.entities.Recipe;
 import com.grocery.app.exceptions.ServiceException;
-import com.grocery.app.repositories.MealRepository;
+import com.grocery.app.repositories.MealRepo;
 import com.grocery.app.services.MealService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ public class MealServiceImpl implements MealService {
     @Autowired
     private ModelMapper modelMapper;
     @Autowired
-    private MealRepository mealRepository;
+    private MealRepo mealRepository;
 
     @Override
     public MealDTO createMeal(MealDTO mealDTO) {
