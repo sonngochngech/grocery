@@ -4,11 +4,17 @@ package com.grocery.app.controllers;
 import com.grocery.app.config.constant.AppConstants;
 import com.grocery.app.config.constant.ResCode;
 import com.grocery.app.dto.UserDetailDTO;
+import com.grocery.app.exceptions.ControllerException;
 import com.grocery.app.exceptions.ResourceException;
 import com.grocery.app.exceptions.ServiceException;
+import com.grocery.app.notification.NotificationConsumer;
+import com.grocery.app.notification.NotificationFactory;
+import com.grocery.app.notification.NotificationProducer;
 import com.grocery.app.payloads.loginCredentials.DefaultCredentials;
 import com.grocery.app.payloads.loginCredentials.SocialCredentials;
 import com.grocery.app.payloads.responses.AuthResponse;
+import com.grocery.app.payloads.responses.BaseResponse;
+import com.grocery.app.payloads.responses.ResponseFactory;
 import com.grocery.app.payloads.users.RegisterUserDTO;
 import com.grocery.app.security.JWTUtil;
 import com.grocery.app.services.UserService;
@@ -43,6 +49,13 @@ public class AuthController {
 
     @Autowired
     private ModelMapper modelMapper;
+
+    @Autowired
+    private NotificationFactory notificationFactory;
+
+    @Autowired
+    private NotificationProducer notificationProducer;
+
 
 
 
@@ -109,6 +122,34 @@ public class AuthController {
             throw new ServiceException(ResCode.INVALID_REFRESH_TOKEN.getCode(),ResCode.INVALID_REFRESH_TOKEN.getMessage());
         }
     }
+
+
+    @PostMapping("get-verify-code")
+    public ResponseEntity<BaseResponse<String>> getVerifyingCode(@RequestBody String email){
+        String code=UUID.randomUUID().toString();
+        redisService.saveData(email,code);
+        notificationProducer.sendMessage(notificationFactory.VerifyCodeNoti(email,code));
+        BaseResponse<String> res=ResponseFactory.createResponse(code,ResCode.GET_VERIFY_CODE_SUCCESSFULLY.getMessage(),ResCode.GET_VERIFY_CODE_SUCCESSFULLY.getCode());
+        return new ResponseEntity<>(res,HttpStatus.OK);
+    }
+
+    @PostMapping("verify-code")
+    public ResponseEntity<BaseResponse<String>> verifyingCode(@RequestBody String code,@RequestBody String email){
+        Object storedCode=redisService.getData(email);
+        if(storedCode==null){
+            throw new ServiceException(ResCode.INVALID_VERIFY_CODE.getCode(),ResCode.INVALID_VERIFY_CODE.getMessage());
+        }
+        if(!((String) storedCode).equals(code)){
+            throw new ControllerException(ResCode.WRONG_VERIFY_CODE.getCode(),ResCode.WRONG_VERIFY_CODE.getMessage());
+        };
+        redisService.removeData(email);
+        BaseResponse<String> res=ResponseFactory.createResponse(email,ResCode.VERIFY_CODE_SUCCESSFULLY.getMessage(),ResCode.VERIFY_CODE_SUCCESSFULLY.getCode());
+        return new ResponseEntity<>(res,HttpStatus.OK);
+
+    }
+
+
+
 
 
 

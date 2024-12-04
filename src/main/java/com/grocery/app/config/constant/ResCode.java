@@ -13,6 +13,12 @@ public enum ResCode {
     REDIS_ERROR("0006", "Redis error"),
     VALIDATION_ERROR_FIELD("0007", "Validation error field"),
 
+//    Auth Code
+    GET_VERIFY_CODE_SUCCESSFULLY("00001", "Get verify code successfully"),
+    INVALID_VERIFY_CODE("00002", "Invalid verify code"),
+    WRONG_VERIFY_CODE("00003", "Wrong verify code"),
+    VERIFY_CODE_SUCCESSFULLY("00004", "Verify code successfully"),
+
 //    User code
     REGISTER_SUCCESSFULLY("00101", "Register successfully"),
     LOGIN_SUCCESSFULLY("00102", "Login successfully"),
@@ -38,6 +44,24 @@ public enum ResCode {
     NOT_OWNER_OF_FAMILY("00207", "Not owner of family"),
     FAMILY_NOT_FOUND("00208", "Family not found"),
     NOT_REMOVED_OWNER("00209", "Not removed owner"),
+
+//    Category Code
+    NO_CATEGORY("00301", "No category"),
+    CATEGORY_EXIST("00302", "Category existed"),
+    CATEGORY_NOT_FOUND("00303", "Category not found"),
+    GET_CATEGORY_SUCCESSFULLY("00304", "Get category successfully"),
+    CREATE_CATEGORY_SUCCESSFULLY("00305", "Create category successfully"),
+    UPDATE_CATEGORY_SUCCESSFULLY("00306", "Update category successfully"),
+    DELETE_CATEGORY_SUCCESSFULLY("00307", "Delete category successfully"),
+
+//    Unit Code
+    NO_UNIT("00401", "No unit"),
+    UNIT_EXIST("00402", "Unit existed"),
+    UNIT_NOT_FOUND("00403", "Unit not found"),
+    GET_UNITS_SUCCESSFULLY("00404", "Get unit successfully"),
+    CREATE_UNIT_SUCCESSFULLY("00405", "Create unit successfully"),
+    UPDATE_UNIT_SUCCESSFULLY("00406", "Update unit successfully"),
+    DELETE_UNIT_SUCCESSFULLY("00407", "Delete unit successfully"),
 
 
     ;
