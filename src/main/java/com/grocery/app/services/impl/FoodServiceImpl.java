@@ -1,6 +1,7 @@
 package com.grocery.app.services.impl;
 
 import com.grocery.app.config.constant.ResCode;
+import com.grocery.app.config.constant.StatusConfig;
 import com.grocery.app.dto.FoodDTO;
 import com.grocery.app.entities.Food;
 import com.grocery.app.exceptions.ServiceException;
@@ -10,6 +11,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Optional;
 @Service
 public class FoodServiceImpl implements FoodService {
@@ -17,9 +19,9 @@ public class FoodServiceImpl implements FoodService {
     private ModelMapper modelMapper;
 
     @Override
-    public FoodDTO createFood(long userId, FoodDTO foodDTO) {
+    public FoodDTO createFood(Long userId, FoodDTO foodDTO) {
         // Kiểm tra owner
-        if(userId != foodDTO.getOwnerId()){
+        if(!Objects.equals(userId, foodDTO.getUser().getId())){
             throw new ServiceException(
                     ResCode.NOT_FOOD_OWNER.getMessage(),
                     ResCode.NOT_FOOD_OWNER.getCode()
@@ -41,7 +43,7 @@ public class FoodServiceImpl implements FoodService {
     }
 
     @Override
-    public Optional<FoodDTO> getFoodById(long userId, long id) {
+    public Optional<FoodDTO> getFoodById(Long userId, Long id) {
         Food food = foodRepo.findById(id).orElse(null);
 
         // Kiểm tra tồn tại
@@ -53,7 +55,7 @@ public class FoodServiceImpl implements FoodService {
         }
 
         // Kiểm tra chủ sở hữu
-        if(food.getOwnerId() != userId){
+        if(!Objects.equals(food.getOwner().getId(), userId)){
             throw new ServiceException(
                     ResCode.NOT_FOOD_OWNER.getMessage(),
                     ResCode.NOT_FOOD_OWNER.getCode()
@@ -66,17 +68,66 @@ public class FoodServiceImpl implements FoodService {
     }
 
     @Override
-    public ArrayList<FoodDTO> getAllFood(long userId, int from, int to) {
-        return null;
+    public ArrayList<FoodDTO> getAllFood(Long userId, int from, int to) {
+        ArrayList<Food> foods = foodRepo.findAllByUserId(userId);
+
+        // clamp
+        int maxSize = foods.size();
+        from = Math.max(0, Math.min(from, maxSize - 1)); // from trong khoảng [0, maxSize - 1]
+        to = Math.max(from + 1, Math.min(to, maxSize)); // to trong khoảng [from + 1, maxSize]
+
+        // Chuyển đổi phần tử trong range từ Food sang FoodDTO
+        ArrayList<FoodDTO> result = new ArrayList<>();
+        for (int i = from; i < to; i++) {
+            result.add(modelMapper.map(foods.get(i), FoodDTO.class));
+        }
+
+        return result;
     }
 
     @Override
-    public FoodDTO updateFood(long userId, FoodDTO foodDTO) {
-        return null;
+    public FoodDTO updateFood(FoodDTO foodDTO) {
+        Food food = modelMapper.map(foodDTO, Food.class);
+
+        if(food == null){
+            throw new ServiceException(
+                    ResCode.FOOD_UPDATE_FAILED.getMessage(),
+                    ResCode.FOOD_UPDATE_FAILED.getCode()
+            );
+        }
+
+        Food updatedFood = foodRepo.save(food);
+
+
+        return modelMapper.map(updatedFood, FoodDTO.class);
     }
 
     @Override
-    public FoodDTO deleteFood(long userId, long id) {
-        return null;
+    public FoodDTO deleteFood(Long userId, Long id) {
+        // Tìm food
+        Food food = foodRepo.findById(id).orElse(null);
+
+        if(food == null || Objects.equals(food.getStatus(), StatusConfig.DELETED.getStatus())){
+            throw new ServiceException(
+                    ResCode.FOOD_NOT_FOUND.getMessage(),
+                    ResCode.FOOD_NOT_FOUND.getCode()
+            );
+        }
+
+        // Kiểm tra quyền sở hữu
+        boolean isOwner = Objects.equals(userId, food.getOwner().getId());
+
+        if(!isOwner){
+            throw new ServiceException(
+                    ResCode.NOT_FOOD_OWNER.getMessage(),
+                    ResCode.NOT_FOOD_OWNER.getCode()
+            );
+        }
+
+        // xóa food
+        food.setStatus(StatusConfig.DELETED.getStatus());
+        Food deletedFood = foodRepo.save(food);
+
+        return modelMapper.map(deletedFood, FoodDTO.class);
     }
 }

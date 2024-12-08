@@ -191,7 +191,7 @@ public class MealController {
     }
 
     @PostMapping("/update")
-    public ResponseEntity<MealDTO> updateMeal(UpdateMealRequest updateMealRequest){
+    public ResponseEntity<MealDTO> updateMeal(@RequestBody UpdateMealRequest updateMealRequest){
         UserInfoConfig currentUser = authenticationService.getCurrentUser();
 
         // Kiểm tra quyền sở hữu

@@ -3,6 +3,7 @@ package com.grocery.app.dto;
 import lombok.*;
 
 import java.sql.Date;
+import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
@@ -15,6 +16,6 @@ public class FoodDTO {
     private String description;
     private CategoryDTO categoryDTO;
     private UnitDTO measureUnitDTO;
-    private Date createdAt;
-    private Date updatedAt;
+    private LocalDate createdAt;
+    private LocalDate updatedAt;
 }

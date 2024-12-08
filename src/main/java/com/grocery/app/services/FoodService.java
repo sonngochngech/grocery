@@ -7,13 +7,13 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 public interface FoodService {
-    FoodDTO createFood(long userId, FoodDTO foodDTO);
+    FoodDTO createFood(Long userId, FoodDTO foodDTO);
 
-    Optional<FoodDTO> getFoodById(long userId, long id);
+    Optional<FoodDTO> getFoodById(Long userId, Long id);
 
-    ArrayList<FoodDTO> getAllFood(long userId, int from, int to);
+    ArrayList<FoodDTO> getAllFood(Long userId, int from, int to);
 
-    FoodDTO updateFood(long userId, FoodDTO foodDTO);
+    FoodDTO updateFood(FoodDTO foodDTO);
 
-    FoodDTO deleteFood(long userId, long id);
+    FoodDTO deleteFood(Long userId, Long id);
 }

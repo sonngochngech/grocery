@@ -1,5 +1,6 @@
 package com.grocery.app.entities;
 
+import com.grocery.app.config.constant.StatusConfig;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -36,4 +37,6 @@ public class Food {
     @ManyToOne
     @JoinColumn(name = "user_id") // Specify the foreign key column name for User
     private User owner;
+
+    private String status = StatusConfig.AVAILABLE.getStatus();
 }
