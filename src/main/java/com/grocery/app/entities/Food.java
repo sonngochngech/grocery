@@ -28,8 +28,8 @@ public class Food {
     private Categories category;
 
     @ManyToOne
-    @JoinColumn(name = "measure_unit_id")  // Specify the foreign key column name for MeasureUnit
-    private MeasureUnit measureUnit;
+    @JoinColumn(name = "unit_id")  // Specify the foreign key column name for MeasureUnit
+    private Unit measureUnit;
 
     private LocalDate createdAt;
     private LocalDate updatedAt;
