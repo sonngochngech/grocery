@@ -2,6 +2,7 @@ package com.grocery.app.entities;
 
 import java.util.*;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.grocery.app.config.constant.AppConstants;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
@@ -41,6 +42,8 @@ public  class User{
 
     private Date birthday;
 
+    private String avatar;
+
 
     @ManyToOne(fetch=FetchType.EAGER)
     @JoinColumn(name="role_id")
@@ -68,6 +71,12 @@ public  class User{
 
     @OneToMany(mappedBy = "sender")
     private List<Notification> sentNotifications=new ArrayList<>();
+
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL,orphanRemoval = true)
+    @JsonIgnore
+    private List<Invitation> invitations=new ArrayList<>();
+
+
 
 
 

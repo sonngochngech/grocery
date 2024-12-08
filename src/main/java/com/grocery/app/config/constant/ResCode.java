@@ -12,6 +12,10 @@ public enum ResCode {
     RESOURCE_NOT_FOUND("0005", "Resource not found"),
     REDIS_ERROR("0006", "Redis error"),
     VALIDATION_ERROR_FIELD("0007", "Validation error field"),
+    FILE_NOT_FOUND("0008", "File NOT FOUND"),
+    FILE_EXCEED_SIZE("0009", "File exceed size"),
+    FILE_NOT_IMAGE("0010", "File not image"),
+    FILE_UPLOAD_ERROR("0011", "File upload error"),
 
 //    Auth Code
     GET_VERIFY_CODE_SUCCESSFULLY("00001", "Get verify code successfully"),
@@ -33,6 +37,7 @@ public enum ResCode {
     LOCK_USER_SUCCESSFULLY("00110", "Lock user successfully"),
     USER_NOT_FOUND("00111", "User not found"),
     EXISTED_USER("00112", "Existed user"),
+    UPLOAD_AVATAR_SUCCESSFULLY("00113", "Upload avatar successfully"),
 
 //    Family Code
     CREATE_FAMILY_SUCCESSFULLY("00201", "Create family successfully"),
@@ -44,6 +49,7 @@ public enum ResCode {
     NOT_OWNER_OF_FAMILY("00207", "Not owner of family"),
     FAMILY_NOT_FOUND("00208", "Family not found"),
     NOT_REMOVED_OWNER("00209", "Not removed owner"),
+    ALREADY_IN_FAMILY("00210", "Already in family"),
 
 //    Category Code
     NO_CATEGORY("00301", "No category"),
@@ -63,7 +69,22 @@ public enum ResCode {
     UPDATE_UNIT_SUCCESSFULLY("00406", "Update unit successfully"),
     DELETE_UNIT_SUCCESSFULLY("00407", "Delete unit successfully"),
 
+//    Fridge Code
+    GET_FRIDGE_SUCCESSFULLY("00501", "Get fridge successfully"),
+    ADD_ITEM_TO_FRIDGE_SUCCESSFULLY("00502", "Add item to fridge successfully"),
+    REMOVE_ITEM_FROM_FRIDGE_SUCCESSFULLY("00503", "Remove item from fridge successfully"),
+    UPDATE_ITEM_IN_FRIDGE_SUCCESSFULLY("00504", "Update item in fridge successfully"),
+    FRIDGE_NOT_FOUND("00505", "Fridge not found"),
+    ITEM_NOT_FOUND("00506", "Item not found"),
 
+// Invitation Code
+    INVITATION_SUCCESSFULLY("00601", "Invitation successfully"),
+    RESPONSE_INVITATION_SUCCESSFULLY("00602", "Response invitation successfully"),
+    INVITATION_NOT_FOUND("00603", "Invitation not found"),
+    NOT_BELONG_TO_INVITATION("00604", "Not belong to invitation"),
+    INVITATION_ALREADY_ACCEPTED("00605", "Invitation already accepted"),
+    INVITATION_ALREADY_REJECTED("00606", "Invitation already rejected"),
+    INVITATION_EXPIRED("00607", "Invitation expired"),
     ;
 
     private final String code;

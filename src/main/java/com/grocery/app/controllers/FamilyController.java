@@ -2,6 +2,7 @@ package com.grocery.app.controllers;
 
 import com.grocery.app.config.UserInfoConfig;
 import com.grocery.app.config.constant.ResCode;
+import com.grocery.app.dto.InvitationDTO;
 import com.grocery.app.dto.UserDTO;
 import com.grocery.app.dto.family.FamilyDTO;
 import com.grocery.app.dto.family.FamilyDetailDTO;
@@ -11,11 +12,14 @@ import com.grocery.app.payloads.responses.ErrorResponse;
 import com.grocery.app.payloads.responses.ResponseFactory;
 import com.grocery.app.services.AuthenticationService;
 import com.grocery.app.services.FamilyService;
+import com.grocery.app.services.InvitationService;
 import com.grocery.app.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,6 +36,12 @@ public class FamilyController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private UserDetailsService userDetailsService;
+
+    @Autowired
+    private InvitationService invitationService;
 
 
 
@@ -105,6 +115,31 @@ public class FamilyController {
         }else{
             throw new ControllerException(ResCode.NOT_BELONG_TO_FAMILY.getMessage(), ResCode.NOT_BELONG_TO_FAMILY.getCode());
         }
+    }
+
+    @PutMapping("/{familyId}/members/invite")
+    public ResponseEntity<BaseResponse<InvitationDTO>> invite(@PathVariable Long familyId,@RequestParam String username) {
+        Long ownerId = authenticationService.getCurrentUser().getId();
+        boolean isOwner = familyService.verifyOwner(familyId,ownerId);
+        UserInfoConfig user = (UserInfoConfig) userDetailsService.loadUserByUsername(username);
+        if(!isOwner){
+            throw new ControllerException(ResCode.NOT_OWNER_OF_FAMILY.getMessage(), ResCode.NOT_OWNER_OF_FAMILY.getCode());
+        }
+        InvitationDTO invitationDTO = invitationService.createInvitation(familyId,user.getId());
+        BaseResponse<InvitationDTO> response = ResponseFactory.createResponse(invitationDTO, ResCode.INVITATION_SUCCESSFULLY.getMessage(), ResCode.INVITATION_SUCCESSFULLY.getCode());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PutMapping("/{familyId}/members/response-invitation")
+    public ResponseEntity<BaseResponse<InvitationDTO>> responseInvitation(@PathVariable Long familyId,@RequestParam Long invitationId,@RequestParam Boolean isAccepted) {
+        Long userId = authenticationService.getCurrentUser().getId();
+        boolean isMember = familyService.verifyMember(familyId,userId);
+        if(isMember){
+            throw new ControllerException(ResCode.ALREADY_IN_FAMILY.getMessage(), ResCode.ALREADY_IN_FAMILY.getCode());
+        }
+        InvitationDTO invitationDTO = invitationService.updateInvitation(isAccepted,invitationId,userId);
+        BaseResponse<InvitationDTO> response = ResponseFactory.createResponse(invitationDTO, ResCode.RESPONSE_INVITATION_SUCCESSFULLY.getMessage(), ResCode.RESPONSE_INVITATION_SUCCESSFULLY.getCode());
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 }

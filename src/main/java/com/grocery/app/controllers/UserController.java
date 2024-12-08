@@ -62,9 +62,8 @@ public class UserController {
         return new  ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/profile/update-invitation")
-    public ResponseEntity<BaseResponse<Void>> updateUserInvitation(@RequestParam String code){
-        return null;
-    }
+
+
+
 
 }

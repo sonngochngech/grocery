@@ -2,6 +2,7 @@ package com.grocery.app.services.impl;
 
 import com.grocery.app.config.constant.ResCode;
 import com.grocery.app.config.constant.Language;
+import com.grocery.app.dto.UserDTO;
 import com.grocery.app.entities.Device;
 import com.grocery.app.entities.Role;
 import com.grocery.app.entities.User;
@@ -95,6 +96,15 @@ public class UserServiceImpl implements UserService {
         return modelMapper.map(existingUser, UserDetailDTO.class);
     }
 
+    @Override
+    public UserDTO getUserById(Long userId) {
+        User user = userRepo.findById(userId).orElse(null);
+        if(user==null){
+            throw new ServiceException(ResCode.USER_NOT_FOUND.getCode(), ResCode.USER_NOT_FOUND.getMessage());
+        }
+        return modelMapper.map(user, UserDTO.class);
+    }
+
 
     private void  Validate(UserDetailDTO userDTO) throws  ServiceException {
         Validate.stateNot(userDTO.getUsername().isEmpty(), ResCode.USERNAME_NOT_FOUND.getCode(), ResCode.USERNAME_NOT_FOUND.getMessage());
@@ -103,6 +113,11 @@ public class UserServiceImpl implements UserService {
     }
     private boolean verifyPassword(String rawPassword, String storedHashedPassword) {
         return passwordEncoder.matches(rawPassword, storedHashedPassword);
+    }
+
+    @Override
+    public boolean verifyUser(Long userId){
+        return userRepo.findById(userId).isPresent();
     }
 
 
