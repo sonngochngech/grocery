@@ -6,7 +6,9 @@ import com.grocery.app.entities.Role;
 import com.grocery.app.entities.User;
 import com.grocery.app.repositories.UserRepo;
 import com.grocery.app.security.JWTUtil;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,7 @@ import java.nio.charset.StandardCharsets;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class ServicesTestSupport {
 
     @Autowired
@@ -48,7 +51,9 @@ public class ServicesTestSupport {
     protected User user;
 
 
-    @BeforeEach
+
+
+    @BeforeAll
     public void setup(){
         // Given
         User user = User.builder()
@@ -78,5 +83,27 @@ public class ServicesTestSupport {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         return headers;
+    }
+    protected HttpHeaders getFormDataHeader(){
+        HttpHeaders headers = new HttpHeaders();
+        String token= jwtUtil.generateToken("test", AppConstants.ACCESS_TOKEN_LIFETIME);
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        headers.add("Authorization", "Bearer " + token);
+        return headers;
+    }
+
+    protected  User addUser(String username){
+        User user = User.builder()
+                .firstName("test")
+                .lastName("test")
+                .username(username)
+                .password(passwordEncoder.encode("123456789"))
+                .email("")
+                .role(Role.builder().id(102L).name("USER").build())
+                .devices(null)
+                .build();
+        user=userRepo.save(user);
+        return user;
+
     }
 }

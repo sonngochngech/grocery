@@ -34,6 +34,8 @@ public class UserDetailDTO {
 
     private  String  email;
 
+    private String avatar;
+
 
     private  String password;
 

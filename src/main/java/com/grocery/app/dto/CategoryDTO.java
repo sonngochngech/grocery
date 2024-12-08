@@ -1,31 +1,22 @@
 package com.grocery.app.dto;
 
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.Date;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@Data
 public class CategoryDTO {
-    private long id;
+
+    private Long id;
     private String name;
-    private String description;
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    private Date createdAt;
+    private Date updatedAt;
+    private Boolean isDeleted;
 }

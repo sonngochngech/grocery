@@ -12,12 +12,12 @@ public class RabbitMQConfig {
 
     @Bean
     public Queue fcmQueue() {
-        return new Queue("fcm.queue", false);
+        return new Queue("fcm.queue", true);
     }
 
     @Bean
     public Queue emailQueue() {
-        return new Queue("email.queue", false);
+        return new Queue("email.queue", true);
     }
 
     @Bean

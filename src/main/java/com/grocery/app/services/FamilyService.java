@@ -8,6 +8,7 @@ import java.util.List;
 public interface FamilyService {
 
     List<FamilyDTO> getFamilyByUser(Long userId);
+    FamilyDTO getFamilyById(Long familyId);
     FamilyDTO createFamily(FamilyDTO familyDTO);
     FamilyDTO updateFamily(FamilyDTO familyDTO);
     FamilyDetailDTO getFamilyInformation(Long familyId);

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -47,5 +48,22 @@ public class Family {
     @LastModifiedDate
     @Column(name = "updated_at")
     private Date updatedAt;
+
+    @OneToOne(mappedBy = "family",cascade = CascadeType.ALL, fetch = FetchType.LAZY,orphanRemoval = true)
+    @JsonIgnore
+    private Fridge fridge;
+
+
+    @OneToMany(mappedBy = "family",cascade = CascadeType.ALL, fetch = FetchType.LAZY,orphanRemoval = true)
+    @JsonIgnore
+    private List<Invitation> invitations=new ArrayList<>();
+
+    @PrePersist
+    public void prePersist() {
+        if(this.fridge==null){
+            this.fridge=Fridge.builder().family(this).build();
+        }
+
+    }
 
 }

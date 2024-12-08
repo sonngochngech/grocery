@@ -7,6 +7,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import java.util.List;
 
@@ -16,6 +17,7 @@ import static com.grocery.app.config.constant.AppConstants.USER_ID;
 
 @SpringBootApplication
 @EnableConfigurationProperties
+@EnableTransactionManagement
 public class AppApplication implements CommandLineRunner {
 
 	@Autowired

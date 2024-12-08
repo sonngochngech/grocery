@@ -48,11 +48,17 @@ public class FamilyServiceImpl implements FamilyService {
     }
 
     @Override
+    public FamilyDTO getFamilyById(Long familyId) {
+        Family family = familyRepo.findById(familyId).orElse(null);
+        if (family == null) {
+            throw new ServiceException(ResCode.FAMILY_NOT_FOUND.getMessage(), ResCode.FAMILY_NOT_FOUND.getCode());
+        }
+        return modelMapper.map(family, FamilyDTO.class);
+    }
+
+    @Override
     public FamilyDTO createFamily(FamilyDTO familyDTO) {
-        log.info("Create family:{} ",familyDTO);
         Family family = modelMapper.map(familyDTO, Family.class);
-        family.setCreatedAt(null);
-        family.setUpdatedAt(null);
         family = familyRepo.save(family);
         return modelMapper.map(family, FamilyDTO.class);
     }
@@ -70,17 +76,14 @@ public class FamilyServiceImpl implements FamilyService {
 
     @Override
     public FamilyDetailDTO getFamilyInformation(Long familyId) {
-        log.info("Get family information:{}",familyId);
         Family family = familyRepo.findById(familyId).orElse(null);
         if (family == null) {
             throw new ServiceException(ResCode.FAMILY_NOT_FOUND.getMessage(), ResCode.FAMILY_NOT_FOUND.getCode());
         }
-        log.info("Family:{}",family);
         List<FamilyMember> familyMembers = family.getFamilyMembers();
         FamilyDTO familyDTO = modelMapper.map(family, FamilyDTO.class);
         List<UserDTO> members =familyMembers.stream().map(familyMember -> modelMapper.map(familyMember.getUser(), UserDTO.class)).toList();
         FamilyDetailDTO familyDetailDTO = FamilyDetailDTO.builder().basicInfo(familyDTO).members(members).build();
-        log.info("Family detail:{}",familyDetailDTO);
         return familyDetailDTO;
     }
 
@@ -117,6 +120,7 @@ public class FamilyServiceImpl implements FamilyService {
             throw new ServiceException(ResCode.FAMILY_NOT_FOUND.getMessage(), ResCode.FAMILY_NOT_FOUND.getCode());
         }
         FamilyMember familyMember = FamilyMember.builder().name(user.getUsername()).user(user).build();
+        familyMember.setFamily(family);
         family.getFamilyMembers().add(familyMember);
         family = familyRepo.save(family);
         return modelMapper.map(family, FamilyDetailDTO.class);
