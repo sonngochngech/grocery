@@ -25,7 +25,7 @@ public class Food {
 
     @ManyToOne
     @JoinColumn(name = "category_id")  // Specify the foreign key column name for Category
-    private Category category;
+    private Categories category;
 
     @ManyToOne
     @JoinColumn(name = "measure_unit_id")  // Specify the foreign key column name for MeasureUnit

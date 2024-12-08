@@ -1,8 +1,5 @@
 package com.grocery.app.dto;
 
-import com.grocery.app.entities.Category;
-import com.grocery.app.entities.MeasureUnit;
-
 import java.sql.Date;
 
 public class FoodDTO {
