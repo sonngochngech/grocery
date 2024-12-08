@@ -20,7 +20,13 @@ public class Recipe {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long Id;
 
+    private String name;
+
     @ManyToMany(mappedBy = "recipes")
     private List<Meal> meals = new ArrayList<>();
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false) // Ràng buộc công thức phải có người sở hữu
+    private User user;
 
 }

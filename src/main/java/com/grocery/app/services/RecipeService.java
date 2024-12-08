@@ -1,6 +1,7 @@
 package com.grocery.app.services;
 
 import com.grocery.app.dto.RecipeDTO;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 
