@@ -14,6 +14,7 @@ import com.grocery.app.dto.request.updateRequest.UpdateMealRequest;
 import com.grocery.app.exceptions.ServiceException;
 import com.grocery.app.services.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,16 +26,23 @@ import java.util.ArrayList;
 @RequestMapping("api/meal")
 @Slf4j
 public class MealController {
+    @Autowired
     private MealService mealService;
+    @Autowired
     private AuthenticationService authenticationService;
+    @Autowired
     private FamilyService familyService;
+    @Autowired
     private RecipeService recipeService;
+    @Autowired
     private UserService userService;
 
     @PostMapping("/add")
-    public ResponseEntity<MealDTO> createMeal(CreateMealRequest createMealRequest){
+    public ResponseEntity<MealDTO> createMeal(@RequestBody CreateMealRequest createMealRequest){
         UserInfoConfig currentUser = authenticationService.getCurrentUser();
 
+        System.out.println("current user");
+        System.out.println(currentUser.getId());
         // Kiểm tra người dùng
         UserDetailDTO user = userService.getUser(currentUser.getId());
 
@@ -44,12 +52,18 @@ public class MealController {
                     ResCode.USER_NOT_FOUND.getCode()
             );
         }
+        System.out.println("user");
+        System.out.println(user.getId());
 
+        System.out.println("check family");
+        System.out.println(createMealRequest);
+        System.out.println(createMealRequest.getFamilyId());
         // Kiểm tra quyền sở hữu của gia đình
         boolean isOwner = familyService.verifyOwner(
                 createMealRequest.getFamilyId(),
                 currentUser.getId()
         );
+        System.out.println(isOwner);
 
         if(!isOwner){
             throw new ServiceException(
@@ -58,11 +72,14 @@ public class MealController {
             );
         }
 
+        System.out.println("family");
         FamilyDetailDTO family = familyService.getFamilyInformation(createMealRequest.getFamilyId());
-
+        System.out.println(family.getBasicInfo().getId());
         // Kiểm tra danh sách công thức trong bữa ăn
         ArrayList<RecipeDTO> recipesList = new ArrayList<>();
+        System.out.println("get recipe");
         for (Long recipeId : createMealRequest.getRecipeList()) {
+            System.out.println("recipe");
             RecipeDTO recipeDTO = recipeService.getRecipeById(
                     currentUser.getId(),
                     recipeId
@@ -74,6 +91,8 @@ public class MealController {
                         ResCode.RESOURCE_NOT_FOUND.getCode()
                 );
             }
+
+            System.out.println(recipeDTO.getId());
 
             recipesList.add(recipeDTO);
         }
@@ -91,7 +110,8 @@ public class MealController {
                 .updatedAt(LocalDate.now())
                 .status(StatusConfig.AVAILABLE.getStatus())
                 .build();
-
+        System.out.println("meal dto");
+        System.out.println(newMeal.getName());
         // Tạo bữa ăn mới
         MealDTO createdMeal = mealService.createMeal(newMeal);
 
@@ -101,6 +121,9 @@ public class MealController {
                     ResCode.MEAL_CREATION_FAILED.getCode()
             );
         }
+
+        System.out.println("created meal");
+        System.out.println(createdMeal.getMealId());
 
         // Trả về bữa ăn mới tạo
         return ResponseEntity.status(HttpStatus.CREATED).body(createdMeal);

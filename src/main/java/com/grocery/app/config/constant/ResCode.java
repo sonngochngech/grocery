@@ -41,6 +41,10 @@ public enum ResCode {
 
 // Food code
     FOOD_NOT_FOUND("00301", "Food is not found"),
+    FOOD_CREATION_FAILED("00402", "Create food fail"),
+    FOOD_UPDATE_FAILED("00403", "Update food fail"),
+    FOOD_DELETE_FAILED("00404", "Delete food fail"),
+    NOT_FOOD_OWNER("00405", "User doesn't own the food"),
 
 // Shopping list code
     SHOPPING_LIST_NOT_FOUND("00401", "Shopping list is not found"),
