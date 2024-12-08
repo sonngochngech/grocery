@@ -19,20 +19,21 @@ public class Food {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long ownerId;
     private String name;
     private String description;
 
     @ManyToOne
-    @JoinColumn(name = "category_id")  // Specify the foreign key column name for Category
+    @JoinColumn(name = "category_id") // Specify the foreign key column name for Category
     private Categories category;
 
     @ManyToOne
-    @JoinColumn(name = "unit_id")  // Specify the foreign key column name for MeasureUnit
+    @JoinColumn(name = "unit_id") // Specify the foreign key column name for MeasureUnit
     private Unit measureUnit;
 
     private LocalDate createdAt;
     private LocalDate updatedAt;
 
-    // Getters and setters (or use Lombok annotations if preferred)
+    @ManyToOne
+    @JoinColumn(name = "user_id") // Specify the foreign key column name for User
+    private User owner;
 }
