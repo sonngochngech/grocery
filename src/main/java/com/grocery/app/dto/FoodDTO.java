@@ -9,8 +9,8 @@ import java.sql.Date;
 @NoArgsConstructor
 @Builder
 public class FoodDTO {
-    private long id;
-    private long ownerId;
+    private Long id;
+    private UserDetailDTO user;
     private String name;
     private String description;
     private CategoryDTO categoryDTO;
