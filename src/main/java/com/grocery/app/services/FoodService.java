@@ -9,7 +9,7 @@ import java.util.Optional;
 public interface FoodService {
     FoodDTO createFood(Long userId, FoodDTO foodDTO);
 
-    Optional<FoodDTO> getFoodById(Long userId, Long id);
+    FoodDTO getFoodById(Long userId, Long id);
 
     ArrayList<FoodDTO> getAllFood(Long userId, int from, int to);
 

@@ -56,11 +56,14 @@ public class TaskController {
         }
 
         // Kiểm tra sự tồn tại của thực phẩm
-        FoodDTO foodDTO = foodService.getFoodById(createTaskRequest.getUserId(), createTaskRequest.getFoodId())
-                .orElseThrow(() -> new ServiceException(
-                        ResCode.FOOD_NOT_FOUND.getMessage(),
-                        ResCode.FOOD_NOT_FOUND.getCode()
-                ));
+        FoodDTO foodDTO = foodService.getFoodById(createTaskRequest.getUserId(), createTaskRequest.getFoodId());
+        if (foodDTO == null) {
+            throw new ServiceException(
+                    ResCode.FOOD_NOT_FOUND.getMessage(),
+                    ResCode.FOOD_NOT_FOUND.getCode()
+            );
+        }
+        ;
 
         // Kiểm tra sự tồn tại của danh sách mua sắm
         ShoppingListDTO shoppingListDTO = shoppingListService.getShoppingListById(createTaskRequest.getUserId(), createTaskRequest.getShoppingListId())
@@ -153,11 +156,14 @@ public class TaskController {
 
         // Cập nhật thực phẩm nếu đã thay đổi
         if (updateTaskRequest.getFoodId() != taskDTO.getFoodDTO().getId()) {
-            FoodDTO foodDTO = foodService.getFoodById(assigner.getId(), updateTaskRequest.getFoodId())
-                    .orElseThrow(() -> new ServiceException(
-                            ResCode.FOOD_NOT_FOUND.getMessage(),
-                            ResCode.FOOD_NOT_FOUND.getCode()
-                    ));
+            FoodDTO foodDTO = foodService.getFoodById(updateTaskRequest.getUserId(), updateTaskRequest.getFoodId());
+            if (foodDTO == null) {
+                throw new ServiceException(
+                        ResCode.FOOD_NOT_FOUND.getMessage(),
+                        ResCode.FOOD_NOT_FOUND.getCode()
+                );
+            }
+            ;
             taskDTO.setFoodDTO(foodDTO);
         }
 

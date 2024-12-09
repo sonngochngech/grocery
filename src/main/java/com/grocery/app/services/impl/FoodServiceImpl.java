@@ -43,7 +43,7 @@ public class FoodServiceImpl implements FoodService {
     }
 
     @Override
-    public Optional<FoodDTO> getFoodById(Long userId, Long id) {
+    public FoodDTO getFoodById(Long userId, Long id) {
         Food food = foodRepo.findById(id).orElse(null);
 
         // Kiểm tra tồn tại
@@ -62,9 +62,7 @@ public class FoodServiceImpl implements FoodService {
             );
         }
 
-        FoodDTO foodDTO = modelMapper.map(food, FoodDTO.class);
-
-        return Optional.ofNullable(foodDTO);
+        return modelMapper.map(food, FoodDTO.class);
     }
 
     @Override

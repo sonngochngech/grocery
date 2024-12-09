@@ -104,7 +104,7 @@ public class FoodController {
         FoodDTO foodDTO = foodService.getFoodById(
                 currentUser.getId(),
                 id
-        ).orElse(null);
+        );
 
         // Kiểm tra tồn tại của food
         if (foodDTO == null) {
@@ -141,7 +141,7 @@ public class FoodController {
         FoodDTO foodDTO = foodService.getFoodById(
                 currentUser.getId(),
                 updateFoodRequest.getId()
-        ).orElse(null);
+        );
 
         // Kiểm tra tồn tại của food
         if (foodDTO == null) {
