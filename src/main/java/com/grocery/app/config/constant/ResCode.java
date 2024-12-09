@@ -103,6 +103,11 @@ public enum ResCode {
     INVITATION_EXPIRED("00607", "Invitation expired"),
 // Recipe code
     RECIPE_NOT_FOUND("00601", "Recipe is not found"),
+    RECIPE_CREATION_FAILED("00602", "Create recipe fail"),
+    RECIPE_UPDATE_FAILED("00603", "Update recipe fail"),
+    RECIPE_DELETE_FAILED("00604", "Delete recipe fail"),
+    NOT_RECIPE_OWNER("00605", "User doesn't own the recipe"),
+    FAVORITE_RECIPE_LIST_EXISTED("00606", "Favorite recipe list for this user has already been create, no need to create a new one"),
 
 // Meal code
     MEAL_NOT_FOUND("00701", "Meal is not found"),

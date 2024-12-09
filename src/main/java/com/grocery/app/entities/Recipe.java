@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,11 +23,21 @@ public class Recipe {
 
     private String name;
 
-    @ManyToMany(mappedBy = "recipes")
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "meal_recipe",
+            joinColumns = @JoinColumn(name = "recipe_id"),
+            inverseJoinColumns = @JoinColumn(name = "meal_id")
+    )
     private List<Meal> meals = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false) // Ràng buộc công thức phải có người sở hữu
     private User user;
 
+    private LocalDate createdAt;
+
+    private LocalDate updatedAt;
+
+    private String status;
 }
