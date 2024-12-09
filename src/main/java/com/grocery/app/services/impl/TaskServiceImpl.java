@@ -44,7 +44,7 @@ public class TaskServiceImpl implements TaskService {
     public Optional<TaskDTO> getTaskById(long userId, long id) {
         // Retrieve task and check user ownership
         return taskRepository.findById(id)
-                .filter(task -> task.getUser().getId() == userId)
+                .filter(task -> task.getUser().getId() == userId && !Objects.equals(task.getStatus(), StatusConfig.DELETED.getStatus()))
                 .map(task -> modelMapper.map(task, TaskDTO.class));
     }
 

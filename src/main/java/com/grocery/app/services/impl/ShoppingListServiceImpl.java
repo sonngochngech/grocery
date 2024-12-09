@@ -34,7 +34,7 @@ public class ShoppingListServiceImpl implements ShoppingListService {
     @Override
     public Optional<ShoppingListDTO> getShoppingListById(long userId, long id) {
         return shoppingListRepository.findById(id)
-                .filter(shoppingList -> shoppingList.getOwner().getId() == userId)
+                .filter(shoppingList -> shoppingList.getOwner().getId() == userId && !shoppingList.getStatus().equals(StatusConfig.DELETED.getStatus()))
                 .map(shoppingList -> modelMapper.map(shoppingList, ShoppingListDTO.class));
     }
 

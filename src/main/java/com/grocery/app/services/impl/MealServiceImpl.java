@@ -45,7 +45,7 @@ public class MealServiceImpl implements MealService {
         Meal meal = mealRepository.findById(mealId).orElse(null);
 
         // Kiểm tra xem Meal có tồn tại không
-        if(meal == null){
+        if(meal == null || Objects.equals(meal.getStatus(), StatusConfig.DELETED.getStatus())){
             throw new ServiceException(
                     ResCode.MEAL_NOT_FOUND.getMessage(),
                     ResCode.MEAL_NOT_FOUND.getCode()
@@ -159,7 +159,7 @@ public class MealServiceImpl implements MealService {
         Meal meal = mealRepository.findById(mealId).orElse(null);
 
         // Kiểm tra xem Meal có tồn tại không
-        if(meal == null){
+        if(meal == null || Objects.equals(meal.getStatus(), StatusConfig.DELETED.getStatus())){
             throw new ServiceException(
                     ResCode.MEAL_NOT_FOUND.getMessage(),
                     ResCode.MEAL_NOT_FOUND.getCode()

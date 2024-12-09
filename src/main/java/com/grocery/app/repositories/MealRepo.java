@@ -10,9 +10,9 @@ import java.util.ArrayList;
 
 @Repository
 public interface MealRepo extends JpaRepository<Meal, Long> {
-    @Query("SELECT s FROM Meal s WHERE s.user.id = :userId ORDER BY s.createdAt DESC")
+    @Query("SELECT s FROM Meal s WHERE s.user.id = :userId AND s.status != 'deleted' ORDER BY s.createdAt DESC")
     ArrayList<Meal> findAllByUserId(@Param("userId") Long userId);
 
-    @Query("SELECT s FROM Meal s WHERE s.user.id = :userId AND s.term = :term ORDER BY s.createdAt DESC")
+    @Query("SELECT s FROM Meal s WHERE s.user.id = :userId AND s.term = :term AND s.status != 'deleted' ORDER BY s.createdAt DESC")
     ArrayList<Meal> findAllByTerm(@Param("userId") Long userId, @Param("term") String term);
 }

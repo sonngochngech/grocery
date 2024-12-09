@@ -71,8 +71,12 @@ public class FoodServiceImpl implements FoodService {
     public ArrayList<FoodDTO> getAllFood(Long userId, int from, int to) {
         ArrayList<Food> foods = foodRepo.findAllByUserId(userId);
 
-        // clamp
         int maxSize = foods.size();
+
+        // Nếu là rỗng
+        if(maxSize == 0) return new ArrayList<>();
+
+        // clamp
         from = Math.max(0, Math.min(from, maxSize - 1)); // from trong khoảng [0, maxSize - 1]
         to = Math.max(from + 1, Math.min(to, maxSize)); // to trong khoảng [from + 1, maxSize]
 
