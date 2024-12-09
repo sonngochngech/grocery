@@ -137,8 +137,8 @@ public class RecipeServiceImpl implements RecipeService {
         return modelMapper.map(deletedRecipe, RecipeDTO.class);
     }
 
-    public FavoriteRecipe createFavoriteList(Long userId, Long familyId) {
-        FavoriteRecipe favoriteRecipe = favoriteRecipeRepo.findByUser(userId, familyId);
+    public FavoriteRecipe createFavoriteList(Long userId) {
+        FavoriteRecipe favoriteRecipe = favoriteRecipeRepo.findByUser(userId);
         if(favoriteRecipe != null){
             throw new ServiceException(
                     ResCode.FAVORITE_RECIPE_LIST_EXISTED.getMessage(),
@@ -155,47 +155,41 @@ public class RecipeServiceImpl implements RecipeService {
             );
         }
 
-        // check family
-        Family selectedFamily = familyRepo.findById(familyId).orElse(null);
-        if(selectedFamily == null){
-            throw new ServiceException(
-                    ResCode.FAMILY_NOT_FOUND.getCode(),
-                    ResCode.FAMILY_NOT_FOUND.getCode()
-            );
-        }
-
-        // check quyền sở hữu family
-        if(!Objects.equals(selectedFamily.getOwner().getId(), userId)){
-            throw new ServiceException(
-                    ResCode.NOT_OWNER_OF_FAMILY.getMessage(),
-                    ResCode.NOT_OWNER_OF_FAMILY.getCode()
-            );
-        }
-
         favoriteRecipe = FavoriteRecipe.builder()
                 .user(user)
                 .favoriteList(new ArrayList<>())
-                .family(selectedFamily)
                 .build();
 
         return favoriteRecipe;
     }
 
     @Override
-    public FavoriteRecipeDTO getFavoriteList(Long userId, Long familyId) {
-        FavoriteRecipe favoriteRecipe = favoriteRecipeRepo.findByUser(userId, familyId);
+    public ArrayList<RecipeDTO> getFavoriteList(Long userId, int from, int to) {
+        FavoriteRecipe favoriteRecipe = favoriteRecipeRepo.findByUser(userId);
+        ArrayList<RecipeDTO> recipeDTOArrayList = new ArrayList<>();
         if(favoriteRecipe == null){
-            favoriteRecipe = createFavoriteList(userId, familyId);
+            favoriteRecipe = createFavoriteList(userId);
+            return recipeDTOArrayList;
         }
 
-        return modelMapper.map(favoriteRecipe, FavoriteRecipeDTO.class);
+        // clamp
+        int maxSize = favoriteRecipe.getFavoriteList().size();
+        from = Math.max(0, Math.min(from, maxSize - 1)); // from trong khoảng [0, maxSize - 1]
+        to = Math.max(from + 1, Math.min(to, maxSize)); // to trong khoảng [from + 1, maxSize]
+
+        // Chuyển đổi phần tử trong range từ Food sang FoodDTO
+        for (int i = from; i < to; i++) {
+            recipeDTOArrayList.add(modelMapper.map(favoriteRecipe.getFavoriteList().get(i), RecipeDTO.class));
+        }
+
+        return recipeDTOArrayList;
     }
 
     @Override
-    public FavoriteRecipeDTO removeFavoriteRecipe(Long userId, Long familyId, Long recipeId) {
-        FavoriteRecipe favoriteRecipe = favoriteRecipeRepo.findByUser(userId, familyId);
+    public FavoriteRecipeDTO removeFavoriteRecipe(Long userId, Long recipeId) {
+        FavoriteRecipe favoriteRecipe = favoriteRecipeRepo.findByUser(userId);
         if(favoriteRecipe == null){
-            favoriteRecipe = createFavoriteList(userId, familyId);
+            favoriteRecipe = createFavoriteList(userId);
         }
 
         // Tìm kiếm recipe
@@ -215,10 +209,10 @@ public class RecipeServiceImpl implements RecipeService {
     }
 
     @Override
-    public FavoriteRecipeDTO addFavoriteRecipe(Long userId, Long familyId, Long recipeId) {
-        FavoriteRecipe favoriteRecipe = favoriteRecipeRepo.findByUser(userId, familyId);
+    public FavoriteRecipeDTO addFavoriteRecipe(Long userId, Long recipeId) {
+        FavoriteRecipe favoriteRecipe = favoriteRecipeRepo.findByUser(userId);
         if(favoriteRecipe == null){
-            favoriteRecipe = createFavoriteList(userId, familyId);
+            favoriteRecipe = createFavoriteList(userId);
         }
 
         // Kiểm tra đã ở trong list chưa

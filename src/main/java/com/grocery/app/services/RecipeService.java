@@ -18,9 +18,9 @@ public interface RecipeService {
 
     RecipeDTO deleteRecipe(Long userId, Long recipeId);
 
-    FavoriteRecipeDTO getFavoriteList(Long userId, Long familyId);
+    ArrayList<RecipeDTO> getFavoriteList(Long userId, int from, int to);
 
-    FavoriteRecipeDTO removeFavoriteRecipe(Long userId, Long familyId, Long recipeId);
+    FavoriteRecipeDTO removeFavoriteRecipe(Long userId, Long recipeId);
 
-    FavoriteRecipeDTO addFavoriteRecipe(Long userId, Long familyId, Long recipeId);
+    FavoriteRecipeDTO addFavoriteRecipe(Long userId, Long recipeId);
 }

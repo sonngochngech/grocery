@@ -31,6 +31,14 @@ public class Recipe {
     )
     private List<Meal> meals = new ArrayList<>();
 
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "recipe_food",
+            joinColumns = @JoinColumn(name = "recipe_id"),
+            inverseJoinColumns = @JoinColumn(name = "food_id")
+    )
+    private List<Food> foods = new ArrayList<>();
+
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false) // Ràng buộc công thức phải có người sở hữu
     private User user;

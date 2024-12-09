@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+
 
 @Data
 @NoArgsConstructor
@@ -12,5 +14,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class CreateRecipeRequest {
     private String name;
-    private Long userId;
+    private String description;
+    private String imageUrl;
+    private ArrayList<Long> foods;
 }

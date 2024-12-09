@@ -24,10 +24,6 @@ public class FavoriteRecipe {
     @JoinColumn(name = "user_id", nullable = false) // Tên cột trong bảng fav_recipe
     private User user;
 
-    @OneToOne // Một gia đình (Family) có thể có nhiều FavoriteRecipe
-    @JoinColumn(name = "family_id") // Cho phép nullable vì có thể không thuộc Family
-    private Family family;
-
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "fav_recipe_id") // Tạo liên kết với bảng Recipe
     private List<Recipe> favoriteList;

@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 @Data
@@ -18,4 +19,7 @@ public class RecipeDTO {
     private String description;
     private String imageUrl;
     private ArrayList<FoodDTO> foodDTOs;
+    private LocalDate createdAt;
+    private LocalDate updatedAt;
+    private String status;
 }

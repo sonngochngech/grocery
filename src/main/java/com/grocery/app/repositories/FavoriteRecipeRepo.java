@@ -11,6 +11,6 @@ import java.util.ArrayList;
 
 @Repository
 public interface FavoriteRecipeRepo extends JpaRepository<FavoriteRecipe, Long> {
-    @Query("SELECT s FROM fav_recipe s WHERE s.user.id = :userId AND s.family.id = :familyId ORDER BY s.createdAt DESC")
-    FavoriteRecipe findByUser(@Param("userId") Long userId, @Param("familyId") Long familyId);
+    @Query("SELECT s FROM fav_recipe s WHERE s.user.id = :userId ORDER BY s.createdAt DESC")
+    FavoriteRecipe findByUser(@Param("userId") Long userId);
 }
