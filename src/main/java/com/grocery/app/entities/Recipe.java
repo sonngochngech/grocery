@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,12 +40,15 @@ public class Recipe {
     private List<Food> foods = new ArrayList<>();
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false) // Ràng buộc công thức phải có người sở hữu
+    @JoinColumn(name = "user_id", nullable = true) // Ràng buộc công thức phải có người sở hữu
     private User user;
 
-    private LocalDate createdAt;
+    @ManyToOne
+    @JoinColumn(name = "favorite_recipe_id")
+    private FavoriteRecipe favRecipe;
 
-    private LocalDate updatedAt;
+    private Date createdAt;
+    private Date updatedAt;
 
     private String status;
 }

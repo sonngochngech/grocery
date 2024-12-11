@@ -6,12 +6,15 @@ import com.grocery.app.config.constant.StatusConfig;
 import com.grocery.app.config.constant.TermConfig;
 import com.grocery.app.dto.MealDTO;
 import com.grocery.app.dto.RecipeDTO;
+import com.grocery.app.dto.UserDTO;
 import com.grocery.app.dto.UserDetailDTO;
 import com.grocery.app.dto.family.FamilyDetailDTO;
 import com.grocery.app.dto.request.RecommendedMealDTO;
 import com.grocery.app.dto.request.createRequest.CreateMealRequest;
 import com.grocery.app.dto.request.updateRequest.UpdateMealRequest;
 import com.grocery.app.exceptions.ServiceException;
+import com.grocery.app.payloads.responses.BaseResponse;
+import com.grocery.app.payloads.responses.ResponseFactory;
 import com.grocery.app.services.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
@@ -38,13 +42,11 @@ public class MealController {
     private UserService userService;
 
     @PostMapping("/add")
-    public ResponseEntity<MealDTO> createMeal(@RequestBody CreateMealRequest createMealRequest){
+    public ResponseEntity<BaseResponse<MealDTO>> createMeal(@RequestBody CreateMealRequest createMealRequest){
         UserInfoConfig currentUser = authenticationService.getCurrentUser();
 
-        System.out.println("current user");
-        System.out.println(currentUser.getId());
         // Kiểm tra người dùng
-        UserDetailDTO user = userService.getUser(currentUser.getId());
+        UserDTO user = userService.getUserById(currentUser.getId());
 
         if(user == null){
             throw new ServiceException(
@@ -52,18 +54,12 @@ public class MealController {
                     ResCode.USER_NOT_FOUND.getCode()
             );
         }
-        System.out.println("user");
-        System.out.println(user.getId());
 
-        System.out.println("check family");
-        System.out.println(createMealRequest);
-        System.out.println(createMealRequest.getFamilyId());
         // Kiểm tra quyền sở hữu của gia đình
         boolean isOwner = familyService.verifyOwner(
                 createMealRequest.getFamilyId(),
                 currentUser.getId()
         );
-        System.out.println(isOwner);
 
         if(!isOwner){
             throw new ServiceException(
@@ -72,14 +68,10 @@ public class MealController {
             );
         }
 
-        System.out.println("family");
         FamilyDetailDTO family = familyService.getFamilyInformation(createMealRequest.getFamilyId());
-        System.out.println(family.getBasicInfo().getId());
         // Kiểm tra danh sách công thức trong bữa ăn
         ArrayList<RecipeDTO> recipesList = new ArrayList<>();
-        System.out.println("get recipe");
         for (Long recipeId : createMealRequest.getRecipeList()) {
-            System.out.println("recipe");
             RecipeDTO recipeDTO = recipeService.getRecipeById(
                     currentUser.getId(),
                     recipeId
@@ -92,26 +84,21 @@ public class MealController {
                 );
             }
 
-            System.out.println(recipeDTO.getId());
-
             recipesList.add(recipeDTO);
         }
 
-        // Tạo bữa ăn tạm thời từ yêu cầu
         MealDTO newMeal = MealDTO
                 .builder()
                 .userDetailDTO(user)
-                .familyDetailDTO(family)
+                .familyDetailDTO(family.getBasicInfo())
                 .name(createMealRequest.getName())
-                .term(TermConfig.valueOf(createMealRequest.getTerm()).getTerm())
+                .term(TermConfig.valueOf(createMealRequest.getTerm().toUpperCase()).getTerm())
                 .date(createMealRequest.getDate())
                 .recipeDTOS(recipesList)
-                .createdAt(LocalDate.now())
-                .updatedAt(LocalDate.now())
+                .createdAt(Date.valueOf(LocalDate.now()))
+                .updatedAt(Date.valueOf(LocalDate.now()))
                 .status(StatusConfig.AVAILABLE.getStatus())
                 .build();
-        System.out.println("meal dto");
-        System.out.println(newMeal.getName());
         // Tạo bữa ăn mới
         MealDTO createdMeal = mealService.createMeal(newMeal);
 
@@ -122,15 +109,20 @@ public class MealController {
             );
         }
 
-        System.out.println("created meal");
-        System.out.println(createdMeal.getMealId());
-
         // Trả về bữa ăn mới tạo
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdMeal);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ResponseFactory.createResponse(
+                        createdMeal,
+                        ResCode.CREATE_FOOD_SUCCESSFULLY.getMessage(),
+                        ResCode.CREATE_FOOD_SUCCESSFULLY.getCode()
+                        )
+                );
     }
 
     @GetMapping("/get/{mealId}")
-    public ResponseEntity<MealDTO> getMealById(@PathVariable Long mealId){
+    public ResponseEntity<BaseResponse<MealDTO>> getMealById(@PathVariable Long mealId){
+        System.out.println("meal id");
+        System.out.println(mealId);
         UserInfoConfig currentUser = authenticationService.getCurrentUser();
 
         // Lấy bữa ăn theo ID và người dùng hiện tại
@@ -148,11 +140,16 @@ public class MealController {
         }
 
         // Trả về thông tin bữa ăn
-        return ResponseEntity.ok(meal);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ResponseFactory.createResponse(
+                        meal,
+                        ResCode.GET_MEAL_SUCCESSFULLY.getMessage(),
+                        ResCode.GET_MEAL_SUCCESSFULLY.getCode()
+                ));
     }
 
     @GetMapping("/getAll")
-    public ResponseEntity<ArrayList<MealDTO>> getAllMeal(@RequestParam int from, @RequestParam int to){
+    public ResponseEntity<BaseResponse<ArrayList<MealDTO>>> getAllMeal(@RequestParam int from, @RequestParam int to){
         UserInfoConfig currentUser = authenticationService.getCurrentUser();
 
         // Lấy tất cả bữa ăn trong khoảng từ `from` đến `to`
@@ -163,35 +160,51 @@ public class MealController {
         );
 
         // Trả về danh sách bữa ăn
-        return ResponseEntity.ok(meals);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                ResponseFactory.createResponse(
+                        meals,
+                        ResCode.GET_MEALS_SUCCESSFULLY.getMessage(),
+                        ResCode.GET_MEALS_SUCCESSFULLY.getCode()
+                )
+        );
     }
 
     @GetMapping("/recommend/{term}")
-    public ResponseEntity<RecommendedMealDTO> recommendMeal(@PathVariable String term){
+    public ResponseEntity<BaseResponse<RecommendedMealDTO>> recommendMeal(@PathVariable String term){
         UserInfoConfig currentUser = authenticationService.getCurrentUser();
+        System.out.println("request term" + term);
 
-        // Kiểm tra và chuyển đổi giá trị `term`
-        String validatedTerm;
-        try {
-            validatedTerm = TermConfig.valueOf(term).getTerm();
-        } catch (IllegalArgumentException e) {
+        // Kiểm tra người dùng
+        UserDTO user = userService.getUserById(currentUser.getId());
+
+        if(user == null){
             throw new ServiceException(
-                    ResCode.INVALID_TERM.getMessage(),
-                    ResCode.INVALID_TERM.getCode()
+                    ResCode.USER_NOT_FOUND.getMessage(),
+                    ResCode.USER_NOT_FOUND.getCode()
             );
         }
+
+        System.out.println("user id");
+        System.out.println(user.getId());
 
         // Lấy danh sách bữa ăn gợi ý
         RecommendedMealDTO recommendedMeals = mealService.recommendMeal(
                 currentUser.getId(),
-                validatedTerm
+                term
         );
 
-        return ResponseEntity.ok(recommendedMeals);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        ResponseFactory.createResponse(
+                                recommendedMeals,
+                                ResCode.GET_RECOMMENDED_MEALS_SUCCESSFULLY.getMessage(),
+                                ResCode.GET_RECOMMENDED_MEALS_SUCCESSFULLY.getCode()
+                        )
+                );
     }
 
     @PostMapping("/update")
-    public ResponseEntity<MealDTO> updateMeal(@RequestBody UpdateMealRequest updateMealRequest){
+    public ResponseEntity<BaseResponse<MealDTO>> updateMeal(@RequestBody UpdateMealRequest updateMealRequest){
         UserInfoConfig currentUser = authenticationService.getCurrentUser();
 
         // Kiểm tra quyền sở hữu
@@ -222,6 +235,8 @@ public class MealController {
 
         // Lấy danh sách công thức mới
         ArrayList<RecipeDTO> newRecipes = new ArrayList<>();
+        System.out.println("New recipe list");
+        System.out.println(updateMealRequest.getRecipeList());
         for (Long recipeId : updateMealRequest.getRecipeList()) {
             RecipeDTO newRecipe = recipeService.getRecipeById(
                     currentUser.getId(),
@@ -241,9 +256,9 @@ public class MealController {
         // Cập nhật thông tin bữa ăn
         currentMeal.setName(updateMealRequest.getName());
         currentMeal.setDate(updateMealRequest.getDate());
-        currentMeal.setTerm(TermConfig.valueOf(updateMealRequest.getTerm()).getTerm());
+        currentMeal.setTerm(TermConfig.valueOf(updateMealRequest.getTerm().toUpperCase()).getTerm());
         currentMeal.setRecipeDTOS(newRecipes);
-        currentMeal.setUpdatedAt(LocalDate.now());
+        currentMeal.setUpdatedAt(Date.valueOf(LocalDate.now()));
 
         // Thực hiện cập nhật bữa ăn
         MealDTO updatedMeal = mealService.updateMeal(currentMeal);
@@ -255,11 +270,18 @@ public class MealController {
             );
         }
 
-        return ResponseEntity.ok(updatedMeal);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        ResponseFactory.createResponse(
+                                updatedMeal,
+                                ResCode.UPDATE_MEAL_SUCCESSFULLY.getMessage(),
+                                ResCode.UPDATE_MEAL_SUCCESSFULLY.getCode()
+                        )
+                );
     }
 
     @DeleteMapping("/delete/{mealId}")
-    public ResponseEntity<MealDTO> deleteMeal(@PathVariable Long mealId){
+    public ResponseEntity<BaseResponse<MealDTO>> deleteMeal(@PathVariable Long mealId){
         UserInfoConfig currentUser = authenticationService.getCurrentUser();
 
         // Thực hiện xóa bữa ăn
@@ -275,6 +297,13 @@ public class MealController {
             );
         }
 
-        return ResponseEntity.ok(deletedMeal);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        ResponseFactory.createResponse(
+                                deletedMeal,
+                                ResCode.DELETE_MEAL_SUCCESSFULLY.getMessage(),
+                                ResCode.DELETE_MEAL_SUCCESSFULLY.getCode()
+                        )
+                );
     }
 }

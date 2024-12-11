@@ -5,26 +5,29 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 
+import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Table(name = "fav_recipe")
 @Data
+@Table(name = "favorite_recipe")
+@Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+
 public class FavoriteRecipe {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // Tự động sinh giá trị ID
     private Long id;
 
-    @ManyToOne // Một người dùng (User) có thể có nhiều FavoriteRecipe
-    @JoinColumn(name = "user_id", nullable = false) // Tên cột trong bảng fav_recipe
+    @OneToOne
+    @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "fav_recipe_id") // Tạo liên kết với bảng Recipe
-    private List<Recipe> favoriteList;
+    @OneToMany(mappedBy = "favRecipe", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Recipe> favoriteList = new ArrayList<>();
 }

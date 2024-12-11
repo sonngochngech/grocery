@@ -76,6 +76,8 @@ public  class User{
     @JsonIgnore
     private List<Invitation> invitations=new ArrayList<>();
 
+    @OneToOne(mappedBy = "user")
+    private FavoriteRecipe favoriteRecipe;
 
 
 

@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,19 +22,19 @@ public class Meal {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long mealId; // Khóa chính của bảng meal
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
     private User user; // Quan hệ nhiều đến một với User (một người dùng có nhiều bữa ăn)
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "family_id")
+    @ManyToOne
+    @JoinColumn(name = "family_id", nullable = false)
     private Family family; // Quan hệ nhiều đến một với Family (một gia đình có nhiều bữa ăn)
 
     private String name;
     private String term;
     private String date;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(cascade = CascadeType.MERGE)
     @JoinTable(
             name = "meal_recipe",
             joinColumns = @JoinColumn(name = "meal_id"),
@@ -43,7 +43,8 @@ public class Meal {
     private List<Recipe> recipes = new ArrayList<>();
     // Danh sách các công thức nấu ăn (một bữa ăn có thể có nhiều công thức)
 
-    private LocalDate createdAt;
-    private LocalDate updatedAt;
+    private Date createdAt;
+
+    private Date updatedAt;
     private String status;
 }

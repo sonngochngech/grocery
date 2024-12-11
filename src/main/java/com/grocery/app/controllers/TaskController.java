@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Objects;
@@ -96,8 +97,8 @@ public class TaskController {
                 .foodDTO(foodDTO)
                 .shoppingListDTO(shoppingListDTO)
                 .quantity(createTaskRequest.getQuantity())
-                .createdAt(LocalDate.now())
-                .updatedAt(LocalDate.now())
+                .createdAt(Date.valueOf(LocalDate.now()))
+                .updatedAt(Date.valueOf(LocalDate.now()))
                 .status(StatusConfig.AVAILABLE.getStatus())  // Đặt trạng thái mặc định nếu cần
                 .build();
 
@@ -209,7 +210,7 @@ public class TaskController {
         }
 
         // Cập nhật ngày sửa đổi
-        taskDTO.setUpdatedAt(LocalDate.now());
+        taskDTO.setUpdatedAt(Date.valueOf(LocalDate.now()));
 
         // Lưu nhiệm vụ đã cập nhật và trả về phản hồi
         TaskDTO updatedTaskDTO = taskService.updateTask(taskDTO);

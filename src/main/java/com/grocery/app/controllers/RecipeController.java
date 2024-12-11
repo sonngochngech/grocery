@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
@@ -70,8 +71,8 @@ public class RecipeController {
                 .description(createRecipeRequest.getDescription())
                 .imageUrl(createRecipeRequest.getImageUrl())
                 .foodDTOs(foodDTOArrayList)
-                .createdAt(LocalDate.now())
-                .updatedAt(LocalDate.now())
+                .createdAt(Date.valueOf(LocalDate.now()))
+                .updatedAt(Date.valueOf(LocalDate.now()))
                 .status(StatusConfig.AVAILABLE.getStatus())
                 .build();
 
@@ -118,7 +119,7 @@ public class RecipeController {
         recipeDTO.setDescription(updateRecipeRequest.getDescription());
         recipeDTO.setName(updateRecipeRequest.getName());
         recipeDTO.setFoodDTOs(foodDTOArrayList);
-        recipeDTO.setUpdatedAt(LocalDate.now());
+        recipeDTO.setUpdatedAt(Date.valueOf(LocalDate.now()));
 
         RecipeDTO updatedRecipeDTO = recipeService.updateRecipe(recipeDTO);
 

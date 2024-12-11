@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Objects;
@@ -81,8 +82,8 @@ public class FoodController {
                 .measureUnitDTO(unitDTO)
                 .description(createFoodRequest.getDescription())
                 .name(createFoodRequest.getName())
-                .createdAt(LocalDate.now())
-                .updatedAt(LocalDate.now())
+                .createdAt(Date.valueOf(LocalDate.now()))
+                .updatedAt(Date.valueOf(LocalDate.now()))
                 .build();
 
         FoodDTO createFood = foodService.createFood(createFoodRequest.getUserId(), foodDTO);
@@ -186,7 +187,7 @@ public class FoodController {
         foodDTO.setMeasureUnitDTO(unitDTO);
         foodDTO.setName(updateFoodRequest.getName());
         foodDTO.setDescription(updateFoodRequest.getDescription());
-        foodDTO.setUpdatedAt(LocalDate.now());
+        foodDTO.setUpdatedAt(Date.valueOf(LocalDate.now()));
 
         FoodDTO updatedFood = foodService.updateFood(foodDTO);
 

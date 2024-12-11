@@ -11,7 +11,7 @@ import java.util.ArrayList;
 @Repository
 public interface ShoppingListRepo extends JpaRepository<ShoppingList, Long> {
 
-    @Query("SELECT s FROM ShoppingList s WHERE s.owner.id = : AND s.status != 'deleted' ORDER BY s.createdAt DESC")
+    @Query("SELECT s FROM ShoppingList s WHERE s.owner.id = :userId AND s.status <> 'deleted' ORDER BY s.createdAt DESC")
     ArrayList<ShoppingList> findAllByUserId(@Param("userId") Long userId);
 }
 

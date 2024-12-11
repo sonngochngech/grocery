@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Objects;
-import java.util.Optional;
+
 @Service
 public class FoodServiceImpl implements FoodService {
     private FoodRepo foodRepo;
@@ -55,7 +55,7 @@ public class FoodServiceImpl implements FoodService {
         }
 
         // Kiểm tra chủ sở hữu
-        if(!Objects.equals(food.getOwner().getId(), userId)){
+        if(!Objects.equals(food.getUser().getId(), userId)){
             throw new ServiceException(
                     ResCode.NOT_FOOD_OWNER.getMessage(),
                     ResCode.NOT_FOOD_OWNER.getCode()
@@ -117,7 +117,7 @@ public class FoodServiceImpl implements FoodService {
         }
 
         // Kiểm tra quyền sở hữu
-        boolean isOwner = Objects.equals(userId, food.getOwner().getId());
+        boolean isOwner = Objects.equals(userId, food.getUser().getId());
 
         if(!isOwner){
             throw new ServiceException(

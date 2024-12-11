@@ -16,6 +16,6 @@ public class FoodDTO {
     private String description;
     private CategoryDTO categoryDTO;
     private UnitDTO measureUnitDTO;
-    private LocalDate createdAt;
-    private LocalDate updatedAt;
+    private Date createdAt;
+    private Date updatedAt;
 }

@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Objects;
@@ -71,8 +72,8 @@ public class ShoppingListController {
                 .familyDTO(familyDTO)
                 .name(createShoppingListRequest.getName())
                 .description(createShoppingListRequest.getDescription())
-                .createdAt(LocalDate.now())
-                .updatedAt(LocalDate.now())
+                .createdAt(Date.valueOf(LocalDate.now()))
+                .updatedAt(Date.valueOf(LocalDate.now()))
                 .status(StatusConfig.AVAILABLE.getStatus())
                 .build();
 
@@ -145,7 +146,7 @@ public class ShoppingListController {
         // Cập nhật thông tin danh sách mua sắm
         shoppingListDTO.setName(updateShoppingListRequest.getName());
         shoppingListDTO.setDescription(updateShoppingListRequest.getDescription());
-        shoppingListDTO.setUpdatedAt(LocalDate.now());
+        shoppingListDTO.setUpdatedAt(Date.valueOf(LocalDate.now()));
 
         // Lưu lại danh sách mua sắm đã cập nhật
         ShoppingListDTO updatedShoppingList = shoppingListService.updateShoppingList(shoppingListDTO);

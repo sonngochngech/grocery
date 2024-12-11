@@ -13,7 +13,6 @@ import java.util.ArrayList;
 @Builder
 public class UpdateMealRequest {
     Long mealId;
-    Long userId;
     Long familyId;
     String name;
     String term;

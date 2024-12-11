@@ -1,13 +1,13 @@
 package com.grocery.app.dto;
 
-import com.grocery.app.dto.family.FamilyDetailDTO;
+import com.grocery.app.dto.family.FamilyDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
+import java.sql.Date;
 
 @Data
 @AllArgsConstructor
@@ -15,13 +15,13 @@ import java.util.ArrayList;
 @Builder
 public class MealDTO {
     private Long mealId;
-    private UserDetailDTO userDetailDTO;
-    private FamilyDetailDTO familyDetailDTO;
+    private UserDTO userDetailDTO;
+    private FamilyDTO familyDetailDTO;
     private String name;
     private String term;
     private String date;
     private ArrayList<RecipeDTO> recipeDTOS;
-    private LocalDate createdAt;
-    private LocalDate updatedAt;
+    private Date createdAt;
+    private Date updatedAt;
     private String status;
 }

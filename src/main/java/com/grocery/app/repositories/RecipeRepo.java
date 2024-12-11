@@ -11,6 +11,6 @@ import java.util.ArrayList;
 
 @Repository
 public interface RecipeRepo extends JpaRepository<Recipe, Long> {
-    @Query("SELECT s FROM Recipe s WHERE s.user.id = :userId AND s.status != 'deleted' ORDER BY s.createdAt DESC")
+    @Query("SELECT s FROM Recipe s WHERE s.user.id = :userId AND s.status <> 'deleted' ORDER BY s.createdAt DESC")
     ArrayList<Recipe> findAllByUserId(@Param("userId") Long userId);
 }
