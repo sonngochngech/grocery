@@ -4,7 +4,9 @@ import com.grocery.app.config.constant.StatusConfig;
 import com.grocery.app.config.UserInfoConfig;
 import com.grocery.app.config.constant.ResCode;
 import com.grocery.app.dto.ShoppingListDTO;
+import com.grocery.app.dto.UserDTO;
 import com.grocery.app.dto.UserDetailDTO;
+import com.grocery.app.dto.family.FamilyDTO;
 import com.grocery.app.dto.family.FamilyDetailDTO;
 import com.grocery.app.dto.request.createRequest.CreateShoppingListRequest;
 import com.grocery.app.dto.request.updateRequest.UpdateShoppingListRequest;
@@ -44,9 +46,9 @@ public class ShoppingListController {
     @PostMapping("/add")
     public ResponseEntity<ShoppingListDTO> createShoppingList(CreateShoppingListRequest createShoppingListRequest) {
         UserInfoConfig userInfoConfig = authenticationService.getCurrentUser(); // Xác thực người dùng hiện tại
-        UserDetailDTO owner = userService.getUser(userInfoConfig.getId()); // Lấy thông tin chi tiết của chủ sở hữu
+        UserDTO owner = userService.getUserById(userInfoConfig.getId()); // Lấy thông tin chi tiết của chủ sở hữu
 
-        FamilyDetailDTO familyDTO = familyService.getFamilyInformation(createShoppingListRequest.getFamilyId());
+        FamilyDTO familyDTO = familyService.getFamilyInformation(createShoppingListRequest.getFamilyId()).getBasicInfo();
         if (familyDTO == null) {
             throw new ServiceException(
                     ResCode.FAMILY_NOT_FOUND.getMessage(),
@@ -56,7 +58,7 @@ public class ShoppingListController {
 
         // Kiểm tra nếu người dùng là chủ sở hữu của gia đình
         boolean isOwner = familyService.verifyOwner(
-                familyDTO.getBasicInfo().getId(),
+                familyDTO.getId(),
                 owner.getId()
         );
         if (!isOwner) {

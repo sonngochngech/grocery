@@ -22,7 +22,6 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
 import java.time.LocalDate;
@@ -99,7 +98,6 @@ public class MealControllerIntegrationTest extends ServicesTestSupport {
         Family family1 = familyRepo.findById(family.getId()).orElse(null);
 
         meal.setFamily(family1);
-
 
         // Tạo các recipe và gán user cho từng recipe
         r1 = Recipe.builder()

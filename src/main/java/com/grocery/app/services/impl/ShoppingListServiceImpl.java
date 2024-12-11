@@ -2,9 +2,21 @@ package com.grocery.app.services.impl;
 
 import com.grocery.app.config.constant.StatusConfig;
 import com.grocery.app.dto.ShoppingListDTO;
+import com.grocery.app.dto.TaskDTO;
+import com.grocery.app.dto.UserDTO;
+import com.grocery.app.dto.family.FamilyDTO;
+import com.grocery.app.entities.Family;
 import com.grocery.app.entities.ShoppingList;
+import com.grocery.app.entities.Task;
+import com.grocery.app.entities.User;
+import com.grocery.app.repositories.FamilyRepo;
 import com.grocery.app.repositories.ShoppingListRepo;
+import com.grocery.app.repositories.TaskRepo;
+import com.grocery.app.repositories.UserRepo;
 import com.grocery.app.services.ShoppingListService;
+import com.grocery.app.services.TaskService;
+import lombok.Getter;
+import lombok.Setter;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,54 +30,64 @@ import java.util.stream.Collectors;
 @Service
 public class ShoppingListServiceImpl implements ShoppingListService {
 
+    // Getters and Setters (if required for testing or other purposes)
     @Autowired
     private ShoppingListRepo shoppingListRepository;
 
     @Autowired
     private ModelMapper modelMapper;
 
+    @Autowired
+    private TaskService taskService;
+
+    @Autowired
+    private TaskRepo taskRepo;
+
+    @Autowired
+    private FamilyRepo familyRepo;
+
+    @Autowired
+    private UserRepo userRepo;
+
     @Override
     public ShoppingListDTO createShoppingList(ShoppingListDTO shoppingListDTO) {
-        ShoppingList shoppingList = modelMapper.map(shoppingListDTO, ShoppingList.class);
+        ShoppingList shoppingList = convertToShoppingList(shoppingListDTO);
         ShoppingList savedShoppingList = shoppingListRepository.save(shoppingList);
-        return modelMapper.map(savedShoppingList, ShoppingListDTO.class);
+        return convertToShoppingListDTO(savedShoppingList);
     }
 
     @Override
     public Optional<ShoppingListDTO> getShoppingListById(long userId, long id) {
+        System.out.println("get shopping " + id + " list of");
+        System.out.println(userId);
+
+        System.out.println(convertToShoppingListDTO(Objects.requireNonNull(shoppingListRepository.findById(id).orElse(null))));
+
         return shoppingListRepository.findById(id)
                 .filter(shoppingList -> shoppingList.getOwner().getId() == userId && !shoppingList.getStatus().equals(StatusConfig.DELETED.getStatus()))
-                .map(shoppingList -> modelMapper.map(shoppingList, ShoppingListDTO.class));
+                .map(this::convertToShoppingListDTO);
     }
 
     @Override
     public ArrayList<ShoppingListDTO> getAllShoppingList(long userId, int from, int to) {
         List<ShoppingList> shoppingLists = shoppingListRepository.findAllByUserId(userId);
 
-        // Clamp "to" variable
-        to = Math.min(to, shoppingLists.size());
-        if (from < 0 || from > to) {
-            throw new IndexOutOfBoundsException("Invalid pagination parameters.");
-        }
+        // Clamp "to" parameter
+        int maxSize = shoppingLists.size();
+        from = Math.max(0, Math.min(from, maxSize - 1)); // from trong khoảng [0, maxSize - 1]
+        to = Math.max(from + 1, Math.min(to, maxSize));
 
         List<ShoppingList> paginatedLists = shoppingLists.subList(from, to);
         return paginatedLists.stream()
-                .map(shoppingList -> modelMapper.map(shoppingList, ShoppingListDTO.class))
+                .map(this::convertToShoppingListDTO)
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
     @Override
     public ShoppingListDTO updateShoppingList(ShoppingListDTO shoppingListDTO) {
-        Optional<ShoppingList> existingShoppingListOpt = shoppingListRepository.findById(shoppingListDTO.getId());
-
-        if (existingShoppingListOpt.isPresent()) {
-            ShoppingList existingShoppingList = existingShoppingListOpt.get();
-            modelMapper.map(shoppingListDTO, existingShoppingList);
-            ShoppingList updatedShoppingList = shoppingListRepository.save(existingShoppingList);
-            return modelMapper.map(updatedShoppingList, ShoppingListDTO.class);
-        }
-
-        return null; // Or throw an exception
+        ShoppingList existingShoppingList = convertToShoppingList(shoppingListDTO);
+        ShoppingList updatedShoppingList = shoppingListRepository.save(existingShoppingList);
+        return convertToShoppingListDTO(updatedShoppingList);
     }
 
     @Override
@@ -77,26 +99,59 @@ public class ShoppingListServiceImpl implements ShoppingListService {
                 !Objects.equals(shoppingList.getStatus(), StatusConfig.DELETED.getStatus())) {
 
             shoppingList.setStatus(StatusConfig.DELETED.getStatus());
-            ShoppingList updatedShoppingList = shoppingListRepository.save(shoppingList);
-            return modelMapper.map(updatedShoppingList, ShoppingListDTO.class);
+            ShoppingList deletedShoppingList = shoppingListRepository.save(shoppingList);
+            return convertToShoppingListDTO(deletedShoppingList);
         }
         return null;
     }
 
-    // Getters and Setters (if required for testing or other purposes)
-    public ShoppingListRepo getShoppingListRepository() {
-        return shoppingListRepository;
+    public ShoppingListDTO convertToShoppingListDTO(ShoppingList shoppingList) {
+        FamilyDTO familyDTO = modelMapper.map(shoppingList.getFamily(), FamilyDTO.class);
+        UserDTO userDTO = modelMapper.map(shoppingList.getOwner(), UserDTO.class);
+
+        ArrayList<TaskDTO> taskDTOS = new ArrayList<>();
+        for (Task task : shoppingList.getTaskArrayList()) {
+            taskDTOS.add(taskService.convertToTaskDTO(task));
+        }
+
+        return ShoppingListDTO.builder()
+                .id(shoppingList.getId())
+                .name(shoppingList.getName())
+                .description(shoppingList.getDescription())
+                .ownerDTO(userDTO)
+                .familyDTO(familyDTO)
+                .taskArrayList(taskDTOS)
+                .createdAt(shoppingList.getCreatedAt())
+                .updatedAt(shoppingList.getUpdatedAt())
+                .status(shoppingList.getStatus())
+                .build();
     }
 
-    public void setShoppingListRepository(ShoppingListRepo shoppingListRepository) {
-        this.shoppingListRepository = shoppingListRepository;
+    public ShoppingList convertToShoppingList(ShoppingListDTO shoppingListDTO) {
+        User user = userRepo.findById(shoppingListDTO.getOwnerDTO().getId()).orElse(null);
+        Family family = familyRepo.findById(shoppingListDTO.getFamilyDTO().getId()).orElse(null);
+        ArrayList<Task> tasks = new ArrayList<>();
+
+        for (TaskDTO taskDTO : shoppingListDTO.getTaskArrayList()) {
+            tasks.add(taskService.convertToTask(taskDTO));
+        }
+
+        ShoppingList shoppingList = ShoppingList.builder()
+                .owner(user)
+                .family(family)
+                .taskArrayList(tasks)
+                .name(shoppingListDTO.getName())
+                .description(shoppingListDTO.getDescription())
+                .createdAt(shoppingListDTO.getCreatedAt())
+                .updatedAt(shoppingListDTO.getUpdatedAt())
+                .status(shoppingListDTO.getStatus())
+                .build();
+
+        if (shoppingListDTO.getId() != null) {
+            shoppingList.setId(shoppingListDTO.getId());
+        }
+
+        return shoppingList;
     }
 
-    public ModelMapper getModelMapper() {
-        return modelMapper;
-    }
-
-    public void setModelMapper(ModelMapper modelMapper) {
-        this.modelMapper = modelMapper;
-    }
 }

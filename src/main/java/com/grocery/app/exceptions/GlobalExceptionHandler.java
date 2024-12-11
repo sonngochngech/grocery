@@ -23,6 +23,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleGlobalException(Exception e) {
         ResCode errorCode = ResCode.INTERNAl_SERVER_ERROR;
         ErrorResponse errorResponse=new ErrorResponse(errorCode.getCode(),e.getMessage());
+        System.out.println("error" + errorResponse);
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

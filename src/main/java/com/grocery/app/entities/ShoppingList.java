@@ -23,18 +23,18 @@ public class ShoppingList {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinColumn(name = "owner_id")
     private User owner;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinColumn(name = "family_id")
     private Family family;
 
     private String name;
     private String description;
 
-    @OneToMany(mappedBy = "shoppingList", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "shoppingList", cascade = CascadeType.MERGE, orphanRemoval = true)
     private List<Task> taskArrayList = new ArrayList<>();
 
     private Date createdAt;

@@ -1,8 +1,15 @@
 package com.grocery.app.services.impl;
 
+import com.grocery.app.config.constant.ResCode;
 import com.grocery.app.config.constant.StatusConfig;
-import com.grocery.app.dto.TaskDTO;
+import com.grocery.app.dto.*;
+import com.grocery.app.entities.Food;
+import com.grocery.app.entities.ShoppingList;
 import com.grocery.app.entities.Task;
+import com.grocery.app.entities.User;
+import com.grocery.app.exceptions.ServiceException;
+import com.grocery.app.repositories.FoodRepo;
+import com.grocery.app.repositories.ShoppingListRepo;
 import com.grocery.app.repositories.TaskRepo;
 import com.grocery.app.repositories.UserRepo;
 import com.grocery.app.services.TaskService;
@@ -28,24 +35,54 @@ public class TaskServiceImpl implements TaskService {
     @Autowired
     private UserRepo userRepository;
 
+    @Autowired
+    private ShoppingListRepo shoppingListRepo;
+
+    @Autowired
+    private FoodRepo foodRepo;
+
     @Override
     public TaskDTO createTask(TaskDTO taskDTO) {
         // Map DTO to entity
-        Task task = modelMapper.map(taskDTO, Task.class);
+        System.out.println("task dto");
+        System.out.println(taskDTO);
+        Task task = convertToTask(taskDTO);
+        System.out.println("converted task");
+        System.out.println(task.getFood().getId());
+        System.out.println(task.getAssignee().getId());
+        System.out.println(task.getShoppingList().getId());
 
         // Save the entity
         Task savedTask = taskRepository.save(task);
 
+        System.out.println("convert saved task to dto");
+        TaskDTO savedTaskDTO = convertToTaskDTO(savedTask);
+        System.out.println(savedTaskDTO.getFoodDTO().getId());
+        System.out.println(savedTaskDTO.getAssignee().getId());
+        System.out.println(savedTaskDTO.getShoppingListId());
+
         // Map entity back to DTO and return
-        return modelMapper.map(savedTask, TaskDTO.class);
+        return savedTaskDTO;
     }
 
     @Override
-    public Optional<TaskDTO> getTaskById(long userId, long id) {
-        // Retrieve task and check user ownership
-        return taskRepository.findById(id)
-                .filter(task -> task.getUser().getId() == userId && !Objects.equals(task.getStatus(), StatusConfig.DELETED.getStatus()))
-                .map(task -> modelMapper.map(task, TaskDTO.class));
+    public TaskDTO getTaskById(long userId, long id) {
+        Task task = taskRepository.findById(id).orElse(null);
+        if(task == null){
+            throw new ServiceException(
+                    ResCode.TASK_NOT_FOUND.getMessage(),
+                    ResCode.TASK_NOT_FOUND.getCode()
+            );
+        }
+
+        if(task.getAssignee().getId() == userId || task.getShoppingList().getOwner().getId() == userId) {
+            // Retrieve task and check user ownership
+            return convertToTaskDTO(task);
+        }
+        else throw new ServiceException(
+            ResCode.NOT_SHOPPING_LIST_OWNER.getMessage(),
+            ResCode.NOT_SHOPPING_LIST_OWNER.getCode()
+        );
     }
 
     @Override
@@ -53,66 +90,101 @@ public class TaskServiceImpl implements TaskService {
         List<Task> tasks = taskRepository.findAllByUserId(userId);
 
         // Clamp "to" parameter
-        to = Math.min(to, tasks.size());
-
-        // Validate pagination bounds
-        if (from < 0 || from > to) {
-            throw new IndexOutOfBoundsException("Invalid pagination parameters.");
-        }
+        int maxSize = tasks.size();
+        from = Math.max(0, Math.min(from, maxSize - 1)); // from trong khoảng [0, maxSize - 1]
+        to = Math.max(from + 1, Math.min(to, maxSize));
 
         // Paginate and map tasks to DTOs
         List<Task> paginatedTasks = tasks.subList(from, to);
 
         return paginatedTasks.stream()
-                .map(task -> modelMapper.map(task, TaskDTO.class))
+                .map(this::convertToTaskDTO)
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
     @Override
     public TaskDTO updateTask(TaskDTO taskDTO) {
-        Task existingTask = taskRepository.findById(taskDTO.getId()).orElse(null);
+        Task existingTask = convertToTask(taskDTO);
 
-        if (existingTask != null) {
-            modelMapper.map(taskDTO, existingTask);
-            Task updatedTask = taskRepository.save(existingTask);
-            return modelMapper.map(updatedTask, TaskDTO.class);
-        }
-
-        return null;
+        Task updatedTask = taskRepository.save(existingTask);
+        return convertToTaskDTO(updatedTask);
     }
 
     @Override
     public TaskDTO deleteTask(long userId, long id) {
-        Optional<Task> taskOpt = taskRepository.findById(id);
+        Task task = taskRepository.findById(id).orElse(null);
 
-        if (taskOpt.isPresent()) {
-            Task task = taskOpt.get();
-
-            // Check ownership and set status if applicable
-            if (task.getUser().getId() == userId && !Objects.equals(task.getStatus(), StatusConfig.DELETED.getStatus())) {
-                task.setStatus(StatusConfig.DELETED.getStatus()); // Assume DELETED is the status to mark as deleted
-                Task deletedTask = taskRepository.save(task);
-                return modelMapper.map(deletedTask, TaskDTO.class);
-            }
+        // Kiểm tra sự tồn tại
+        if (task == null || Objects.equals(task.getStatus(), StatusConfig.DELETED.getStatus())) {
+            throw new ServiceException(
+                    ResCode.TASK_NOT_FOUND.getMessage(),
+                    ResCode.TASK_NOT_FOUND.getCode()
+            );
         }
 
-        return null;
+        // Kiểm tra quyền sở hữu cả danh sách mua sắm
+        if (task.getShoppingList().getOwner().getId() != userId) {
+            throw new ServiceException(
+                    ResCode.NOT_SHOPPING_LIST_OWNER.getMessage(),
+                    ResCode.NOT_SHOPPING_LIST_OWNER.getCode()
+            );
+        }
+
+        task.setStatus(StatusConfig.DELETED.getStatus()); // Assume DELETED is the status to mark as deleted
+        Task deletedTask = taskRepository.save(task);
+        return convertToTaskDTO(deletedTask);
     }
 
-    // Getters and Setters for testing purposes (if needed)
-    public TaskRepo getTaskRepository() {
-        return taskRepository;
+    @Override
+    public TaskDTO convertToTaskDTO(Task task) {
+        UserDTO userDTO = modelMapper.map(task.getAssignee(), UserDTO.class);
+        Food food = task.getFood();
+        FoodDTO foodDTO = FoodDTO.builder()
+                .id(food.getId())
+                .name(food.getName())
+                .description(food.getDescription())
+                .user(modelMapper.map(food.getUser(), UserDTO.class))
+                .categoryDTO(modelMapper.map(food.getCategory(), CategoryDTO.class))
+                .measureUnitDTO(modelMapper.map(food.getMeasureUnit(), UnitDTO.class))
+                .createdAt(food.getCreatedAt())
+                .updatedAt(food.getUpdatedAt())
+                .status(food.getStatus())
+                .build();
+
+        return TaskDTO.builder()
+                .id(task.getId())
+                .assignee(userDTO)
+                .shoppingListId(task.getShoppingList().getId())
+                .foodDTO(foodDTO)
+                .quantity(task.getQuantity())
+                .createdAt(task.getCreatedAt())
+                .updatedAt(task.getUpdatedAt())
+                .status(task.getStatus())
+                .build();
     }
 
-    public void setTaskRepository(TaskRepo taskRepository) {
-        this.taskRepository = taskRepository;
-    }
+    @Override
+    public Task convertToTask(TaskDTO taskDTO) {
+        ShoppingList shoppingList = shoppingListRepo.findById(taskDTO.getShoppingListId()).orElse(null);
+        User assignee = userRepository.findById(taskDTO.getAssignee().getId()).orElse(null);
+        Food food = foodRepo.findById(taskDTO.getFoodDTO().getId()).orElse(null);
 
-    public ModelMapper getModelMapper() {
-        return modelMapper;
-    }
+        Task task = Task.builder()
+                .assignee(assignee)
+                .shoppingList(shoppingList)
+                .food(food)
+                .quantity(taskDTO.getQuantity())
+                .createdAt(taskDTO.getCreatedAt())
+                .updatedAt(taskDTO.getUpdatedAt())
+                .status(taskDTO.getStatus())
+                .build();
 
-    public void setModelMapper(ModelMapper modelMapper) {
-        this.modelMapper = modelMapper;
+        System.out.println(taskDTO.getId());
+
+        if (taskDTO.getId() != null) {
+            task.setId(taskDTO.getId());
+        }
+
+        return task;
     }
 }

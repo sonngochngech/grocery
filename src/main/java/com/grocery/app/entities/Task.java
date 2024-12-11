@@ -9,7 +9,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Date;
-import java.time.LocalDate;
 
 @Data
 @Entity
@@ -20,6 +19,7 @@ import java.time.LocalDate;
 public class Task {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
@@ -28,9 +28,7 @@ public class Task {
 
     @ManyToOne
     @JoinColumn(name = "buyer_id", foreignKey = @ForeignKey(name = "fk_buyer"))
-    private User user;
-
-    private String name;
+    private User assignee;
 
     @ManyToOne
     @JoinColumn(name = "food_id", foreignKey = @ForeignKey(name = "fk_food"))
@@ -39,10 +37,8 @@ public class Task {
     private float quantity;
 
     private String status;
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    @Convert(converter = LocalDateConverter.class)
+
     private Date createdAt;
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    @Convert(converter = LocalDateConverter.class)
+
     private Date updatedAt;
 }

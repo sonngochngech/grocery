@@ -10,9 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class CreateTaskRequest {
-    private Long userId;
     private Long shoppingListId;
+    private Long assignee;
     private Long foodId;
-    private Long measureUnitId;
     private float quantity;
 }

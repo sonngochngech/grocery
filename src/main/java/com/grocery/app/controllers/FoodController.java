@@ -49,7 +49,7 @@ public class FoodController {
             );
         }
 
-        UserDetailDTO userDetailDTO = userService.getUser(createFoodRequest.getUserId());
+        UserDTO userDetailDTO = userService.getUserById(createFoodRequest.getUserId());
         if (userDetailDTO == null) {
             throw new ServiceException(
                     ResCode.USER_NOT_FOUND.getMessage(),

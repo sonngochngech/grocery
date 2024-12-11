@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Date;
-import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
@@ -14,8 +13,8 @@ import java.time.LocalDate;
 @Builder
 public class TaskDTO {
     private Long id;
-    private ShoppingListDTO shoppingListDTO;
-    private UserDetailDTO user;
+    private Long shoppingListId;
+    private UserDTO assignee;
     private FoodDTO foodDTO;
     private float quantity;
     private Date createdAt;
