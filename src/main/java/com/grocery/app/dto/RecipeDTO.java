@@ -15,12 +15,31 @@ import java.util.ArrayList;
 @Builder
 public class RecipeDTO {
     private Long id;
-    private UserDetailDTO userDetailDTO;
+
+    private Long user;
+
+    //
     private String name;
+
+    //
     private String description;
+
+    //
     private String imageUrl;
-    private ArrayList<FoodDTO> foodDTOs;
+
+    //
+    private ArrayList<FoodDTO> foods;
+
+    private ArrayList<Long> meals;
+
+    private Long favoriteList;
+
+    //
     private Date createdAt;
+
+    //
     private Date updatedAt;
+
+    //
     private String status;
 }

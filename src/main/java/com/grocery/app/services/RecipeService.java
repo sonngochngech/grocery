@@ -1,9 +1,7 @@
 package com.grocery.app.services;
 
-import com.grocery.app.dto.FavoriteRecipeDTO;
+import com.grocery.app.dto.FavoriteRecipeListDTO;
 import com.grocery.app.dto.RecipeDTO;
-import com.grocery.app.entities.FavoriteRecipe;
-import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 
@@ -20,7 +18,7 @@ public interface RecipeService {
 
     ArrayList<RecipeDTO> getFavoriteList(Long userId, int from, int to);
 
-    FavoriteRecipeDTO removeFavoriteRecipe(Long userId, Long recipeId);
+    FavoriteRecipeListDTO removeFavoriteRecipe(Long userId, Long recipeId);
 
-    FavoriteRecipeDTO addFavoriteRecipe(Long userId, Long recipeId);
+    FavoriteRecipeListDTO addFavoriteRecipe(Long userId, Long recipeId);
 }

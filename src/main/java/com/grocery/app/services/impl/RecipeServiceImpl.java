@@ -2,22 +2,20 @@ package com.grocery.app.services.impl;
 
 import com.grocery.app.config.constant.ResCode;
 import com.grocery.app.config.constant.StatusConfig;
-import com.grocery.app.dto.FavoriteRecipeDTO;
+import com.grocery.app.dto.FavoriteRecipeListDTO;
+import com.grocery.app.dto.FoodDTO;
 import com.grocery.app.dto.RecipeDTO;
-import com.grocery.app.entities.Family;
-import com.grocery.app.entities.FavoriteRecipe;
-import com.grocery.app.entities.Recipe;
-import com.grocery.app.entities.User;
+import com.grocery.app.entities.*;
 import com.grocery.app.exceptions.ServiceException;
-import com.grocery.app.repositories.FamilyRepo;
-import com.grocery.app.repositories.FavoriteRecipeRepo;
-import com.grocery.app.repositories.RecipeRepo;
-import com.grocery.app.repositories.UserRepo;
+import com.grocery.app.repositories.*;
+import com.grocery.app.services.FoodService;
 import com.grocery.app.services.RecipeService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Objects;
@@ -34,17 +32,23 @@ public class RecipeServiceImpl implements RecipeService {
     private UserRepo userRepo;
     @Autowired
     private FamilyRepo familyRepo;
+    @Autowired
+    private FoodService foodService;
+    @Autowired
+    private MealRepo mealRepo;
+    @Autowired
+    private FoodRepo foodRepo;
 
     @Override
     public RecipeDTO createRecipe(RecipeDTO recipeDTO) {
         // Chuyển đổi đối tượng RecipeDTO thành Meal
-        Recipe recipe = modelMapper.map(recipeDTO, Recipe.class);
+        Recipe recipe = convertToRecipe(recipeDTO);
 
         // Lưu Recipe mới vào cơ sở dữ liệu
         Recipe createdRecipe = recipeRepo.save(recipe);
 
         // Chuyển đổi đối tượng Recipe đã tạo thành RecipeDTO và trả về
-        return modelMapper.map(createdRecipe, RecipeDTO.class);
+        return convertToRecipeDTO(createdRecipe);
     }
 
     @Override
@@ -67,7 +71,7 @@ public class RecipeServiceImpl implements RecipeService {
             );
         }
 
-        return modelMapper.map(recipe, RecipeDTO.class);
+        return convertToRecipeDTO(recipe);
     }
 
     @Override
@@ -86,7 +90,7 @@ public class RecipeServiceImpl implements RecipeService {
         // Chuyển đổi phần tử trong range từ Recipe sang RecipeDTO
         ArrayList<RecipeDTO> result = new ArrayList<>();
         for (int i = from; i < to; i++) {
-            result.add(modelMapper.map(recipes.get(i), RecipeDTO.class));
+            result.add(convertToRecipeDTO(recipes.get(i)));
         }
 
         return result;
@@ -94,18 +98,11 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public RecipeDTO updateRecipe(RecipeDTO recipeDTO) {
-        Recipe recipe = modelMapper.map(recipeDTO, Recipe.class);
-
-        if(recipe == null){
-            throw new ServiceException(
-                    ResCode.RECIPE_UPDATE_FAILED.getMessage(),
-                    ResCode.RECIPE_UPDATE_FAILED.getCode()
-            );
-        }
+        Recipe recipe = convertToRecipe(recipeDTO);
 
         Recipe updatedRecipe = recipeRepo.save(recipe);
 
-        return modelMapper.map(updatedRecipe, RecipeDTO.class);
+        return convertToRecipeDTO(updatedRecipe);
     }
 
     @Override
@@ -134,12 +131,12 @@ public class RecipeServiceImpl implements RecipeService {
         recipe.setStatus(StatusConfig.DELETED.getStatus());
         Recipe deletedRecipe = recipeRepo.save(recipe);
 
-        return modelMapper.map(deletedRecipe, RecipeDTO.class);
+        return convertToRecipeDTO(deletedRecipe);
     }
 
-    public FavoriteRecipe createFavoriteList(Long userId) {
-        FavoriteRecipe favoriteRecipe = favoriteRecipeRepo.findByUser(userId);
-        if(favoriteRecipe != null){
+    public FavoriteRecipeList createFavoriteList(Long userId) {
+        FavoriteRecipeList favoriteRecipeList = favoriteRecipeRepo.findByUser(userId);
+        if(favoriteRecipeList != null){
             throw new ServiceException(
                     ResCode.FAVORITE_RECIPE_LIST_EXISTED.getMessage(),
                     ResCode.FAVORITE_RECIPE_LIST_EXISTED.getCode()
@@ -155,45 +152,45 @@ public class RecipeServiceImpl implements RecipeService {
             );
         }
 
-        favoriteRecipe = FavoriteRecipe.builder()
+        favoriteRecipeList = FavoriteRecipeList.builder()
                 .user(user)
                 .favoriteList(new ArrayList<>())
                 .build();
 
-        return favoriteRecipe;
+        return favoriteRecipeList;
     }
 
     @Override
     public ArrayList<RecipeDTO> getFavoriteList(Long userId, int from, int to) {
-        FavoriteRecipe favoriteRecipe = favoriteRecipeRepo.findByUser(userId);
+        FavoriteRecipeList favoriteRecipeList = favoriteRecipeRepo.findByUser(userId);
         ArrayList<RecipeDTO> recipeDTOArrayList = new ArrayList<>();
-        if(favoriteRecipe == null){
-            favoriteRecipe = createFavoriteList(userId);
+        if(favoriteRecipeList == null){
+            favoriteRecipeList = createFavoriteList(userId);
             return recipeDTOArrayList;
         }
 
         // clamp
-        int maxSize = favoriteRecipe.getFavoriteList().size();
+        int maxSize = favoriteRecipeList.getFavoriteList().size();
         from = Math.max(0, Math.min(from, maxSize - 1)); // from trong khoảng [0, maxSize - 1]
         to = Math.max(from + 1, Math.min(to, maxSize)); // to trong khoảng [from + 1, maxSize]
 
         // Chuyển đổi phần tử trong range từ Food sang FoodDTO
         for (int i = from; i < to; i++) {
-            recipeDTOArrayList.add(modelMapper.map(favoriteRecipe.getFavoriteList().get(i), RecipeDTO.class));
+            recipeDTOArrayList.add(convertToRecipeDTO(favoriteRecipeList.getFavoriteList().get(i)));
         }
 
         return recipeDTOArrayList;
     }
 
     @Override
-    public FavoriteRecipeDTO removeFavoriteRecipe(Long userId, Long recipeId) {
-        FavoriteRecipe favoriteRecipe = favoriteRecipeRepo.findByUser(userId);
-        if(favoriteRecipe == null){
-            favoriteRecipe = createFavoriteList(userId);
+    public FavoriteRecipeListDTO removeFavoriteRecipe(Long userId, Long recipeId) {
+        FavoriteRecipeList favoriteRecipeList = favoriteRecipeRepo.findByUser(userId);
+        if(favoriteRecipeList == null){
+            favoriteRecipeList = createFavoriteList(userId);
         }
 
         // Tìm kiếm recipe
-        Iterator<Recipe> iterator = favoriteRecipe.getFavoriteList().iterator();
+        Iterator<Recipe> iterator = favoriteRecipeList.getFavoriteList().iterator();
         while (iterator.hasNext()) {
             Recipe recipe = iterator.next();
             if (Objects.equals(recipe.getId(), recipeId)) {
@@ -203,24 +200,24 @@ public class RecipeServiceImpl implements RecipeService {
         }
 
         // lưu lại
-        favoriteRecipeRepo.save(favoriteRecipe);
+        favoriteRecipeRepo.save(favoriteRecipeList);
 
-        return modelMapper.map(favoriteRecipe, FavoriteRecipeDTO.class);
+        return convertToFavoriteRecipeListDTO(favoriteRecipeList);
     }
 
     @Override
-    public FavoriteRecipeDTO addFavoriteRecipe(Long userId, Long recipeId) {
-        FavoriteRecipe favoriteRecipe = favoriteRecipeRepo.findByUser(userId);
-        if(favoriteRecipe == null){
-            favoriteRecipe = createFavoriteList(userId);
+    public FavoriteRecipeListDTO addFavoriteRecipe(Long userId, Long recipeId) {
+        FavoriteRecipeList favoriteRecipeList = favoriteRecipeRepo.findByUser(userId);
+        if(favoriteRecipeList == null){
+            favoriteRecipeList = createFavoriteList(userId);
         }
 
         // Kiểm tra đã ở trong list chưa
-        boolean alreadyExists = favoriteRecipe.getFavoriteList().stream()
+        boolean alreadyExists = favoriteRecipeList.getFavoriteList().stream()
                 .anyMatch(recipe -> Objects.equals(recipe.getId(), recipeId));
 
         if(alreadyExists){
-            return modelMapper.map(favoriteRecipe, FavoriteRecipeDTO.class);
+            return convertToFavoriteRecipeListDTO(favoriteRecipeList);
         }
 
         // Kiểm tra tồn tại recipe
@@ -240,9 +237,104 @@ public class RecipeServiceImpl implements RecipeService {
             );
         }
 
-        favoriteRecipe.getFavoriteList().add(recipe);
-        favoriteRecipeRepo.save(favoriteRecipe);
+        favoriteRecipeList.getFavoriteList().add(recipe);
+        favoriteRecipeRepo.save(favoriteRecipeList);
 
-        return  modelMapper.map(favoriteRecipe, FavoriteRecipeDTO.class);
+        return  convertToFavoriteRecipeListDTO(favoriteRecipeList);
+    }
+
+    public RecipeDTO convertToRecipeDTO(Recipe recipe){
+        ArrayList<FoodDTO> foodDTOS = new ArrayList<>();
+        for (Food food : recipe.getFoods()){
+            foodDTOS.add(foodService.convertToFoodDTO(food));
+        }
+
+        ArrayList<Long> meals = new ArrayList<>();
+        for (Meal meal : recipe.getMeals()){
+            meals.add(meal.getMealId());
+        }
+
+        return RecipeDTO.builder()
+                .id(recipe.getId())
+                .user(recipe.getUser().getId())
+                .name(recipe.getName())
+                .description(recipe.getDescription())
+                .imageUrl(recipe.getImageUrl())
+                .meals(meals)
+                .favoriteList(recipe.getFavRecipe() != null ? recipe.getFavRecipe().getId() : null)
+                .foods(foodDTOS)
+                .createdAt(Date.valueOf(LocalDate.now()))
+                .updatedAt(Date.valueOf(LocalDate.now()))
+                .status(recipe.getStatus())
+                .build();
+    }
+
+    public Recipe convertToRecipe(RecipeDTO recipeDTO){
+        ArrayList<Meal> meals = new ArrayList<>();
+        for(Long id : recipeDTO.getMeals()){
+            meals.add(mealRepo.findById(id).orElse(null));
+        }
+
+        ArrayList<Food> foods = new ArrayList<>();
+        for (FoodDTO foodDTO : recipeDTO.getFoods()){
+            foods.add(foodService.convertToFood(foodDTO));
+        }
+
+        User user = userRepo.findById(recipeDTO.getUser()).orElse(null);
+
+        Recipe recipe = Recipe.builder()
+                .user(user)
+                .meals(meals)
+                .name(recipeDTO.getName())
+                .description(recipeDTO.getDescription())
+                .imageUrl(recipeDTO.getImageUrl())
+                .foods(foods)
+                .createdAt(recipeDTO.getCreatedAt())
+                .updatedAt(recipeDTO.getUpdatedAt())
+                .status(recipeDTO.getStatus())
+                .build();
+
+        if(recipeDTO.getId() != null){
+            recipe.setId(recipeDTO.getId());
+        }
+
+        if(recipeDTO.getFavoriteList() != null){
+            recipe.setFavRecipe(favoriteRecipeRepo.findById(recipeDTO.getFavoriteList()).orElse(null));
+        }
+
+        return recipe;
+    }
+
+    public FavoriteRecipeList convertToFavoriteRecipeList(FavoriteRecipeListDTO favoriteRecipeListDTO){
+        ArrayList<Recipe> recipes = new ArrayList<>();
+        for(RecipeDTO recipeDTO : favoriteRecipeListDTO.getFavoriteDTOList()){
+            recipes.add(convertToRecipe(recipeDTO));
+        }
+
+        User user = userRepo.findById(favoriteRecipeListDTO.getUserId()).orElse(null);
+
+        FavoriteRecipeList favoriteRecipeList = FavoriteRecipeList.builder()
+                .favoriteList(recipes)
+                .user(user)
+                .build();
+
+        if(favoriteRecipeListDTO.getId() != null){
+            favoriteRecipeList.setId(favoriteRecipeListDTO.getId());
+        }
+
+        return favoriteRecipeList;
+    }
+
+    public FavoriteRecipeListDTO convertToFavoriteRecipeListDTO(FavoriteRecipeList favoriteRecipeList){
+        ArrayList<RecipeDTO> recipeDTOS = new ArrayList<>();
+        for(Recipe recipe : favoriteRecipeList.getFavoriteList()){
+            recipeDTOS.add(convertToRecipeDTO(recipe));
+        }
+
+        return FavoriteRecipeListDTO.builder()
+                .Id(favoriteRecipeList.getId())
+                .favoriteDTOList(recipeDTOS)
+                .userId(favoriteRecipeList.getUser().getId())
+                .build();
     }
 }

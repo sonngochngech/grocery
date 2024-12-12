@@ -5,11 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
 
 import java.util.ArrayList;
-import java.util.List;
 
 @Data
 @Table(name = "favorite_recipe")
@@ -18,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 
-public class FavoriteRecipe {
+public class FavoriteRecipeList {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // Tự động sinh giá trị ID
@@ -29,5 +26,5 @@ public class FavoriteRecipe {
     private User user;
 
     @OneToMany(mappedBy = "favRecipe", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Recipe> favoriteList = new ArrayList<>();
+    private ArrayList<Recipe> favoriteList = new ArrayList<>();
 }

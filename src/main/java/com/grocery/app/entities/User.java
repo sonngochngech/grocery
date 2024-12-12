@@ -3,7 +3,6 @@ package com.grocery.app.entities;
 import java.util.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.grocery.app.config.constant.AppConstants;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -77,7 +76,7 @@ public  class User{
     private List<Invitation> invitations=new ArrayList<>();
 
     @OneToOne(mappedBy = "user")
-    private FavoriteRecipe favoriteRecipe;
+    private FavoriteRecipeList favoriteRecipeList;
 
 
 

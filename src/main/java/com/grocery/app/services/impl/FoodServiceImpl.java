@@ -144,6 +144,7 @@ public class FoodServiceImpl implements FoodService {
         return convertToFoodDTO(deletedFood);
     }
 
+    @Override
     public FoodDTO convertToFoodDTO(Food food) {
         CategoryDTO categoryDTO = modelMapper.map(food.getCategory(), CategoryDTO.class);
         UnitDTO unitDTO = modelMapper.map(food.getMeasureUnit(), UnitDTO.class);
@@ -161,6 +162,7 @@ public class FoodServiceImpl implements FoodService {
                 .build();
     }
 
+    @Override
     public Food convertToFood(FoodDTO foodDTO) {
         User user = userRepo.findById(foodDTO.getUser().getId()).orElse(null);
         Category category = categoryRepo.findById(foodDTO.getCategoryDTO().getId()).orElse(null);

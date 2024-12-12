@@ -1,6 +1,5 @@
 package com.grocery.app.dto;
 
-import com.grocery.app.dto.family.FamilyDetailDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,9 +11,10 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class FavoriteRecipeDTO {
+public class FavoriteRecipeListDTO {
     private Long Id;
-    private FamilyDetailDTO familyDetailDTO;
-    private UserDetailDTO userDetailDTO;
+    private Long userId;
+
+    //
     private List<RecipeDTO> favoriteDTOList;
 }

@@ -149,7 +149,8 @@ public class MealController {
     }
 
     @GetMapping("/getAll")
-    public ResponseEntity<BaseResponse<ArrayList<MealDTO>>> getAllMeal(@RequestParam int from, @RequestParam int to){
+    public ResponseEntity<BaseResponse<ArrayList<MealDTO>>> getAllMeal(@RequestParam(defaultValue = "0") int from,
+                                                                       @RequestParam(defaultValue = "10") int to){
         UserInfoConfig currentUser = authenticationService.getCurrentUser();
 
         // Lấy tất cả bữa ăn trong khoảng từ `from` đến `to`
