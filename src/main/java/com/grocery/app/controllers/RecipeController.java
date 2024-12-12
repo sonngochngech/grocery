@@ -246,7 +246,7 @@ public class RecipeController {
     }
 
     @PostMapping("/favorites/remove")
-    public ResponseEntity<ArrayList<RecipeDTO>> removeRecipeFromFavorites(@RequestBody FavRequest favRequest) {
+    public ResponseEntity<BaseResponse<ArrayList<RecipeDTO>>> removeRecipeFromFavorites(@RequestBody FavRequest favRequest) {
         UserInfoConfig currentUser = authenticationService.getCurrentUser();
 
         // xóa khỏi danh sách
@@ -262,6 +262,13 @@ public class RecipeController {
                 favRequest.getTo()
         );
 
-        return ResponseEntity.ok(recipeDTOArrayList);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        ResponseFactory.createResponse(
+                                recipeDTOArrayList,
+                                ResCode.REMOVE_FAVORITE_RECIPE_SUCCESSFULLY.getMessage(),
+                                ResCode.REMOVE_FAVORITE_RECIPE_SUCCESSFULLY.getCode()
+                        )
+                );
     }
 }

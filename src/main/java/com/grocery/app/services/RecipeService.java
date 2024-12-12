@@ -2,6 +2,7 @@ package com.grocery.app.services;
 
 import com.grocery.app.dto.FavoriteRecipeListDTO;
 import com.grocery.app.dto.RecipeDTO;
+import com.grocery.app.entities.FavoriteRecipeList;
 
 import java.util.ArrayList;
 
@@ -21,4 +22,6 @@ public interface RecipeService {
     FavoriteRecipeListDTO removeFavoriteRecipe(Long userId, Long recipeId);
 
     FavoriteRecipeListDTO addFavoriteRecipe(Long userId, Long recipeId);
+
+    FavoriteRecipeList createFavoriteList(Long userId);
 }

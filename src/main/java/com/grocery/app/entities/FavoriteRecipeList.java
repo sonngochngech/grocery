@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Table(name = "favorite_recipe")
@@ -25,6 +26,6 @@ public class FavoriteRecipeList {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(mappedBy = "favRecipe", cascade = CascadeType.ALL, orphanRemoval = true)
-    private ArrayList<Recipe> favoriteList = new ArrayList<>();
+    @OneToMany(mappedBy = "favRecipe", cascade = CascadeType.MERGE, orphanRemoval = true)
+    private List<Recipe> favoriteList = new ArrayList<>();
 }

@@ -11,6 +11,9 @@ import lombok.NoArgsConstructor;
 @Builder
 public class FavRequest {
     private Long recipeId;
-    private int from;
-    private int to;
+
+    @Builder.Default
+    private int from = 0;
+    @Builder.Default
+    private int to = 10;
 }

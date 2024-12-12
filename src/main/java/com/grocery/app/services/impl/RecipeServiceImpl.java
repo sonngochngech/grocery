@@ -134,6 +134,7 @@ public class RecipeServiceImpl implements RecipeService {
         return convertToRecipeDTO(deletedRecipe);
     }
 
+    @Override
     public FavoriteRecipeList createFavoriteList(Long userId) {
         FavoriteRecipeList favoriteRecipeList = favoriteRecipeRepo.findByUser(userId);
         if(favoriteRecipeList != null){
@@ -156,6 +157,7 @@ public class RecipeServiceImpl implements RecipeService {
                 .user(user)
                 .favoriteList(new ArrayList<>())
                 .build();
+        System.out.println(favoriteRecipeList.getFavoriteList());
 
         return favoriteRecipeList;
     }
@@ -168,6 +170,8 @@ public class RecipeServiceImpl implements RecipeService {
             favoriteRecipeList = createFavoriteList(userId);
             return recipeDTOArrayList;
         }
+
+        System.out.println(from + " " + to);
 
         // clamp
         int maxSize = favoriteRecipeList.getFavoriteList().size();
@@ -190,14 +194,23 @@ public class RecipeServiceImpl implements RecipeService {
         }
 
         // Tìm kiếm recipe
-        Iterator<Recipe> iterator = favoriteRecipeList.getFavoriteList().iterator();
-        while (iterator.hasNext()) {
-            Recipe recipe = iterator.next();
-            if (Objects.equals(recipe.getId(), recipeId)) {
-                iterator.remove(); // Xóa nếu có cùng ID
+        int n = favoriteRecipeList.getFavoriteList().size();
+        System.out.println("current size " + n);
+        int index = -1;
+        for(int i = 0; i < n; ++i){
+            if(Objects.equals(favoriteRecipeList.getFavoriteList().get(i).getId(), recipeId)){
+                index = i;
                 break;
             }
         }
+
+        if(index != -1){
+            favoriteRecipeList.getFavoriteList().get(index).setFavRecipe(null);
+            recipeRepo.save(favoriteRecipeList.getFavoriteList().get(index));
+            favoriteRecipeList.getFavoriteList().remove(index);
+        }
+
+        System.out.println("after " + favoriteRecipeList.getFavoriteList().size());
 
         // lưu lại
         favoriteRecipeRepo.save(favoriteRecipeList);
@@ -212,8 +225,9 @@ public class RecipeServiceImpl implements RecipeService {
             favoriteRecipeList = createFavoriteList(userId);
         }
 
-        // Kiểm tra đã ở trong list chưa
-        boolean alreadyExists = favoriteRecipeList.getFavoriteList().stream()
+        // Kiểm tra List không trống đã ở trong list chưa
+        boolean alreadyExists = !favoriteRecipeList.getFavoriteList().isEmpty()
+                && favoriteRecipeList.getFavoriteList().stream()
                 .anyMatch(recipe -> Objects.equals(recipe.getId(), recipeId));
 
         if(alreadyExists){
@@ -236,9 +250,12 @@ public class RecipeServiceImpl implements RecipeService {
                     ResCode.NOT_FOOD_OWNER.getCode()
             );
         }
-
+        System.out.println("size" + favoriteRecipeList.getFavoriteList().size());
         favoriteRecipeList.getFavoriteList().add(recipe);
+        recipe.setFavRecipe(favoriteRecipeList);
         favoriteRecipeRepo.save(favoriteRecipeList);
+        recipeRepo.save(recipe);
+        System.out.println("size" + favoriteRecipeList.getFavoriteList().size());
 
         return  convertToFavoriteRecipeListDTO(favoriteRecipeList);
     }

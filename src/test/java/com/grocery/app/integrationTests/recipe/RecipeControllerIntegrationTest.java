@@ -3,12 +3,14 @@ package com.grocery.app.integrationTests.recipe;
 import com.grocery.app.config.constant.StatusConfig;
 import com.grocery.app.dto.MealDTO;
 import com.grocery.app.dto.RecipeDTO;
+import com.grocery.app.dto.request.FavRequest;
 import com.grocery.app.dto.request.createRequest.CreateRecipeRequest;
 import com.grocery.app.dto.request.updateRequest.UpdateRecipeRequest;
 import com.grocery.app.entities.*;
 import com.grocery.app.integrationTests.base.ServicesTestSupport;
 import com.grocery.app.payloads.responses.BaseResponse;
 import com.grocery.app.repositories.*;
+import com.grocery.app.services.RecipeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +52,10 @@ public class RecipeControllerIntegrationTest extends ServicesTestSupport {
     private UserRepo userRepo;
     @Autowired
     private RecipeRepo recipeRepo;
+    @Autowired
+    private RecipeService recipeService;
+    @Autowired
+    private FavoriteRecipeRepo favoriteRecipeRepo;
 
     @BeforeEach
     void setUp() {
@@ -145,6 +151,18 @@ public class RecipeControllerIntegrationTest extends ServicesTestSupport {
                 .build();
 
         recipe = recipeRepo.save(recipe);
+
+        otherRecipe = Recipe.builder()
+                .user(user)
+                .meals(new ArrayList<>())
+                .name("recipeEeEeE")
+                .description("dedededeede")
+                .imageUrl("url")
+                .foods(List.of(food, otherFood))
+                .status(StatusConfig.AVAILABLE.getStatus())
+                .build();
+
+        otherRecipe = recipeRepo.save(otherRecipe);
     }
 
     @Test
@@ -272,5 +290,103 @@ public class RecipeControllerIntegrationTest extends ServicesTestSupport {
 
         assertThat(recipeDTO.getStatus(), is(StatusConfig.DELETED.getStatus()));
 
+    }
+
+    @Test
+    void testGetFavRecipeList() throws Exception{
+        System.out.println("-----test get favorite recipe list-----");
+        ResponseEntity<BaseResponse<ArrayList<RecipeDTO>>> response = testRestTemplate.exchange(
+                "/api/recipe/favorite/get",
+                HttpMethod.GET,
+                new HttpEntity<>(getHeader()),
+                new ParameterizedTypeReference<BaseResponse<ArrayList<RecipeDTO>>>() {}
+        );
+
+        assertThat(response.getStatusCode(), is(HttpStatus.OK));
+
+        ArrayList<RecipeDTO> recipeDTO = Objects.requireNonNull(response.getBody()).getData();
+
+        assertThat(recipeDTO.size(), is(0));
+    }
+
+    @Test
+    void testAddWithoutExistingFavList() throws Exception{
+        System.out.println("-----test add recipe to favorite recipe list-----");
+        FavRequest favRequest = FavRequest.builder()
+                .recipeId(recipe.getId())
+                .build();
+
+        ResponseEntity<BaseResponse<ArrayList<RecipeDTO>>> response = testRestTemplate.exchange(
+                "/api/recipe/favorites/add",
+                HttpMethod.POST,
+                new HttpEntity<>(favRequest, getHeader()),
+                new ParameterizedTypeReference<BaseResponse<ArrayList<RecipeDTO>>>() {}
+        );
+
+        assertThat(response.getStatusCode(), is(HttpStatus.OK));
+
+        ArrayList<RecipeDTO> recipeDTO = Objects.requireNonNull(response.getBody()).getData();
+
+        assertThat(recipeDTO.size(), is(1));
+        assertThat(recipeDTO.get(0).getId(), is(recipe.getId()));
+    }
+
+    @Test
+    void testAddWithExistingFavList() throws Exception{
+        System.out.println("-----test add recipe to favorite recipe list-----");
+        FavoriteRecipeList favoriteRecipeList = recipeService.createFavoriteList(user.getId());
+        favoriteRecipeList.setFavoriteList(new ArrayList<>(List.of(otherRecipe)));
+        otherRecipe.setFavRecipe(favoriteRecipeList);
+        favoriteRecipeRepo.save(favoriteRecipeList);
+        recipeRepo.save(otherRecipe);
+
+        FavRequest favRequest = FavRequest.builder()
+                .recipeId(recipe.getId())
+                .build();
+
+        ResponseEntity<BaseResponse<ArrayList<RecipeDTO>>> response = testRestTemplate.exchange(
+                "/api/recipe/favorites/add",
+                HttpMethod.POST,
+                new HttpEntity<>(favRequest, getHeader()),
+                new ParameterizedTypeReference<BaseResponse<ArrayList<RecipeDTO>>>() {}
+        );
+
+        assertThat(response.getStatusCode(), is(HttpStatus.OK));
+
+        ArrayList<RecipeDTO> recipeDTO = Objects.requireNonNull(response.getBody()).getData();
+
+        assertThat(recipeDTO.size(), is(2));
+        assertThat(recipeDTO.get(1).getId(), is(recipe.getId()));
+        assertThat(recipeDTO.get(0).getId(), is(otherRecipe.getId()));
+    }
+
+    @Test
+    void testRemove() throws Exception{
+        System.out.println("-----test remove recipe from favorite recipe list-----");
+        FavoriteRecipeList favoriteRecipeList = recipeService.createFavoriteList(user.getId());
+        favoriteRecipeList.setFavoriteList(new ArrayList<>(List.of(recipe, otherRecipe)));
+        recipe.setFavRecipe(favoriteRecipeList);
+        otherRecipe.setFavRecipe(favoriteRecipeList);
+        favoriteRecipeRepo.save(favoriteRecipeList);
+        recipeRepo.save(recipe);
+        recipeRepo.save(otherRecipe);
+
+        FavRequest favRequest = FavRequest.builder()
+                .recipeId(recipe.getId())
+                .build();
+
+        ResponseEntity<BaseResponse<ArrayList<RecipeDTO>>> response = testRestTemplate.exchange(
+                "/api/recipe/favorites/remove",
+                HttpMethod.POST,
+                new HttpEntity<>(favRequest, getHeader()),
+                new ParameterizedTypeReference<BaseResponse<ArrayList<RecipeDTO>>>() {}
+        );
+
+        assertThat(response.getStatusCode(), is(HttpStatus.OK));
+
+        ArrayList<RecipeDTO> recipeDTO = Objects.requireNonNull(response.getBody()).getData();
+
+        assertThat(recipeDTO.size(), is(1));
+        assertThat(recipeDTO.get(0).getId(), is(otherRecipe.getId()));
     }
 }
