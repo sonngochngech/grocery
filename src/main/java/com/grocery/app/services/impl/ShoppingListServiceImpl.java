@@ -1,5 +1,6 @@
 package com.grocery.app.services.impl;
 
+import com.grocery.app.config.constant.ResCode;
 import com.grocery.app.config.constant.StatusConfig;
 import com.grocery.app.dto.ShoppingListDTO;
 import com.grocery.app.dto.TaskDTO;
@@ -9,6 +10,7 @@ import com.grocery.app.entities.Family;
 import com.grocery.app.entities.ShoppingList;
 import com.grocery.app.entities.Task;
 import com.grocery.app.entities.User;
+import com.grocery.app.exceptions.ServiceException;
 import com.grocery.app.repositories.FamilyRepo;
 import com.grocery.app.repositories.ShoppingListRepo;
 import com.grocery.app.repositories.TaskRepo;
@@ -57,15 +59,25 @@ public class ShoppingListServiceImpl implements ShoppingListService {
     }
 
     @Override
-    public Optional<ShoppingListDTO> getShoppingListById(long userId, long id) {
-        System.out.println("get shopping " + id + " list of");
-        System.out.println(userId);
+    public ShoppingListDTO getShoppingListById(long userId, long id) {
 
-        System.out.println(convertToShoppingListDTO(Objects.requireNonNull(shoppingListRepository.findById(id).orElse(null))));
+        ShoppingList shoppingList = shoppingListRepository.findById(id).orElse(null);
 
-        return shoppingListRepository.findById(id)
-                .filter(shoppingList -> shoppingList.getOwner().getId() == userId && !shoppingList.getStatus().equals(StatusConfig.DELETED.getStatus()))
-                .map(this::convertToShoppingListDTO);
+        if(shoppingList == null){
+            throw new ServiceException(
+                    ResCode.SHOPPING_LIST_NOT_FOUND.getMessage(),
+                    ResCode.SHOPPING_LIST_NOT_FOUND.getCode()
+            );
+        }
+
+        if(shoppingList.getOwner().getId() != userId){
+            throw new ServiceException(
+                    ResCode.NOT_SHOPPING_LIST_OWNER.getMessage(),
+                    ResCode.NOT_SHOPPING_LIST_OWNER.getCode()
+            );
+        }
+
+        return convertToShoppingListDTO(shoppingList);
     }
 
     @Override

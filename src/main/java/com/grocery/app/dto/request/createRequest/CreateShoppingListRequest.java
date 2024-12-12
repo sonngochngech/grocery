@@ -10,9 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class CreateShoppingListRequest {
-    private Long ownerId;
     private Long familyId;
     private String name;
     private String description;
-
 }

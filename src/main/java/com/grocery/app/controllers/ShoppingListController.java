@@ -5,12 +5,12 @@ import com.grocery.app.config.UserInfoConfig;
 import com.grocery.app.config.constant.ResCode;
 import com.grocery.app.dto.ShoppingListDTO;
 import com.grocery.app.dto.UserDTO;
-import com.grocery.app.dto.UserDetailDTO;
 import com.grocery.app.dto.family.FamilyDTO;
-import com.grocery.app.dto.family.FamilyDetailDTO;
 import com.grocery.app.dto.request.createRequest.CreateShoppingListRequest;
 import com.grocery.app.dto.request.updateRequest.UpdateShoppingListRequest;
 import com.grocery.app.exceptions.ServiceException;
+import com.grocery.app.payloads.responses.BaseResponse;
+import com.grocery.app.payloads.responses.ResponseFactory;
 import com.grocery.app.services.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 @RestController
-@RequestMapping("api/shoppingList")
+@RequestMapping("api/shopping")
 @Slf4j
 public class ShoppingListController {
 
@@ -44,7 +44,7 @@ public class ShoppingListController {
 
     // Tạo một danh sách mua sắm mới
     @PostMapping("/add")
-    public ResponseEntity<ShoppingListDTO> createShoppingList(CreateShoppingListRequest createShoppingListRequest) {
+    public ResponseEntity<BaseResponse<ShoppingListDTO>> createShoppingList(@RequestBody CreateShoppingListRequest createShoppingListRequest) {
         UserInfoConfig userInfoConfig = authenticationService.getCurrentUser(); // Xác thực người dùng hiện tại
         UserDTO owner = userService.getUserById(userInfoConfig.getId()); // Lấy thông tin chi tiết của chủ sở hữu
 
@@ -74,6 +74,7 @@ public class ShoppingListController {
                 .familyDTO(familyDTO)
                 .name(createShoppingListRequest.getName())
                 .description(createShoppingListRequest.getDescription())
+                .taskArrayList(new ArrayList<>())
                 .createdAt(Date.valueOf(LocalDate.now()))
                 .updatedAt(Date.valueOf(LocalDate.now()))
                 .status(StatusConfig.AVAILABLE.getStatus())
@@ -82,33 +83,36 @@ public class ShoppingListController {
         // Lưu danh sách mua sắm đã tạo
         ShoppingListDTO createdShoppingList = shoppingListService.createShoppingList(shoppingListDTO);
 
-        if (createdShoppingList == null) {
-            throw new ServiceException(
-                    ResCode.SHOPPING_LIST_CREATION_FAILED.getMessage(),
-                    ResCode.SHOPPING_LIST_CREATION_FAILED.getCode()
-            );
-        }
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdShoppingList); // Trả về danh sách đã tạo
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(
+                        ResponseFactory.createResponse(
+                                createdShoppingList,
+                                ResCode.CREATE_SHOPPING_LIST_SUCCESSFULLY.getMessage(),
+                                ResCode.CREATE_SHOPPING_LIST_SUCCESSFULLY.getCode()
+                        )
+                );// Trả về danh sách đã tạo
     }
 
     // Lấy danh sách mua sắm theo ID
     @GetMapping("/get/{shoppingListId}")
-    public ResponseEntity<ShoppingListDTO> getShoppingListById(@PathVariable long shoppingListId) {
+    public ResponseEntity<BaseResponse<ShoppingListDTO>> getShoppingListById(@PathVariable long shoppingListId) {
         UserInfoConfig user = authenticationService.getCurrentUser();
 
-        ShoppingListDTO shoppingListDTO = shoppingListService.getShoppingListById(user.getId(), shoppingListId)
-                .orElseThrow(() -> new ServiceException(
-                        ResCode.SHOPPING_LIST_NOT_FOUND.getMessage(),
-                        ResCode.SHOPPING_LIST_NOT_FOUND.getCode()
-                ));
+        ShoppingListDTO shoppingListDTO = shoppingListService.getShoppingListById(user.getId(), shoppingListId);
 
-        return ResponseEntity.ok(shoppingListDTO); // Trả về danh sách mua sắm được tìm thấy
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        ResponseFactory.createResponse(
+                                shoppingListDTO,
+                                ResCode.GET_SHOPPING_LIST_SUCCESSFULLY.getMessage(),
+                                ResCode.GET_SHOPPING_LIST_SUCCESSFULLY.getCode()
+                        )
+                ); // Trả về danh sách mua sắm được tìm thấy
     }
 
     // Lấy tất cả danh sách mua sắm trong một khoảng từ chỉ số from đến to
     @GetMapping("/getAll")
-    public ResponseEntity<ArrayList<ShoppingListDTO>> getAllShoppingList(
+    public ResponseEntity<BaseResponse<ArrayList<ShoppingListDTO>>> getAllShoppingList(
             @RequestParam(defaultValue = "0") int from,
             @RequestParam(defaultValue = "10") int to) {
 
@@ -119,21 +123,25 @@ public class ShoppingListController {
                 to
         );
 
-        return ResponseEntity.ok(shoppingLists); // Trả về danh sách mua sắm trong khoảng
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        ResponseFactory.createResponse(
+                                shoppingLists,
+                                ResCode.GET_SHOPPING_LISTS_SUCCESSFULLY.getMessage(),
+                                ResCode.GET_SHOPPING_LISTS_SUCCESSFULLY.getCode()
+                        )
+                ); // Trả về danh sách mua sắm trong khoảng
     }
 
     // Cập nhật thông tin của một danh sách mua sắm
     @PostMapping("/update")
-    public ResponseEntity<ShoppingListDTO> updateShoppingList(UpdateShoppingListRequest updateShoppingListRequest) {
+    public ResponseEntity<BaseResponse<ShoppingListDTO>> updateShoppingList(@RequestBody UpdateShoppingListRequest updateShoppingListRequest) {
         UserInfoConfig userInfoConfig = authenticationService.getCurrentUser();
 
         // Kiểm tra nếu danh sách mua sắm tồn tại
         ShoppingListDTO shoppingListDTO = shoppingListService.getShoppingListById(
                 userInfoConfig.getId(),
                 updateShoppingListRequest.getShoppingListId()
-        ).orElseThrow(() -> new ServiceException(
-                ResCode.SHOPPING_LIST_NOT_FOUND.getMessage(),
-                ResCode.SHOPPING_LIST_NOT_FOUND.getCode())
         );
 
         // Kiểm tra nếu người dùng là chủ sở hữu
@@ -152,12 +160,19 @@ public class ShoppingListController {
 
         // Lưu lại danh sách mua sắm đã cập nhật
         ShoppingListDTO updatedShoppingList = shoppingListService.updateShoppingList(shoppingListDTO);
-        return ResponseEntity.ok(updatedShoppingList); // Trả về danh sách mua sắm đã cập nhật
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        ResponseFactory.createResponse(
+                                updatedShoppingList,
+                                ResCode.UPDATE_SHOPPING_LIST_SUCCESSFULLY.getMessage(),
+                                ResCode.UPDATE_SHOPPING_LIST_SUCCESSFULLY.getCode()
+                        )
+                ); // Trả về danh sách mua sắm đã cập nhật
     }
 
     // Xoá danh sách mua sắm dựa vào ID
     @DeleteMapping("/delete/{shoppingListId}")
-    public ResponseEntity<ShoppingListDTO> deleteShoppingList(@PathVariable long shoppingListId) {
+    public ResponseEntity<BaseResponse<ShoppingListDTO>> deleteShoppingList(@PathVariable long shoppingListId) {
         UserInfoConfig currentUser = authenticationService.getCurrentUser();
 
         ShoppingListDTO deletedShoppingList = shoppingListService.deleteShoppingList(currentUser.getId(), shoppingListId);
@@ -169,6 +184,13 @@ public class ShoppingListController {
             );
         }
 
-        return ResponseEntity.ok(deletedShoppingList); // Trả về danh sách mua sắm đã xoá
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        ResponseFactory.createResponse(
+                                deletedShoppingList,
+                                ResCode.DELETE_SHOPPING_LIST_SUCCESSFULLY.getMessage(),
+                                ResCode.DELETE_SHOPPING_LIST_SUCCESSFULLY.getCode()
+                        )
+                ); // Trả về danh sách mua sắm đã xoá
     }
 }

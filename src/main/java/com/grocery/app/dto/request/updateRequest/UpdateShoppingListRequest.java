@@ -11,8 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class UpdateShoppingListRequest {
     private Long shoppingListId;
-    private Long ownerId;
     private Long familyId;
-    private String Name;
+    private String name;
     private String description;
 }

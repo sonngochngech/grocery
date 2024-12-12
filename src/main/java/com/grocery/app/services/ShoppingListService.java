@@ -8,7 +8,7 @@ import java.util.Optional;
 public interface ShoppingListService {
     ShoppingListDTO createShoppingList(ShoppingListDTO shoppingListDTO);
 
-    Optional<ShoppingListDTO> getShoppingListById(long userId, long id);
+    ShoppingListDTO getShoppingListById(long userId, long id);
 
     ArrayList<ShoppingListDTO> getAllShoppingList(long userId, int from, int to);
 

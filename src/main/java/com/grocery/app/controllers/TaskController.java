@@ -73,11 +73,7 @@ public class TaskController {
 
         // Kiểm tra sự tồn tại của danh sách mua sắm
         System.out.println("shopping list");
-        ShoppingListDTO shoppingListDTO = shoppingListService.getShoppingListById(assigner.getId(), createTaskRequest.getShoppingListId())
-                .orElseThrow(() -> new ServiceException(
-                        ResCode.SHOPPING_LIST_NOT_FOUND.getMessage(),
-                        ResCode.SHOPPING_LIST_NOT_FOUND.getCode()
-                ));
+        ShoppingListDTO shoppingListDTO = shoppingListService.getShoppingListById(assigner.getId(), createTaskRequest.getShoppingListId());
         System.out.println(shoppingListDTO.getId());
 
         // Kiểm tra quyền sở hữu của người giao trong gia đình
