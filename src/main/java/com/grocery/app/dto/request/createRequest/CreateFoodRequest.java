@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class CreateFoodRequest {
-    private Long userId;
     private Long unitId;
     private Long categoryId;
     private String name;

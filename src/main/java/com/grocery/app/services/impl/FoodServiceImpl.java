@@ -110,15 +110,7 @@ public class FoodServiceImpl implements FoodService {
     public FoodDTO updateFood(FoodDTO foodDTO) {
         Food food = convertToFood(foodDTO);
 
-        if (food == null) {
-            throw new ServiceException(
-                    ResCode.FOOD_UPDATE_FAILED.getMessage(),
-                    ResCode.FOOD_UPDATE_FAILED.getCode()
-            );
-        }
-
         Food updatedFood = foodRepo.save(food);
-
 
         return convertToFoodDTO(updatedFood);
     }

@@ -5,10 +5,17 @@ import com.grocery.app.config.constant.ResCode;
 import com.grocery.app.dto.*;
 import com.grocery.app.dto.request.createRequest.CreateFoodRequest;
 import com.grocery.app.dto.request.updateRequest.UpdateFoodRequest;
+import com.grocery.app.entities.Category;
+import com.grocery.app.entities.Unit;
 import com.grocery.app.entities.User;
 import com.grocery.app.exceptions.ServiceException;
+import com.grocery.app.payloads.responses.BaseResponse;
+import com.grocery.app.payloads.responses.ResponseFactory;
+import com.grocery.app.repositories.CategoryRepo;
+import com.grocery.app.repositories.UnitRepo;
 import com.grocery.app.services.*;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,20 +43,18 @@ public class FoodController {
     private CategoryService categoryService;
     @Autowired
     private UnitService unitService;
+    @Autowired
+    private CategoryRepo categoryRepo;
+    @Autowired
+    private UnitRepo unitRepo;
+    @Autowired
+    private ModelMapper modelMapper;
 
     @PostMapping("/add")
-    public ResponseEntity<FoodDTO> createFood(@RequestBody CreateFoodRequest createFoodRequest) {
+    public ResponseEntity<BaseResponse<FoodDTO>> createFood(@RequestBody CreateFoodRequest createFoodRequest) {
         UserInfoConfig currentUser = authenticationService.getCurrentUser();
 
-        // Kiểm tra auth
-        if (!Objects.equals(currentUser.getId(), createFoodRequest.getUserId())) {
-            throw new ServiceException(
-                    ResCode.NOT_FOOD_OWNER.getMessage(),
-                    ResCode.NOT_FOOD_OWNER.getCode()
-            );
-        }
-
-        UserDTO userDetailDTO = userService.getUserById(createFoodRequest.getUserId());
+        UserDTO userDetailDTO = userService.getUserById(currentUser.getId());
         if (userDetailDTO == null) {
             throw new ServiceException(
                     ResCode.USER_NOT_FOUND.getMessage(),
@@ -57,24 +62,25 @@ public class FoodController {
             );
         }
 
-        // TODO: Kiểm tra Category và Unit
-        CategoryDTO categoryDTO = null;
-
-        if (categoryDTO == null) {
+        // Không có service nên phải lấy thẳng từ repo
+        Category category = categoryRepo.findById(createFoodRequest.getCategoryId()).orElse(null);
+        if(category == null){
             throw new ServiceException(
                     ResCode.CATEGORY_NOT_FOUND.getMessage(),
                     ResCode.CATEGORY_NOT_FOUND.getCode()
             );
         }
 
-        UnitDTO unitDTO = null;
+        CategoryDTO categoryDTO = modelMapper.map(category, CategoryDTO.class);
 
-        if (unitDTO == null) {
+        Unit unit = unitRepo.findById(createFoodRequest.getUnitId()).orElse(null);
+        if(unit == null){
             throw new ServiceException(
                     ResCode.UNIT_NOT_FOUND.getMessage(),
                     ResCode.UNIT_NOT_FOUND.getCode()
             );
         }
+        UnitDTO unitDTO = modelMapper.map(unit, UnitDTO.class);
 
         FoodDTO foodDTO = FoodDTO.builder()
                 .user(userDetailDTO)
@@ -86,7 +92,7 @@ public class FoodController {
                 .updatedAt(Date.valueOf(LocalDate.now()))
                 .build();
 
-        FoodDTO createFood = foodService.createFood(createFoodRequest.getUserId(), foodDTO);
+        FoodDTO createFood = foodService.createFood(currentUser.getId(), foodDTO);
         if (createFood == null) {
             throw new ServiceException(
                     ResCode.FOOD_CREATION_FAILED.getMessage(),
@@ -94,11 +100,18 @@ public class FoodController {
             );
         }
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(createFood);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(
+                        ResponseFactory.createResponse(
+                                createFood,
+                                ResCode.CREATE_FOOD_SUCCESSFULLY.getMessage(),
+                                ResCode.CREATE_FAMILY_SUCCESSFULLY.getCode()
+                        )
+                );
     }
 
     @GetMapping("/get/{id}")
-    public ResponseEntity<FoodDTO> getFoodById(@PathVariable Long id) {
+    public ResponseEntity<BaseResponse<FoodDTO>> getFoodById(@PathVariable Long id) {
         UserInfoConfig currentUser = authenticationService.getCurrentUser();
 
         // Lấy food theo ID và người dùng hiện tại
@@ -116,11 +129,19 @@ public class FoodController {
         }
 
         // Trả về thông tin food
-        return ResponseEntity.ok(foodDTO);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        ResponseFactory.createResponse(
+                                foodDTO,
+                                ResCode.GET_FOOD_SUCCESSFULLY.getMessage(),
+                                ResCode.GET_FOOD_SUCCESSFULLY.getCode()
+                        )
+                );
     }
 
     @GetMapping("/getAll")
-    public ResponseEntity<ArrayList<FoodDTO>> getAllFood(@RequestParam int from, @RequestParam int to){
+    public ResponseEntity<BaseResponse<ArrayList<FoodDTO>>> getAllFood(@RequestParam(defaultValue = "0") int from,
+                                                                       @RequestParam(defaultValue = "10") int to){
         UserInfoConfig currentUser = authenticationService.getCurrentUser();
 
         // Lấy tất cả food trong khoảng từ `from` đến `to`
@@ -131,11 +152,18 @@ public class FoodController {
         );
 
         // Trả về danh sách food
-        return ResponseEntity.ok(foodDTOS);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        ResponseFactory.createResponse(
+                                foodDTOS,
+                                ResCode.GET_FOOD_LIST_SUCCESSFULLY.getMessage(),
+                                ResCode.GET_FOOD_LIST_SUCCESSFULLY.getCode()
+                        )
+                );
     }
 
     @PostMapping("/update")
-    public ResponseEntity<FoodDTO> updateFood(@RequestBody UpdateFoodRequest updateFoodRequest){
+    public ResponseEntity<BaseResponse<FoodDTO>> updateFood(@RequestBody UpdateFoodRequest updateFoodRequest){
         UserInfoConfig currentUser = authenticationService.getCurrentUser();
 
         // Lấy food theo ID và người dùng hiện tại
@@ -153,10 +181,7 @@ public class FoodController {
         }
 
         // Kiểm tra quyền sở hữu
-        if(!Objects.equals(currentUser.getId(), updateFoodRequest.getId())
-                || !Objects.equals(currentUser.getId(), foodDTO.getUser().getId())
-                || !Objects.equals(foodDTO.getUser().getId(), updateFoodRequest.getUserId())
-        ){
+        if(!Objects.equals(currentUser.getId(), foodDTO.getUser().getId())){
             throw new ServiceException(
                     ResCode.NOT_FOOD_OWNER.getMessage(),
                     ResCode.NOT_FOOD_OWNER.getCode()
@@ -164,24 +189,25 @@ public class FoodController {
         }
 
 
-        // TODO: Kiểm tra Category và Unit
-        CategoryDTO categoryDTO = null;
-
-        if (categoryDTO == null) {
+        // Không có service nên phải lấy thẳng từ repo
+        Category category = categoryRepo.findById(updateFoodRequest.getCategoryId()).orElse(null);
+        if(category == null){
             throw new ServiceException(
                     ResCode.CATEGORY_NOT_FOUND.getMessage(),
                     ResCode.CATEGORY_NOT_FOUND.getCode()
             );
         }
 
-        UnitDTO unitDTO = null;
+        CategoryDTO categoryDTO = modelMapper.map(category, CategoryDTO.class);
 
-        if (unitDTO == null) {
+        Unit unit = unitRepo.findById(updateFoodRequest.getUnitId()).orElse(null);
+        if(unit == null){
             throw new ServiceException(
                     ResCode.UNIT_NOT_FOUND.getMessage(),
                     ResCode.UNIT_NOT_FOUND.getCode()
             );
         }
+        UnitDTO unitDTO = modelMapper.map(unit, UnitDTO.class);
 
         foodDTO.setCategoryDTO(categoryDTO);
         foodDTO.setMeasureUnitDTO(unitDTO);
@@ -198,11 +224,18 @@ public class FoodController {
             );
         }
 
-        return ResponseEntity.ok(updatedFood);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        ResponseFactory.createResponse(
+                                updatedFood,
+                                ResCode.UPDATE_FOOD_SUCCESSFULLY.getMessage(),
+                                ResCode.UPDATE_FOOD_SUCCESSFULLY.getCode()
+                        )
+                );
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<FoodDTO> deleteMeal(@PathVariable Long id){
+    public ResponseEntity<BaseResponse<FoodDTO>> deleteMeal(@PathVariable Long id){
         UserInfoConfig currentUser = authenticationService.getCurrentUser();
 
         // Thực hiện xóa bữa ăn
@@ -218,6 +251,13 @@ public class FoodController {
             );
         }
 
-        return ResponseEntity.ok(deletedFood);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(
+                        ResponseFactory.createResponse(
+                                deletedFood,
+                                ResCode.DELETE_FOOD_SUCCESSFULLY.getMessage(),
+                                ResCode.DELETE_FOOD_SUCCESSFULLY.getCode()
+                        )
+                );
     }
 }

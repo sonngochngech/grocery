@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class UpdateFoodRequest {
     private Long id;
-    private Long userId;
     private Long unitId;
     private Long categoryId;
     private String name;
