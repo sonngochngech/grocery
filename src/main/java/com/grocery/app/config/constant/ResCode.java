@@ -16,6 +16,7 @@ public enum ResCode {
     FILE_EXCEED_SIZE("0009", "File exceed size"),
     FILE_NOT_IMAGE("0010", "File not image"),
     FILE_UPLOAD_ERROR("0011", "File upload error"),
+    MAIL_SEND_ERROR("0012", "Mail send error"),
 
 //    Auth Code
     GET_VERIFY_CODE_SUCCESSFULLY("00001", "Get verify code successfully"),

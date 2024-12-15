@@ -1,6 +1,8 @@
 package com.grocery.app.payloads.users;
 
 import com.grocery.app.dto.DeviceDTO;
+import com.grocery.app.dto.RoleDTO;
+import com.grocery.app.entities.Role;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -36,6 +38,7 @@ public class RegisterUserDTO {
     private Date birthday;
 
     private String sexType;
+    private Role role;
 
     private DeviceDTO deviceDTO;
 

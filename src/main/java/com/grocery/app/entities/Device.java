@@ -1,5 +1,6 @@
 package com.grocery.app.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -25,6 +26,7 @@ public class Device {
 
 
     @ManyToMany(mappedBy = "devices")
+    @JsonIgnore
     private Set<User> users=new HashSet<>();
 
 }

@@ -1,5 +1,7 @@
 package com.grocery.app.services.impl;
 
+import com.grocery.app.config.constant.ResCode;
+import com.grocery.app.exceptions.ServiceException;
 import com.grocery.app.factory.MailMessageFactory;
 import com.grocery.app.dto.MailDetailsDTO;
 import com.grocery.app.services.MailService;
@@ -28,13 +30,20 @@ public class MailServiceImpl implements MailService {
 
     @Override
     public void sendEmail(MailDetailsDTO mailDetailsDTO) {
+        try{
+            SimpleMailMessage mailMessage=mailMessageFactory.createSimpleMail();
+            mailMessage.setFrom(from);
+            mailMessage.setTo(mailDetailsDTO.getRecipient());
+            mailMessage.setSubject(mailDetailsDTO.getSubject());
+            mailMessage.setText(mailDetailsDTO.getMessage());
+            javaMailSender.send(mailMessage);
 
-        SimpleMailMessage mailMessage=mailMessageFactory.createSimpleMail();
-        mailMessage.setFrom(from);
-        mailMessage.setTo(mailDetailsDTO.getRecipient());
-        mailMessage.setSubject(mailDetailsDTO.getSubject());
-        mailMessage.setText(mailDetailsDTO.getMessage());
-        javaMailSender.send(mailMessage);
+        }catch (Exception e){
+            e.printStackTrace();
+            throw new ServiceException(ResCode.MAIL_SEND_ERROR.getMessage(), ResCode.MAIL_SEND_ERROR.getCode());
+        }
+
+
     }
 
     @Override

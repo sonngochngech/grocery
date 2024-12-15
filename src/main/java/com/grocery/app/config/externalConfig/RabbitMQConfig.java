@@ -1,9 +1,6 @@
 package com.grocery.app.config.externalConfig;
 
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.DirectExchange;
-import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -17,8 +14,13 @@ public class RabbitMQConfig {
 
     @Bean
     public Queue emailQueue() {
-        return new Queue("email.queue", true);
+        return QueueBuilder.durable("email.queue")
+                .withArgument("x-dead-letter-exchange", "")
+                .withArgument("x-dead-letter-routing-key", "email")
+                .withArgument("x-message-ttl", 5000)
+                .build();
     }
+
 
     @Bean
     public DirectExchange exchange() {

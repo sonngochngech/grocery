@@ -15,7 +15,9 @@ import com.grocery.app.payloads.loginCredentials.SocialCredentials;
 import com.grocery.app.payloads.responses.AuthResponse;
 import com.grocery.app.payloads.responses.BaseResponse;
 import com.grocery.app.payloads.responses.ResponseFactory;
+import com.grocery.app.payloads.users.GetVerifyCodeDTO;
 import com.grocery.app.payloads.users.RegisterUserDTO;
+import com.grocery.app.payloads.users.VerifyCodeDTO;
 import com.grocery.app.security.JWTUtil;
 import com.grocery.app.services.UserService;
 import com.grocery.app.utils.RedisService;
@@ -76,7 +78,7 @@ public class AuthController {
                 user,
                 accessToken,
                 refreshToken);
-        return new ResponseEntity<>(authResponse, HttpStatus.CREATED);
+        return new ResponseEntity<>(authResponse, HttpStatus.OK);
     }
 
     @PostMapping("default-login")
@@ -125,8 +127,9 @@ public class AuthController {
 
 
     @PostMapping("get-verify-code")
-    public ResponseEntity<BaseResponse<String>> getVerifyingCode(@RequestBody String email){
-        String code=UUID.randomUUID().toString();
+    public ResponseEntity<BaseResponse<String>> getVerifyingCode(@Valid @RequestBody GetVerifyCodeDTO dto){
+        String email=dto.getEmail();
+        String code = String.valueOf((int)(Math.random() * 900000) + 100000);
         redisService.saveData(email,code);
         notificationProducer.sendMessage(notificationFactory.VerifyCodeNoti(email,code));
         BaseResponse<String> res=ResponseFactory.createResponse(code,ResCode.GET_VERIFY_CODE_SUCCESSFULLY.getMessage(),ResCode.GET_VERIFY_CODE_SUCCESSFULLY.getCode());
@@ -134,7 +137,9 @@ public class AuthController {
     }
 
     @PostMapping("verify-code")
-    public ResponseEntity<BaseResponse<String>> verifyingCode(@RequestBody String code,@RequestBody String email){
+    public ResponseEntity<BaseResponse<String>> verifyingCode( @Valid @RequestBody VerifyCodeDTO verifyCodeDTO){
+        String email=verifyCodeDTO.getEmail();
+        String code=verifyCodeDTO.getCode();
         Object storedCode=redisService.getData(email);
         if(storedCode==null){
             throw new ServiceException(ResCode.INVALID_VERIFY_CODE.getCode(),ResCode.INVALID_VERIFY_CODE.getMessage());
