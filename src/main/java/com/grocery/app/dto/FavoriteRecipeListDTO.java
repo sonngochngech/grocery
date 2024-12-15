@@ -1,22 +1,20 @@
 package com.grocery.app.dto;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
+import java.util.List;
 
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Data
-public class CategoryDTO {
+public class FavoriteRecipeListDTO {
+    private Long Id;
+    private Long userId;
 
-    private Long id;
-    private String name;
-    private Date createdAt;
-    private Date updatedAt;
-    private Boolean isDeleted;
+    //
+    private List<RecipeDTO> favoriteDTOList;
 }

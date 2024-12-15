@@ -25,11 +25,9 @@ public class FridgeItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
     private Integer quantity;
 
     private Integer duration;
-
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -40,7 +38,11 @@ public class FridgeItem {
     private Date updatedAt;
 
     @ManyToOne
-    @JoinColumn(name="fridge_id")
+    @JoinColumn(name = "fridge_id")
     @JsonIgnore
     private Fridge fridge;
+
+    @ManyToOne
+    @JoinColumn(name = "food_id", nullable = false) // Specify the foreign key column for Food
+    private Food food;
 }

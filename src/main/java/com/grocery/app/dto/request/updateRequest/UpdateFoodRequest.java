@@ -1,22 +1,18 @@
-package com.grocery.app.dto;
-
+package com.grocery.app.dto.request.updateRequest;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
-
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Data
-public class CategoryDTO {
-
+public class UpdateFoodRequest {
     private Long id;
+    private Long unitId;
+    private Long categoryId;
     private String name;
-    private Date createdAt;
-    private Date updatedAt;
-    private Boolean isDeleted;
+    private String description;
 }
