@@ -163,6 +163,15 @@ public class FoodServiceImpl implements FoodService {
     }
 
     @Override
+    public Food verifyFoodExistence(Long id) {
+        Food food = foodRepo.findById(id).orElse(null);
+        if(food == null){
+            return null;
+        }
+        return food;
+    }
+
+    @Override
     public Food convertToFood(FoodDTO foodDTO) {
         User user = userRepo.findById(foodDTO.getUser().getId()).orElse(null);
         Category category = categoryRepo.findById(foodDTO.getCategoryDTO().getId()).orElse(null);

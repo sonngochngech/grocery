@@ -42,7 +42,7 @@ public class FridgeItem {
     @JsonIgnore
     private Fridge fridge;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "food_id", nullable = false) // Specify the foreign key column for Food
     private Food food;
 }

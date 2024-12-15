@@ -10,6 +10,7 @@ import com.grocery.app.payloads.responses.ResponseFactory;
 import com.grocery.app.services.AuthenticationService;
 import com.grocery.app.services.FamilyService;
 import com.grocery.app.services.FridgeService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,7 +45,7 @@ public class FridgeController {
     }
 
     @PutMapping("/add")
-    private ResponseEntity<BaseResponse<FridgeDTO>> AddItemToFridge(@RequestParam Long familyId, @RequestBody FridgeItemDTO fridgeItemDTO){
+    private ResponseEntity<BaseResponse<FridgeDTO>> AddItemToFridge(@RequestParam Long familyId,@Valid @RequestBody FridgeItemDTO fridgeItemDTO){
         Long userId = authenticationService.getCurrentUser().getId();
         Boolean isOwner = familyService.verifyOwner(familyId,userId);
         if(!isOwner){

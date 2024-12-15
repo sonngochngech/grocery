@@ -23,7 +23,7 @@ public  class User{
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
 
-    @Unique
+    @Column(unique=true)
     private String username;
 
     @Size(min=3,max=20,message="First name must be between 5 and 20 characters")

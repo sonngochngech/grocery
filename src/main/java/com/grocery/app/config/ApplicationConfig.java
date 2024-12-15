@@ -2,8 +2,6 @@ package com.grocery.app.config;
 
 import com.cloudinary.Cloudinary;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.grocery.app.mapper.MapperFactory;
-import io.github.cdimascio.dotenv.Dotenv;
 import org.modelmapper.ModelMapper;
 
 import org.springframework.context.annotation.Bean;
@@ -26,14 +24,10 @@ public class ApplicationConfig {
         return new ObjectMapper();
     }
 
-    @Bean
-    public Dotenv dotenv(){
-        return Dotenv.load();
-    }
 
     @Bean
     public Cloudinary cloudinary() {
-        return new Cloudinary(dotenv().get("CLOUDINARY_URL"));
+        return new Cloudinary("cloudinary://574434112775762:8z64CpIpyOQ7s0oRq-6Vl7BFzJs@dzhjv29ho");
     }
 
 }

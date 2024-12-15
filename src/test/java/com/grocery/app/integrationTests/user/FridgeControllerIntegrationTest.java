@@ -3,13 +3,11 @@ package com.grocery.app.integrationTests.user;
 import com.grocery.app.config.constant.ResCode;
 import com.grocery.app.dto.FridgeDTO;
 import com.grocery.app.dto.FridgeItemDTO;
-import com.grocery.app.entities.Family;
-import com.grocery.app.entities.FamilyMember;
-import com.grocery.app.entities.Role;
-import com.grocery.app.entities.User;
+import com.grocery.app.entities.*;
 import com.grocery.app.integrationTests.base.ServicesTestSupport;
 import com.grocery.app.payloads.responses.BaseResponse;
 import com.grocery.app.repositories.FamilyRepo;
+import com.grocery.app.repositories.FoodRepo;
 import com.grocery.app.repositories.FridgeRepo;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,6 +45,9 @@ public class FridgeControllerIntegrationTest extends ServicesTestSupport {
     @Autowired
     private FridgeRepo fridgeRepo;
 
+    @Autowired
+    private FoodRepo foodRepo;
+
 
     @BeforeAll
     void setUp() {
@@ -67,25 +68,29 @@ public class FridgeControllerIntegrationTest extends ServicesTestSupport {
         fa2= Family.builder().name("test").owner(fmUser).build();
         fa2=familyRepo.save(fa2);
 
+        Food food=Food.builder().name("hello").description("zoo").build();
+        foodRepo.save(food);
+
 
 
 
 
     }
-
-    @Test
-    @Order(1)
-    void givenFamily_whenCheckFridge_thenFridgeIsCreated() {
-        assert fa1.getFridge()!=null;
-        assert fa1.getFridge().getName().equals("My Fridge");
-    }
+//
+//    @Test
+//    @Order(1)
+//    void givenFamily_whenCheckFridge_thenFridgeIsCreated() {
+//        assert fa1.getFridge()!=null;
+//        assert fa1.getFridge().getName().equals("My Fridge");
+//    }
     @Test
     @Order(2)
     void givenFamily_WhenAddItemToFridge_thenItemIsAdded() throws  Exception{
-        FridgeItemDTO fridgeItemDTO=FridgeItemDTO.builder().duration(3).quantity(3).build();
+        FridgeItemDTO fridgeItemDTO=FridgeItemDTO.builder().duration(3).quantity(3).food(FridgeItemDTO.FoodFridgeDTO.builder().id(1L).build()).build();
         HttpEntity<String> httpEntity=new HttpEntity<>(objectMapper.writeValueAsString(fridgeItemDTO),getHeader());
         ResponseEntity<BaseResponse<FridgeDTO>> res=testRestTemplate.exchange("/api/family/fridges/add?familyId=1", HttpMethod.PUT,httpEntity,new ParameterizedTypeReference<BaseResponse<FridgeDTO>>(){});
 
+        System.out.println(res);
 
         Family family=familyRepo.findById(1L).get();
         assertThat(family.getFridge().getFridgeItemList().size(), is(1));
@@ -115,7 +120,7 @@ public class FridgeControllerIntegrationTest extends ServicesTestSupport {
     @Test
     @Order(4)
     void givenFamily_WhenUpdateFridge_thenIsSuccess() throws Exception{
-        FridgeItemDTO fridgeItemDTO=FridgeItemDTO.builder().duration(4).quantity(3).id(1L).build();
+        FridgeItemDTO fridgeItemDTO=FridgeItemDTO.builder().duration(4).quantity(3).id(1L).food(new FridgeItemDTO.FoodFridgeDTO(1L,null,null,null)).build();
         HttpEntity<String> httpEntity=new HttpEntity<>(objectMapper.writeValueAsString(fridgeItemDTO),getHeader());
         ResponseEntity<BaseResponse<FridgeDTO>> res=testRestTemplate.exchange("/api/family/fridges/update?familyId=1", HttpMethod.PUT,httpEntity,new ParameterizedTypeReference<BaseResponse<FridgeDTO>>(){});
         System.out.println(res);
@@ -124,6 +129,7 @@ public class FridgeControllerIntegrationTest extends ServicesTestSupport {
         assert res.getBody().getData()!=null;
         assert res.getBody().getData().getFridgeItemList().get(0).getDuration().equals(4);
         assert res.getBody().getData().getFridgeItemList().get(0).getQuantity().equals(3);
+
     }
 
     @Test

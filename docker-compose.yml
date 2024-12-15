@@ -1,12 +1,14 @@
+version: '3.8'
+
 services:
   mysql:
     container_name: mysql
     image: mysql:8.0-debian
     environment:
-      MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
-      MYSQL_DATABASE: '${DB_DATABASE}'
-      MYSQL_USERNAME: '${DB_USERNAME}'
-      MYSQL_PASSWORD: '${DB_PASSWORD}'
+      MYSQL_ROOT_PASSWORD: 'root'
+      MYSQL_DATABASE: 'db'
+      MYSQL_USERNAME: 'root'
+      MYSQL_PASSWORD: 'root'
       MYSQL_ALLOW_EMPTY: 1
     ports:
       - '3306:3306'
@@ -14,26 +16,44 @@ services:
       - backend
     volumes:
       - data-mysql:/var/lib/mysql
-    
+
   rabbitmq:
+    container_name: rabbitmq
     image: 'rabbitmq:4.0.2'
     environment:
-      RABBITMQ_DEFAULT_USER: '${RABBITMQ_DEFAULT_USER}'
-      RABBITMQ_DEFAULT_PASS: '${RABBITMQ_DEFAULT_PASS}'
+      RABBITMQ_DEFAULT_USER: 'guest'
+      RABBITMQ_DEFAULT_PASS: 'guest'
     ports:
       - '5672:5672'
     networks:
       - backend
+
   redis:
+    container_name: redis
     image: 'redis:8.0-M01'
     ports:
       - '6379:6379'
     networks:
       - backend
-  
+
+  myapp:
+    container_name: myapp
+    image:  'nguyeson/grocery:latest'
+    depends_on:
+      - mysql
+      - rabbitmq
+      - redis
+
+    networks:
+      - backend
+    ports:
+      - '8081:8081'  # Example port, change as needed?
+
+
 networks:
   backend:
     driver: bridge
+
 volumes:
   data-mysql:
     driver: local

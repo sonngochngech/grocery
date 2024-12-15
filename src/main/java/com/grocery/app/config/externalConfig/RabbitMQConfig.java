@@ -1,11 +1,23 @@
 package com.grocery.app.config.externalConfig;
 
 import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Configuration
 public class RabbitMQConfig {
+
+    @Bean
+    public RabbitAdmin rabbitAdmin(ConnectionFactory connectionFactory) {
+        RabbitAdmin rabbitAdmin = new RabbitAdmin(connectionFactory);
+        rabbitAdmin.setAutoStartup(true); // Ensures the admin starts automatically
+        return rabbitAdmin;
+    }
 
     @Bean
     public Queue fcmQueue() {
@@ -14,11 +26,9 @@ public class RabbitMQConfig {
 
     @Bean
     public Queue emailQueue() {
-        return QueueBuilder.durable("email.queue")
-                .withArgument("x-dead-letter-exchange", "")
-                .withArgument("x-dead-letter-routing-key", "email")
-                .withArgument("x-message-ttl", 5000)
-                .build();
+        Map<String, Object> args = new HashMap<>();
+        args.put("x-message-ttl", 5000); // Match the existing queue settings
+        return new Queue("email.queue", true, false, false, args);
     }
 
 

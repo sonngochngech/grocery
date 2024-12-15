@@ -18,6 +18,7 @@ public enum ResCode {
     FILE_NOT_IMAGE("0010", "File not image"),
     FILE_UPLOAD_ERROR("0011", "File upload error"),
     MAIL_SEND_ERROR("0012", "Mail send error"),
+    ID_NULL("0013", "Id mustn't be null"),
 
     //    Auth Code
     GET_VERIFY_CODE_SUCCESSFULLY("00001", "Get verify code successfully"),

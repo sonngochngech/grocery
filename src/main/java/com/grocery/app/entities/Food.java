@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "food")
@@ -40,6 +42,10 @@ public class Food {
     @ManyToOne
     @JoinColumn(name = "user_id") // Specify the foreign key column name for User
     private User user;
+
+
+    @OneToMany(mappedBy = "food",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<FridgeItem> fridgeItems=new ArrayList<>();
 
     private String status = StatusConfig.AVAILABLE.getStatus();
 }

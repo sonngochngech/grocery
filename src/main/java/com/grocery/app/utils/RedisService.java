@@ -17,6 +17,8 @@ public class RedisService {
         try{
             redisTemplate.opsForValue().set(key, data);
         }catch (Exception e){
+
+            System.out.println(e.getMessage());
             throw new RuntimeException(ResCode.REDIS_ERROR.getMessage());
         }
     }
@@ -32,6 +34,7 @@ public class RedisService {
         try{
             redisTemplate.delete(key);
         }catch (Exception e){
+            System.out.println(e.getMessage());
             throw new RuntimeException(ResCode.REDIS_ERROR.getMessage());
         }
     }

@@ -21,4 +21,6 @@ public interface FoodService {
     Food convertToFood(FoodDTO foodDTO);
 
     FoodDTO convertToFoodDTO(Food food);
+
+    Food verifyFoodExistence(Long id);
 }
