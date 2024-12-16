@@ -14,6 +14,7 @@ import com.grocery.app.services.AuthenticationService;
 import com.grocery.app.services.FoodService;
 import com.grocery.app.services.RecipeService;
 import com.grocery.app.services.UserService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 
 @RestController
 @RequestMapping("api/recipe")
+@SecurityRequirement(name = "bearerAuth")
 public class RecipeController {
     @Autowired
     private AuthenticationService authenticationService;

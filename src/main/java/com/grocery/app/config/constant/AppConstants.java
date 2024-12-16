@@ -3,8 +3,8 @@ package com.grocery.app.config.constant;
 public class AppConstants {
 
     public static final  String[] ADMIN_URLS= { "/api/admin/**" };
-    public static final  String[] PUBLIC_URLS= {  "/api/auth/**" };
-    public static final  String[] USER_URLS= { "/api/user/**","/api/family/**","api/upload/**" };
+    public static final  String[] PUBLIC_URLS= {  "/api/auth/**","/v3/api-docs/**","/swagger-ui.html" ,"/swagger-ui/**"};
+    public static final  String[] USER_URLS= { "/api/user/**","/api/family/**","api/upload/**","api/users/" };
     public static final Long ADMIN_ID= 101L;
     public static final Long USER_ID= 102L;
     public static enum SexType {

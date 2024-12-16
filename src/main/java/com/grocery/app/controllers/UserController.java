@@ -7,6 +7,7 @@ import com.grocery.app.payloads.responses.ResponseFactory;
 import com.grocery.app.payloads.users.UpdateUserDTO;
 import com.grocery.app.services.AuthenticationService;
 import com.grocery.app.services.UserService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -19,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("api/users")
 @Slf4j
+@SecurityRequirement(name = "bearerAuth")
 public class UserController {
 
     @Autowired

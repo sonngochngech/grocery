@@ -12,6 +12,7 @@ import com.grocery.app.exceptions.ServiceException;
 import com.grocery.app.payloads.responses.BaseResponse;
 import com.grocery.app.payloads.responses.ResponseFactory;
 import com.grocery.app.services.*;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +26,7 @@ import java.util.Objects;
 @RestController
 @RequestMapping("api/shopping")
 @Slf4j
+@SecurityRequirement(name = "bearerAuth")
 public class ShoppingListController {
 
     private final ShoppingListService shoppingListService;

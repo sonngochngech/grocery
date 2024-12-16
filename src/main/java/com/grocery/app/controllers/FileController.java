@@ -8,6 +8,7 @@ import com.grocery.app.services.AuthenticationService;
 import com.grocery.app.services.FileService;
 import com.grocery.app.services.UserService;
 import com.grocery.app.utils.ImagePathUtil;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,7 @@ import static com.grocery.app.config.constant.AppConstants.AVATAR_PATH;
 
 @RestController
 @RequestMapping("/api/upload")
+@SecurityRequirement(name = "bearerAuth")
 public class FileController {
 
     @Autowired

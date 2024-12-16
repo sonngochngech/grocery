@@ -16,6 +16,7 @@ public class RedisConfig {
     private String REDIS_HOST="redis";
     private Integer REDIS_PORT=6379;
 
+
     @Bean
     JedisConnectionFactory jedisConnectionFactory() {
         RedisStandaloneConfiguration config= new RedisStandaloneConfiguration(REDIS_HOST,REDIS_PORT);

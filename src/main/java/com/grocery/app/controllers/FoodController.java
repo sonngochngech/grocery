@@ -14,6 +14,7 @@ import com.grocery.app.payloads.responses.ResponseFactory;
 import com.grocery.app.repositories.CategoryRepo;
 import com.grocery.app.repositories.UnitRepo;
 import com.grocery.app.services.*;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,8 @@ import java.util.Objects;
 @RestController
 @RequestMapping("api/food")
 @Slf4j
+@SecurityRequirement(name = "bearerAuth")
+
 public class FoodController {
     @Autowired
     private FoodService foodService;
