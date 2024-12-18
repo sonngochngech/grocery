@@ -200,12 +200,11 @@ public class TaskController {
 
         // Cập nhật số lượng nếu đã thay đổi
         taskDTO.setQuantity(updateTaskRequest.getQuantity());
+        ShoppingListDTO shoppingListDTO = shoppingListService.getShoppingListById(assigner.getId(), updateTaskRequest.getShoppingListId());
+        System.out.println(shoppingListDTO.getId());
 
-        // Đảm bảo người giao là chủ sở hữu của gia đình trong danh sách mua sắm
-        boolean isOwner = familyService.verifyOwner(
-                taskDTO.getShoppingListId(),
-                assigner.getId()
-        );
+        // Kiểm tra quyền sở hữu của người giao trong gia đình
+        boolean isOwner = familyService.verifyOwner(shoppingListDTO.getFamilyDTO().getId(), assigner.getId());
         if (!isOwner) {
             throw new ServiceException(
                     ResCode.NOT_OWNER_OF_FAMILY.getMessage(),
@@ -213,11 +212,9 @@ public class TaskController {
             );
         }
 
-        // Xác minh người nhận có thuộc về gia đình không
-        boolean isMember = familyService.verifyMember(
-                taskDTO.getShoppingListId(),
-                updateTaskRequest.getUserId()
-        );
+        // Kiểm tra thành viên của người được giao trong gia đình
+        boolean isMember = familyService.verifyMember(shoppingListDTO.getFamilyDTO().getId(), updateTaskRequest.getUserId());
+
         if (!isMember) {
             throw new ServiceException(
                     ResCode.NOT_BELONG_TO_FAMILY.getMessage(),
