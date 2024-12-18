@@ -86,6 +86,8 @@ public class ShoppingListServiceImpl implements ShoppingListService {
 
         // Clamp "to" parameter
         int maxSize = shoppingLists.size();
+        if(maxSize == 0) return new ArrayList<>();
+
         from = Math.max(0, Math.min(from, maxSize - 1)); // from trong khoảng [0, maxSize - 1]
         to = Math.max(from + 1, Math.min(to, maxSize));
 

@@ -9,7 +9,7 @@ public interface MealService {
     MealDTO createMeal(MealDTO mealDTO);
     MealDTO getMealById(Long userId, Long mealId);
     ArrayList<MealDTO> getAllMeal(Long userId, int from, int to);
-    RecommendedMealDTO recommendMeal(Long userId, String term);
+    ArrayList<RecommendedMealDTO> recommendMeal(Long userId);
     MealDTO updateMeal(MealDTO mealDTO);
     MealDTO deleteMeal(Long userId, Long mealId);
 }

@@ -171,7 +171,7 @@ public class MealController {
     }
 
     @GetMapping("/recommend/{term}")
-    public ResponseEntity<BaseResponse<RecommendedMealDTO>> recommendMeal(@PathVariable String term){
+    public ResponseEntity<BaseResponse<ArrayList<RecommendedMealDTO>>> recommendMeal(@PathVariable String term){
         UserInfoConfig currentUser = authenticationService.getCurrentUser();
         System.out.println("request term" + term);
 
@@ -189,9 +189,8 @@ public class MealController {
         System.out.println(user.getId());
 
         // Lấy danh sách bữa ăn gợi ý
-        RecommendedMealDTO recommendedMeals = mealService.recommendMeal(
-                currentUser.getId(),
-                term
+        ArrayList<RecommendedMealDTO> recommendedMeals = mealService.recommendMeal(
+                currentUser.getId()
         );
 
         return ResponseEntity.status(HttpStatus.OK)
