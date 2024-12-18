@@ -92,6 +92,9 @@ public class MealServiceImpl implements MealService {
 
         // Kiểm tra và điều chỉnh chỉ số "to" để không vượt ngoài phạm vi danh sách
         int maxSize = meals.size();
+
+        if(maxSize == 0) return new ArrayList<>();
+
         from = Math.max(0, Math.min(from, maxSize - 1)); // from trong khoảng [0, maxSize - 1]
         to = Math.max(from + 1, Math.min(to, maxSize));
 
@@ -107,67 +110,60 @@ public class MealServiceImpl implements MealService {
     }
 
     @Override
-    public RecommendedMealDTO recommendMeal(Long userId, String term) {
+    public ArrayList<RecommendedMealDTO> recommendMeal(Long userId) {
+        ArrayList<RecommendedMealDTO> recommendations = new ArrayList<>();
 
-        System.out.println("term");
-        System.out.println(term);
+        // Lặp qua tất cả các term trong TermConfig
+        for (TermConfig termConfig : TermConfig.values()) {
+            String term = termConfig.getTerm();
+            System.out.println("Processing term: " + term);
 
-        // Validate term
-        if (!Objects.equals(TermConfig.valueOf(term.toUpperCase()).getTerm(), term)) {
-            throw new ServiceException(
-                    ResCode.INVALID_TERM.getMessage(),
-                    ResCode.INVALID_TERM.getCode()
-            );
+            // Lấy tất cả các món ăn của người dùng dựa trên term
+            ArrayList<Meal> meals = mealRepository.findAllByTerm(userId, term);
+            System.out.println("Number of meals found for term " + term + ": " + meals.size());
+
+            // Bỏ qua nếu danh sách bữa ăn rỗng
+            if (meals.isEmpty()) continue;
+
+            // Tính trung bình số lượng công thức (recipes) của các bữa ăn
+            int avgRecipes = meals.stream()
+                    .mapToInt(meal -> meal.getRecipes().size())
+                    .sum() / meals.size();
+
+            // Tạo một tập hợp các công thức không trùng lặp
+            HashSet<Recipe> uniqueRecipesSet = new HashSet<>();
+            for (Meal meal : meals) {
+                uniqueRecipesSet.addAll(meal.getRecipes());
+            }
+
+            // Chuyển HashSet thành ArrayList để dễ xử lý
+            ArrayList<Recipe> uniqueRecipes = new ArrayList<>(uniqueRecipesSet);
+
+            // Trộn danh sách để tạo tính ngẫu nhiên
+            Collections.shuffle(uniqueRecipes);
+
+            // Khởi tạo danh sách chứa các công thức được chọn
+            ArrayList<RecipeDTO> selectedRecipes = new ArrayList<>();
+
+            // Chọn ngẫu nhiên avgRecipes công thức hoặc tất cả nếu ít hơn
+            for (int i = 0; i < Math.min(avgRecipes, uniqueRecipes.size()); i++) {
+                Recipe recipe = uniqueRecipes.get(i);
+                RecipeDTO recipeDTO = modelMapper.map(recipe, RecipeDTO.class);
+                selectedRecipes.add(recipeDTO);
+            }
+
+            // Chỉ thêm vào danh sách kết quả nếu có công thức được chọn
+            if (!selectedRecipes.isEmpty()) {
+                recommendations.add(RecommendedMealDTO.builder()
+                        .term(term)
+                        .recommendedRecipes(selectedRecipes)
+                        .build());
+            }
         }
 
-        // Lấy tất cả các món ăn của người dùng dựa trên term
-        System.out.println("term");
-        System.out.println(term);
-        System.out.println("number meal found");
-        ArrayList<Meal> meals = mealRepository.findAllByTerm(userId, term);
-        System.out.println(meals.size());
-
-        // Kiểm tra nếu danh sách rỗng, trả về null
-        if (meals.isEmpty()) return null;
-
-        // Tính trung bình số lượng công thức (recipes) của các bữa ăn
-        int avgRecipes = 0;
-        for (Meal meal : meals) {
-            avgRecipes += meal.getRecipes().size();
-        }
-        avgRecipes /= meals.size();
-        System.out.println("recommend meal size");
-        System.out.println(avgRecipes);
-
-        // Tạo một tập hợp các công thức không trùng lặp
-        HashSet<Recipe> uniqueRecipesSet = new HashSet<>();
-        for (Meal meal : meals) {
-            uniqueRecipesSet.addAll(meal.getRecipes());
-        }
-
-        // Chuyển HashSet thành ArrayList để dễ xử lý
-        ArrayList<Recipe> uniqueRecipes = new ArrayList<>(uniqueRecipesSet);
-
-        // Trộn danh sách để tạo tính ngẫu nhiên
-        Collections.shuffle(uniqueRecipes);
-
-        // Khởi tạo danh sách chứa các công thức được chọn
-        ArrayList<RecipeDTO> selectedRecipes = new ArrayList<>();
-
-        // Chọn ngẫu nhiên avgRecipes công thức hoặc tất cả nếu ít hơn
-        for (int i = 0; i < Math.min(avgRecipes, uniqueRecipes.size()); i++) {
-            Recipe recipe = uniqueRecipes.get(i);
-            RecipeDTO recipeDTO = modelMapper.map(recipe, RecipeDTO.class);
-            selectedRecipes.add(recipeDTO);
-        }
-
-        // Tạo và trả về DTO
-
-        return RecommendedMealDTO.builder()
-                .term(term)
-                .recommendedRecipes(selectedRecipes)
-                .build();
+        return recommendations;
     }
+
 
 
     @Override
