@@ -17,6 +17,7 @@ import com.grocery.app.repositories.MealRepo;
 import com.grocery.app.repositories.RecipeRepo;
 import com.grocery.app.repositories.UserRepo;
 import com.grocery.app.services.MealService;
+import com.grocery.app.services.RecipeService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,8 @@ public class MealServiceImpl implements MealService {
     private UserRepo userRepo;
     @Autowired
     private RecipeRepo recipeRepo;
+    @Autowired
+    private RecipeService recipeService;
 
     @Override
     public MealDTO createMeal(MealDTO mealDTO) {
@@ -148,7 +151,7 @@ public class MealServiceImpl implements MealService {
             // Chọn ngẫu nhiên avgRecipes công thức hoặc tất cả nếu ít hơn
             for (int i = 0; i < Math.min(avgRecipes, uniqueRecipes.size()); i++) {
                 Recipe recipe = uniqueRecipes.get(i);
-                RecipeDTO recipeDTO = modelMapper.map(recipe, RecipeDTO.class);
+                RecipeDTO recipeDTO = recipeService.convertToRecipeDTO(recipe);
                 selectedRecipes.add(recipeDTO);
             }
 
@@ -221,7 +224,7 @@ public class MealServiceImpl implements MealService {
         ArrayList<RecipeDTO> recipeDTOS = new ArrayList<>();
         for(Recipe recipe : meal.getRecipes()){
             System.out.println(recipe.getId());
-            recipeDTOS.add(modelMapper.map(recipe, RecipeDTO.class));
+            recipeDTOS.add(recipeService.convertToRecipeDTO(recipe));
         }
 
         mealDTO.setRecipeDTOS(recipeDTOS);

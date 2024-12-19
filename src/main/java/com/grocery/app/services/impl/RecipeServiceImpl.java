@@ -56,7 +56,7 @@ public class RecipeServiceImpl implements RecipeService {
         Recipe recipe = recipeRepo.findById(recipeId).orElse(null);
 
         // Kiểm tra sự tồn tại
-        if(recipe == null || Objects.equals(recipe.getStatus(), StatusConfig.DELETED.getStatus())){
+        if (recipe == null || Objects.equals(recipe.getStatus(), StatusConfig.DELETED.getStatus())) {
             throw new ServiceException(
                     ResCode.RECIPE_NOT_FOUND.getMessage(),
                     ResCode.RECIPE_NOT_FOUND.getCode()
@@ -64,7 +64,7 @@ public class RecipeServiceImpl implements RecipeService {
         }
 
         // Kiểm tra quyền sở hữu
-        if(!Objects.equals(userId, recipe.getUser().getId())){
+        if (!Objects.equals(userId, recipe.getUser().getId())) {
             throw new ServiceException(
                     ResCode.NOT_RECIPE_OWNER.getMessage(),
                     ResCode.NOT_RECIPE_OWNER.getCode()
@@ -81,7 +81,7 @@ public class RecipeServiceImpl implements RecipeService {
         int maxSize = recipes.size();
 
         // Nếu không có recipe thì trả về mảng rỗng
-        if(maxSize == 0) return new ArrayList<>();
+        if (maxSize == 0) return new ArrayList<>();
 
         // clamp
         from = Math.max(0, Math.min(from, maxSize - 1)); // from trong khoảng [0, maxSize - 1]
@@ -110,7 +110,7 @@ public class RecipeServiceImpl implements RecipeService {
         // Tìm food
         Recipe recipe = recipeRepo.findById(recipeId).orElse(null);
 
-        if(recipe == null || Objects.equals(recipe.getStatus(), StatusConfig.DELETED.getStatus())){
+        if (recipe == null || Objects.equals(recipe.getStatus(), StatusConfig.DELETED.getStatus())) {
             throw new ServiceException(
                     ResCode.RECIPE_NOT_FOUND.getMessage(),
                     ResCode.RECIPE_NOT_FOUND.getCode()
@@ -120,7 +120,7 @@ public class RecipeServiceImpl implements RecipeService {
         // Kiểm tra quyền sở hữu
         boolean isOwner = Objects.equals(userId, recipe.getUser().getId());
 
-        if(!isOwner){
+        if (!isOwner) {
             throw new ServiceException(
                     ResCode.NOT_RECIPE_OWNER.getMessage(),
                     ResCode.NOT_RECIPE_OWNER.getCode()
@@ -137,7 +137,7 @@ public class RecipeServiceImpl implements RecipeService {
     @Override
     public FavoriteRecipeList createFavoriteList(Long userId) {
         FavoriteRecipeList favoriteRecipeList = favoriteRecipeRepo.findByUser(userId);
-        if(favoriteRecipeList != null){
+        if (favoriteRecipeList != null) {
             throw new ServiceException(
                     ResCode.FAVORITE_RECIPE_LIST_EXISTED.getMessage(),
                     ResCode.FAVORITE_RECIPE_LIST_EXISTED.getCode()
@@ -146,7 +146,7 @@ public class RecipeServiceImpl implements RecipeService {
 
         // check user
         User user = userRepo.findById(userId).orElse(null);
-        if(user == null){
+        if (user == null) {
             throw new ServiceException(
                     ResCode.USER_NOT_FOUND.getMessage(),
                     ResCode.USER_NOT_FOUND.getCode()
@@ -166,7 +166,7 @@ public class RecipeServiceImpl implements RecipeService {
     public ArrayList<RecipeDTO> getFavoriteList(Long userId, int from, int to) {
         FavoriteRecipeList favoriteRecipeList = favoriteRecipeRepo.findByUser(userId);
         ArrayList<RecipeDTO> recipeDTOArrayList = new ArrayList<>();
-        if(favoriteRecipeList == null){
+        if (favoriteRecipeList == null) {
             favoriteRecipeList = createFavoriteList(userId);
             return recipeDTOArrayList;
         }
@@ -189,7 +189,7 @@ public class RecipeServiceImpl implements RecipeService {
     @Override
     public FavoriteRecipeListDTO removeFavoriteRecipe(Long userId, Long recipeId) {
         FavoriteRecipeList favoriteRecipeList = favoriteRecipeRepo.findByUser(userId);
-        if(favoriteRecipeList == null){
+        if (favoriteRecipeList == null) {
             favoriteRecipeList = createFavoriteList(userId);
         }
 
@@ -197,14 +197,14 @@ public class RecipeServiceImpl implements RecipeService {
         int n = favoriteRecipeList.getFavoriteList().size();
         System.out.println("current size " + n);
         int index = -1;
-        for(int i = 0; i < n; ++i){
-            if(Objects.equals(favoriteRecipeList.getFavoriteList().get(i).getId(), recipeId)){
+        for (int i = 0; i < n; ++i) {
+            if (Objects.equals(favoriteRecipeList.getFavoriteList().get(i).getId(), recipeId)) {
                 index = i;
                 break;
             }
         }
 
-        if(index != -1){
+        if (index != -1) {
             favoriteRecipeList.getFavoriteList().get(index).setFavRecipe(null);
             recipeRepo.save(favoriteRecipeList.getFavoriteList().get(index));
             favoriteRecipeList.getFavoriteList().remove(index);
@@ -221,7 +221,7 @@ public class RecipeServiceImpl implements RecipeService {
     @Override
     public FavoriteRecipeListDTO addFavoriteRecipe(Long userId, Long recipeId) {
         FavoriteRecipeList favoriteRecipeList = favoriteRecipeRepo.findByUser(userId);
-        if(favoriteRecipeList == null){
+        if (favoriteRecipeList == null) {
             favoriteRecipeList = createFavoriteList(userId);
         }
 
@@ -230,13 +230,13 @@ public class RecipeServiceImpl implements RecipeService {
                 && favoriteRecipeList.getFavoriteList().stream()
                 .anyMatch(recipe -> Objects.equals(recipe.getId(), recipeId));
 
-        if(alreadyExists){
+        if (alreadyExists) {
             return convertToFavoriteRecipeListDTO(favoriteRecipeList);
         }
 
         // Kiểm tra tồn tại recipe
         Recipe recipe = recipeRepo.findById(recipeId).orElse(null);
-        if(recipe == null){
+        if (recipe == null) {
             throw new ServiceException(
                     ResCode.RECIPE_NOT_FOUND.getMessage(),
                     ResCode.RECIPE_NOT_FOUND.getCode()
@@ -244,7 +244,7 @@ public class RecipeServiceImpl implements RecipeService {
         }
 
         // Kiểm tra chủ sở hữu
-        if(!Objects.equals(recipe.getUser().getId(), userId)){
+        if (!Objects.equals(recipe.getUser().getId(), userId)) {
             throw new ServiceException(
                     ResCode.NOT_FOOD_OWNER.getMessage(),
                     ResCode.NOT_FOOD_OWNER.getCode()
@@ -257,17 +257,18 @@ public class RecipeServiceImpl implements RecipeService {
         recipeRepo.save(recipe);
         System.out.println("size" + favoriteRecipeList.getFavoriteList().size());
 
-        return  convertToFavoriteRecipeListDTO(favoriteRecipeList);
+        return convertToFavoriteRecipeListDTO(favoriteRecipeList);
     }
 
-    public RecipeDTO convertToRecipeDTO(Recipe recipe){
+    @Override
+    public RecipeDTO convertToRecipeDTO(Recipe recipe) {
         ArrayList<FoodDTO> foodDTOS = new ArrayList<>();
-        for (Food food : recipe.getFoods()){
+        for (Food food : recipe.getFoods()) {
             foodDTOS.add(foodService.convertToFoodDTO(food));
         }
 
         ArrayList<Long> meals = new ArrayList<>();
-        for (Meal meal : recipe.getMeals()){
+        for (Meal meal : recipe.getMeals()) {
             meals.add(meal.getMealId());
         }
 
@@ -286,14 +287,15 @@ public class RecipeServiceImpl implements RecipeService {
                 .build();
     }
 
-    public Recipe convertToRecipe(RecipeDTO recipeDTO){
+    @Override
+    public Recipe convertToRecipe(RecipeDTO recipeDTO) {
         ArrayList<Meal> meals = new ArrayList<>();
-        for(Long id : recipeDTO.getMeals()){
+        for (Long id : recipeDTO.getMeals()) {
             meals.add(mealRepo.findById(id).orElse(null));
         }
 
         ArrayList<Food> foods = new ArrayList<>();
-        for (FoodDTO foodDTO : recipeDTO.getFoods()){
+        for (FoodDTO foodDTO : recipeDTO.getFoods()) {
             foods.add(foodService.convertToFood(foodDTO));
         }
 
@@ -311,20 +313,20 @@ public class RecipeServiceImpl implements RecipeService {
                 .status(recipeDTO.getStatus())
                 .build();
 
-        if(recipeDTO.getId() != null){
+        if (recipeDTO.getId() != null) {
             recipe.setId(recipeDTO.getId());
         }
 
-        if(recipeDTO.getFavoriteList() != null){
+        if (recipeDTO.getFavoriteList() != null) {
             recipe.setFavRecipe(favoriteRecipeRepo.findById(recipeDTO.getFavoriteList()).orElse(null));
         }
 
         return recipe;
     }
 
-    public FavoriteRecipeList convertToFavoriteRecipeList(FavoriteRecipeListDTO favoriteRecipeListDTO){
+    public FavoriteRecipeList convertToFavoriteRecipeList(FavoriteRecipeListDTO favoriteRecipeListDTO) {
         ArrayList<Recipe> recipes = new ArrayList<>();
-        for(RecipeDTO recipeDTO : favoriteRecipeListDTO.getFavoriteDTOList()){
+        for (RecipeDTO recipeDTO : favoriteRecipeListDTO.getFavoriteDTOList()) {
             recipes.add(convertToRecipe(recipeDTO));
         }
 
@@ -335,16 +337,16 @@ public class RecipeServiceImpl implements RecipeService {
                 .user(user)
                 .build();
 
-        if(favoriteRecipeListDTO.getId() != null){
+        if (favoriteRecipeListDTO.getId() != null) {
             favoriteRecipeList.setId(favoriteRecipeListDTO.getId());
         }
 
         return favoriteRecipeList;
     }
 
-    public FavoriteRecipeListDTO convertToFavoriteRecipeListDTO(FavoriteRecipeList favoriteRecipeList){
+    public FavoriteRecipeListDTO convertToFavoriteRecipeListDTO(FavoriteRecipeList favoriteRecipeList) {
         ArrayList<RecipeDTO> recipeDTOS = new ArrayList<>();
-        for(Recipe recipe : favoriteRecipeList.getFavoriteList()){
+        for (Recipe recipe : favoriteRecipeList.getFavoriteList()) {
             recipeDTOS.add(convertToRecipeDTO(recipe));
         }
 
