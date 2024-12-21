@@ -51,7 +51,6 @@ public class TaskController {
         // Lấy người dùng hiện tại đang được xác thực để gán nhiệm vụ
         UserInfoConfig assigner = authenticationService.getCurrentUser();
 
-        System.out.println("assignee");
         // Kiểm tra sự tồn tại của người được giao (người dùng)
         UserDTO assignee = userService.getUserById(createTaskRequest.getAssignee());
         if (assignee == null) {
@@ -60,10 +59,7 @@ public class TaskController {
                     ResCode.USER_NOT_FOUND.getCode()
             );
         }
-        System.out.println(assignee.getId());
-
         // Kiểm tra sự tồn tại của thực phẩm
-        System.out.println("food");
         FoodDTO foodDTO = foodService.getFoodById(assigner.getId(), createTaskRequest.getFoodId());
         if (foodDTO == null) {
             throw new ServiceException(
@@ -71,12 +67,8 @@ public class TaskController {
                     ResCode.FOOD_NOT_FOUND.getCode()
             );
         }
-        System.out.println(foodDTO.getId());
-
         // Kiểm tra sự tồn tại của danh sách mua sắm
-        System.out.println("shopping list");
         ShoppingListDTO shoppingListDTO = shoppingListService.getShoppingListById(assigner.getId(), createTaskRequest.getShoppingListId());
-        System.out.println(shoppingListDTO.getId());
 
         // Kiểm tra quyền sở hữu của người giao trong gia đình
         boolean isOwner = familyService.verifyOwner(shoppingListDTO.getFamilyDTO().getId(), assigner.getId());
@@ -97,7 +89,6 @@ public class TaskController {
         }
 
         // Xây dựng TaskDTO với các thực thể đã được xác minh và các chi tiết khác
-        System.out.println("task dto");
         TaskDTO taskDTO = TaskDTO.builder()
                 .assignee(assignee)
                 .foodDTO(foodDTO)
@@ -107,10 +98,6 @@ public class TaskController {
                 .updatedAt(Date.valueOf(LocalDate.now()))
                 .status(StatusConfig.AVAILABLE.getStatus())  // Đặt trạng thái mặc định nếu cần
                 .build();
-
-        System.out.println(taskDTO.getFoodDTO().getId());
-        System.out.println(taskDTO.getAssignee().getId());
-        System.out.println(taskDTO.getShoppingListId());
 
         // Lưu nhiệm vụ và trả về phản hồi với nhiệm vụ đã tạo
         TaskDTO createdTask = taskService.createTask(taskDTO);
@@ -201,7 +188,6 @@ public class TaskController {
         // Cập nhật số lượng nếu đã thay đổi
         taskDTO.setQuantity(updateTaskRequest.getQuantity());
         ShoppingListDTO shoppingListDTO = shoppingListService.getShoppingListById(assigner.getId(), updateTaskRequest.getShoppingListId());
-        System.out.println(shoppingListDTO.getId());
 
         // Kiểm tra quyền sở hữu của người giao trong gia đình
         boolean isOwner = familyService.verifyOwner(shoppingListDTO.getFamilyDTO().getId(), assigner.getId());

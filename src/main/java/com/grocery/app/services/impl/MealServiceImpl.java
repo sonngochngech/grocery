@@ -171,10 +171,10 @@ public class MealServiceImpl implements MealService {
 
     @Override
     public MealDTO updateMeal(MealDTO mealDTO) {
-
         Meal meal = convertToEntity(mealDTO);
+        meal.getRecipes().forEach(recipe -> recipe.setMeals(new ArrayList<>()));
         Meal updatedMeal = mealRepository.save(meal);
-
+        System.out.println("updated meal" + updatedMeal.getMealId());
         return convertToDTO(updatedMeal);
     }
 
@@ -247,16 +247,28 @@ public class MealServiceImpl implements MealService {
 
         ArrayList<Recipe> recipes = new ArrayList<>();
         for(RecipeDTO recipeDTO : mealDTO.getRecipeDTOS()){
+            System.out.println("recipe id" + recipeDTO.getId());
             Recipe recipe = recipeRepo.findById(recipeDTO.getId()).orElse(null);
             recipes.add(recipe);
+            System.out.println("recipe id" + recipeDTO.getId());
         }
 
+        System.out.println("set recipes");
         meal.setRecipes(recipes);
+        for(Recipe id : meal.getRecipes()){
+            System.out.println("recipe id" + id.getId());;
+        }
+        System.out.println("map user");
         meal.setUser(modelMapper.map(mealDTO.getUserDetailDTO(), User.class));
+        System.out.println("user id" + meal.getUser().getId());
+        System.out.println("map family");
         meal.setFamily(modelMapper.map(mealDTO.getFamilyDetailDTO(), Family.class));
+        System.out.println("family id" + meal.getFamily().getId());
 
+        System.out.println("map id");
         if(mealDTO.getMealId() != null){
             meal.setMealId(mealDTO.getMealId());
+            System.out.println(meal.getMealId());
         }
 
         return meal;

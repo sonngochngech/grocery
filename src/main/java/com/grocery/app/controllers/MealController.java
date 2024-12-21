@@ -123,8 +123,6 @@ public class MealController {
 
     @GetMapping("/get/{mealId}")
     public ResponseEntity<BaseResponse<MealDTO>> getMealById(@PathVariable Long mealId){
-        System.out.println("meal id");
-        System.out.println(mealId);
         UserInfoConfig currentUser = authenticationService.getCurrentUser();
 
         // Lấy bữa ăn theo ID và người dùng hiện tại
@@ -175,7 +173,6 @@ public class MealController {
     @GetMapping("/recommend/{term}")
     public ResponseEntity<BaseResponse<ArrayList<RecommendedMealDTO>>> recommendMeal(@PathVariable String term){
         UserInfoConfig currentUser = authenticationService.getCurrentUser();
-        System.out.println("request term" + term);
 
         // Kiểm tra người dùng
         UserDTO user = userService.getUserById(currentUser.getId());
@@ -186,9 +183,6 @@ public class MealController {
                     ResCode.USER_NOT_FOUND.getCode()
             );
         }
-
-        System.out.println("user id");
-        System.out.println(user.getId());
 
         // Lấy danh sách bữa ăn gợi ý
         ArrayList<RecommendedMealDTO> recommendedMeals = mealService.recommendMeal(
@@ -237,8 +231,6 @@ public class MealController {
 
         // Lấy danh sách công thức mới
         ArrayList<RecipeDTO> newRecipes = new ArrayList<>();
-        System.out.println("New recipe list");
-        System.out.println(updateMealRequest.getRecipeList());
         for (Long recipeId : updateMealRequest.getRecipeList()) {
             RecipeDTO newRecipe = recipeService.getRecipeById(
                     currentUser.getId(),

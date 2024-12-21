@@ -124,7 +124,6 @@ public class MealControllerIntegrationTest extends ServicesTestSupport {
         recipeRepo.save(r4);
 
         meal.getRecipes().add(r1);
-        meal.getRecipes().add(r2);
         System.out.println("recipe length");
         System.out.println(meal.getRecipes().size());
 
@@ -264,7 +263,7 @@ public class MealControllerIntegrationTest extends ServicesTestSupport {
                 .name("new name")
                 .date("new date")
                 .term("Lunch")
-                .recipeList(new ArrayList<>(List.of(1L)))
+                .recipeList(new ArrayList<>(List.of(1L, 2L)))
                 .build();
 
         // Gửi yêu cầu HTTP GET để lấy thông tin meal

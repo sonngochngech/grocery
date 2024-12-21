@@ -1,5 +1,6 @@
 package com.grocery.app.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,6 +34,7 @@ public class Recipe {
             joinColumns = @JoinColumn(name = "recipe_id"),
             inverseJoinColumns = @JoinColumn(name = "meal_id")
     )
+    @JsonIgnore
     private List<Meal> meals = new ArrayList<>();
 
     @ManyToMany(cascade = CascadeType.MERGE)
