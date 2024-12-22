@@ -2,6 +2,7 @@ package com.grocery.app.controllers;
 
 import com.grocery.app.config.UserInfoConfig;
 import com.grocery.app.config.constant.ResCode;
+import com.grocery.app.config.constant.StatusConfig;
 import com.grocery.app.dto.*;
 import com.grocery.app.dto.request.createRequest.CreateFoodRequest;
 import com.grocery.app.dto.request.updateRequest.UpdateFoodRequest;
@@ -93,6 +94,7 @@ public class FoodController {
                 .name(createFoodRequest.getName())
                 .createdAt(Date.valueOf(LocalDate.now()))
                 .updatedAt(Date.valueOf(LocalDate.now()))
+                .status(StatusConfig.AVAILABLE.getStatus())
                 .build();
 
         FoodDTO createFood = foodService.createFood(currentUser.getId(), foodDTO);
