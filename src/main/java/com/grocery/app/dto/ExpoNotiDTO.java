@@ -5,17 +5,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class NotiContentDTO {
-    private String title;
-    private String message;
-    private String externalData;
-    private String type;
+public class ExpoNotiDTO {
 
+    private List<String> token=new ArrayList<>();
+    private String body;
+    private String externalData;
 }

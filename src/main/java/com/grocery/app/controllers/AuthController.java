@@ -55,8 +55,8 @@ public class AuthController {
     @Autowired
     private NotificationFactory notificationFactory;
 
-//    @Autowired
-//    private NotificationProducer notificationProducer;
+    @Autowired
+    private NotificationProducer notificationProducer;
 
 
 
@@ -99,7 +99,6 @@ public class AuthController {
                 refreshToken);
         return new ResponseEntity<>(authResponse, HttpStatus.OK);
 
-
     }
 
     @PostMapping("social-login")
@@ -131,7 +130,7 @@ public class AuthController {
         String email=dto.getEmail();
         String code = String.valueOf((int)(Math.random() * 900000) + 100000);
         redisService.saveData(email,code);
-//        notificationProducer.sendMessage(notificationFactory.VerifyCodeNoti(email,code));
+        notificationProducer.sendMessage(notificationFactory.VerifyCodeNoti(email,code));
         BaseResponse<String> res=ResponseFactory.createResponse(code,ResCode.GET_VERIFY_CODE_SUCCESSFULLY.getMessage(),ResCode.GET_VERIFY_CODE_SUCCESSFULLY.getCode());
         return new ResponseEntity<>(res,HttpStatus.OK);
     }

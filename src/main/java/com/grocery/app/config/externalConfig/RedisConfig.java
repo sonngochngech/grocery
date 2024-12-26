@@ -1,6 +1,9 @@
 package com.grocery.app.config.externalConfig;
 
-import io.lettuce.core.dynamic.annotation.Value;
+import io.github.cdimascio.dotenv.Dotenv;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
@@ -13,7 +16,11 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 public class RedisConfig {
 
 
-    private String REDIS_HOST="redis";
+
+
+    @Value("${spring.redis.host}")
+    private String REDIS_HOST;
+
     private Integer REDIS_PORT=6379;
 
 

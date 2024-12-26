@@ -21,6 +21,7 @@ public class UserInfoConfig implements UserDetails {
     private Long id;
     private String username;
     private String password;
+    private String email;
     private String role;
     private Boolean isActive;
     private Set<String> authProviderType=new HashSet<>();
@@ -29,6 +30,7 @@ public class UserInfoConfig implements UserDetails {
         this.username = user.getUsername();
         this.password = user.getPassword();
         this.role = user.getRole().getName();
+        this.email = user.getEmail() == null ? "" : user.getEmail();
         this.isActive = user.getIsActivated();
         this.id = user.getId();
 

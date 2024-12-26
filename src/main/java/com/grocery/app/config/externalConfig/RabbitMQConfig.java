@@ -21,7 +21,9 @@ public class RabbitMQConfig {
 
     @Bean
     public Queue fcmQueue() {
-        return new Queue("fcm.queue", true);
+        Map<String, Object> args = new HashMap<>();
+        args.put("x-message-ttl", 5000); // Match the existing queue settings
+        return new Queue("fcm.queue", true, false, false, args);
     }
 
     @Bean

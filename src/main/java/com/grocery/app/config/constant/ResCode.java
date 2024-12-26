@@ -154,6 +154,9 @@ public enum ResCode {
 
     // Enum code
     INVALID_TERM("99901", "Invalid term"),
+    NOTIFICATION_NOT_FOUND("99902", "Notification not found"),
+    GET_NOTIFICATION_SUCCESSFULLY("99903", "Get notification successfully"),
+    DELETE_NOTIFICATION_SUCCESSFULLY("99904", "Delete notification successfully"),
     ;
 
     private final String code;

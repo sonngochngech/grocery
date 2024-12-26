@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/admin/units")
+@RequestMapping("api/")
 @SecurityRequirement(name = "bearerAuth")
 public class UnitController {
 
@@ -24,29 +24,29 @@ public class UnitController {
     private UnitService unitService;
 
 
-    @GetMapping("")
+    @GetMapping("/user/units")
     public ResponseEntity<BaseResponse<List<UnitDTO>>> getAllUnits(){
         List<UnitDTO> units = unitService.getAllUnit();
         BaseResponse<List<UnitDTO>> response = ResponseFactory.createResponse(units, ResCode.GET_UNITS_SUCCESSFULLY.getCode(), ResCode.GET_UNITS_SUCCESSFULLY.getMessage());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PostMapping("/create")
+    @PostMapping("/admin/units/create")
     public ResponseEntity<BaseResponse<UnitDTO>> createUnit(@RequestBody @Valid UnitDTO unitDTO){
         UnitDTO unit = unitService.createUnit(unitDTO);
         BaseResponse<UnitDTO> response = ResponseFactory.createResponse(unit, ResCode.CREATE_UNIT_SUCCESSFULLY.getCode(), ResCode.CREATE_UNIT_SUCCESSFULLY.getMessage());
         return new ResponseEntity<>(response, HttpStatus.OK);
 
     }
-    @PutMapping("/update")
+    @PutMapping("/admin/units/update")
     public ResponseEntity<BaseResponse<UnitDTO>> updateUnit(@RequestBody @Valid UnitDTO unitDTO){
         UnitDTO unit = unitService.updateUnit(unitDTO);
         BaseResponse<UnitDTO> response = ResponseFactory.createResponse(unit, ResCode.UPDATE_UNIT_SUCCESSFULLY.getCode(), ResCode.UPDATE_UNIT_SUCCESSFULLY.getMessage());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @DeleteMapping("/delete")
-    public ResponseEntity<BaseResponse<UnitDTO>> deleteUnit(@RequestBody Long id){
+    @DeleteMapping("/admin/units/delete/{id}")
+    public ResponseEntity<BaseResponse<UnitDTO>> deleteUnit(@PathVariable Long id){
         UnitDTO unit = unitService.deleteUnit(id);
         BaseResponse<UnitDTO> response = ResponseFactory.createResponse(unit, ResCode.DELETE_UNIT_SUCCESSFULLY.getCode(), ResCode.DELETE_UNIT_SUCCESSFULLY.getMessage());
         return new ResponseEntity<>(response, HttpStatus.OK);

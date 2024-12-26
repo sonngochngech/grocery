@@ -2,10 +2,7 @@ package com.grocery.app.entities;
 
 import com.grocery.app.config.constant.StatusConfig;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.sql.Date;
 import java.util.ArrayList;
@@ -13,7 +10,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "food")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

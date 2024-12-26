@@ -54,6 +54,7 @@ public class UserServiceImpl implements UserService {
                 throw new ServiceException(ResCode.EXISTED_USER.getCode(), ResCode.EXISTED_USER.getMessage());
             }
             User registerUser = userRepo.save(user);
+
             return modelMapper.map(registerUser, UserDetailDTO.class);
     }
 

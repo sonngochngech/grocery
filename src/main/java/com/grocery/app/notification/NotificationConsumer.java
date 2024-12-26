@@ -7,5 +7,5 @@ public interface NotificationConsumer {
 
     public void receiveEmailMessage(String message, Channel channel, Message amqpMessage) throws Exception;
 
-    public void receiveFcmMessage(String message);
+    public void receiveFcmMessage(String message) throws Exception;
 }

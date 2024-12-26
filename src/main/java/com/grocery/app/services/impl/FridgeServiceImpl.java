@@ -5,11 +5,13 @@ import com.grocery.app.config.constant.ResCode;
 import com.grocery.app.dto.FoodDTO;
 import com.grocery.app.dto.FridgeDTO;
 import com.grocery.app.dto.FridgeItemDTO;
+import com.grocery.app.dto.UserFridgeDTO;
 import com.grocery.app.entities.Food;
 import com.grocery.app.entities.Fridge;
 import com.grocery.app.entities.FridgeItem;
 import com.grocery.app.exceptions.ServiceException;
 import com.grocery.app.repositories.FoodRepo;
+import com.grocery.app.repositories.FridgeItemRepo;
 import com.grocery.app.repositories.FridgeRepo;
 import com.grocery.app.services.FoodService;
 import com.grocery.app.services.FridgeService;
@@ -17,6 +19,10 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigInteger;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class FridgeServiceImpl implements FridgeService {
@@ -29,6 +35,10 @@ public class FridgeServiceImpl implements FridgeService {
 
     @Autowired
     private FoodService foodService;
+
+
+    @Autowired
+    private FridgeItemRepo fridgeItemRepo;
 
     @Override
     public FridgeDTO getFridgeByFamily(Long familyId) {
@@ -85,5 +95,26 @@ public class FridgeServiceImpl implements FridgeService {
             throw new ServiceException(ResCode.FOOD_NOT_FOUND.getMessage(), ResCode.FOOD_NOT_FOUND.getCode());
         }
         return  result;
+    }
+
+    @Override
+    public List<UserFridgeDTO> findExpriedFridgeItems() {
+        List<Object[]> results = fridgeRepo.findExpriedFridgeItems().orElse(null);
+        if(results == null) return  null;
+        return results.stream()
+                .map(r -> new UserFridgeDTO(
+                        (String) r[0],
+                        (String) r[1],
+                        (String) r[2],
+                        ((Long) r[3])
+                ))
+                .collect(Collectors.toList());
+    }
+
+    public Void  isNotifiedItem(List<Long> ids){
+        List<FridgeItem> fridgeItems = fridgeItemRepo.findAllById(ids);
+        fridgeItems.forEach(item -> item.setIsNotified(true));
+        fridgeItemRepo.saveAll(fridgeItems);
+        return null;
     }
 }
