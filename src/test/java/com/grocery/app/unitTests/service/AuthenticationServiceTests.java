@@ -31,7 +31,7 @@ public class AuthenticationServiceTests {
     @BeforeEach
     public void setUp() {
         UserInfoConfig userInfoConfig = new UserInfoConfig(
-                1L, "test","test",null, Boolean.TRUE,null
+                1L, "test","test","test",null, Boolean.TRUE,null
         );
         Authentication auth= new UsernamePasswordAuthenticationToken(userInfoConfig,null,null);
 

@@ -10,6 +10,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -26,8 +27,10 @@ public class UnitServiceImpl implements UnitService {
     public List<UnitDTO> getAllUnit() {
         List<Unit> units=unitRepo.findAll();
         if (units == null || units.isEmpty()) {
-            throw new ServiceException(ResCode.NO_UNIT.getMessage(), ResCode.NO_UNIT.getCode());
+//            throw new ServiceException(ResCode.NO_UNIT.getMessage(), ResCode.NO_UNIT.getCode());
+            return new ArrayList<>();
         }
+
         return units.stream().map(unit -> modelMapper.map(unit,UnitDTO.class)).toList();
     }
 

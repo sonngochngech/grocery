@@ -45,4 +45,7 @@ public class FridgeItem {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "food_id", nullable = false) // Specify the foreign key column for Food
     private Food food;
+
+    @Builder.Default
+    private Boolean isNotified = Boolean.FALSE;
 }

@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  mysql:
+    container_name: mysql-development-grocery
+    image: mysql:8.0-debian
+    environment:
+      MYSQL_ROOT_PASSWORD: 'root'
+      MYSQL_DATABASE: 'db'
+      MYSQL_USERNAME: 'root'
+      MYSQL_PASSWORD: 'root'
+      MYSQL_ALLOW_EMPTY: 1
+    ports:
+      - '3306:3306'
+    networks:
+      - development-backend-grocery
+    volumes:
+      - data-mysql:/var/lib/mysql
+
+  rabbitmq:
+    container_name: rabbitmq-development-grocery
+    image: 'rabbitmq:4.0.2'
+    environment:
+      RABBITMQ_DEFAULT_USER: 'guest'
+      RABBITMQ_DEFAULT_PASS: 'guest'
+    ports:
+      - '5672:5672'
+    networks:
+      - development-backend-grocery
+
+  redis:
+    container_name: redis-development-grocery
+    image: 'redis:8.0-M01'
+    ports:
+      - '6379:6379'
+    networks:
+      - development-backend-grocery
+
+
+
+networks:
+  development-backend-grocery:
+    driver: bridge
+
+volumes:
+  data-mysql:
+    driver: local

@@ -2,9 +2,7 @@ package com.grocery.app.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -13,6 +11,7 @@ import java.util.Set;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Table(name="devices")
 public class Device {
 
@@ -25,7 +24,7 @@ public class Device {
     private String deviceName;
 
 
-    @ManyToMany(mappedBy = "devices")
+    @ManyToMany(mappedBy = "devices",fetch = FetchType.EAGER)
     @JsonIgnore
     private Set<User> users=new HashSet<>();
 

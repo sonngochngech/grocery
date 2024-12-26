@@ -2,6 +2,7 @@ package com.grocery.app.integrationTests.base;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.grocery.app.config.constant.AppConstants;
+import com.grocery.app.entities.Device;
 import com.grocery.app.entities.Role;
 import com.grocery.app.entities.User;
 import com.grocery.app.repositories.UserRepo;
@@ -22,6 +23,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Set;
 
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -56,18 +58,7 @@ public class ServicesTestSupport {
     @BeforeAll
     public void setup(){
         // Given
-        User user = User.builder()
-                .firstName("test")
-                .lastName("test")
-                .username("test")
-                .password(passwordEncoder.encode("123456789"))
-                .email("")
-                .role(Role.builder().id(102L).name("USER").build())
-                .devices(null)
-                .build();
-        // When
-        userRepo.save(user);
-        this.user=userRepo.findById(1L).orElse(null);
+        this.user=addUser("test");
 
     }
 
@@ -98,9 +89,9 @@ public class ServicesTestSupport {
                 .lastName("test")
                 .username(username)
                 .password(passwordEncoder.encode("123456789"))
-                .email("")
+                .email(username)
                 .role(Role.builder().id(102L).name("USER").build())
-                .devices(null)
+                .devices(Set.of(Device.builder().deviceId(username).build(),Device.builder().deviceId(username+'1').build()))
                 .build();
         user=userRepo.save(user);
         return user;

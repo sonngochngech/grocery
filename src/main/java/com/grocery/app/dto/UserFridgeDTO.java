@@ -1,21 +1,22 @@
 package com.grocery.app.dto;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class NotiContentDTO {
-    private String title;
-    private String message;
-    private String externalData;
-    private String type;
+public class UserFridgeDTO {
 
+    private String foodName;
+    private String email;
+    private String fridgeName;
+    private Long fridgeItemId;
 }

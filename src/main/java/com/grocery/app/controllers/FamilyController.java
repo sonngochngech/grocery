@@ -7,6 +7,8 @@ import com.grocery.app.dto.UserDTO;
 import com.grocery.app.dto.family.FamilyDTO;
 import com.grocery.app.dto.family.FamilyDetailDTO;
 import com.grocery.app.exceptions.ControllerException;
+import com.grocery.app.notification.NotificationFactory;
+import com.grocery.app.notification.NotificationProducer;
 import com.grocery.app.payloads.responses.BaseResponse;
 import com.grocery.app.payloads.responses.ErrorResponse;
 import com.grocery.app.payloads.responses.ResponseFactory;
@@ -43,6 +45,12 @@ public class FamilyController {
 
     @Autowired
     private InvitationService invitationService;
+
+    @Autowired
+    private NotificationProducer notificationProducer;
+
+    @Autowired
+    private NotificationFactory notificationFactory;
 
 
 
@@ -127,20 +135,22 @@ public class FamilyController {
             throw new ControllerException(ResCode.NOT_OWNER_OF_FAMILY.getMessage(), ResCode.NOT_OWNER_OF_FAMILY.getCode());
         }
         InvitationDTO invitationDTO = invitationService.createInvitation(familyId,user.getId());
+        String content="Nếu bạn đồng ý tham gia gia đình, hãy ấn vào link  và chấp nhận lời mời: "+ "http://10.13.28.161:8081/api/response-invitation?invitationId="+invitationDTO.getId()+"&isAccepted=true&userId="+user.getId()+"&familyId="+familyId;
+        notificationProducer.sendMessage(notificationFactory.sendInvitationNoti(user.getEmail(),content));
         BaseResponse<InvitationDTO> response = ResponseFactory.createResponse(invitationDTO, ResCode.INVITATION_SUCCESSFULLY.getMessage(), ResCode.INVITATION_SUCCESSFULLY.getCode());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PutMapping("/{familyId}/members/response-invitation")
-    public ResponseEntity<BaseResponse<InvitationDTO>> responseInvitation(@PathVariable Long familyId,@RequestParam Long invitationId,@RequestParam Boolean isAccepted) {
-        Long userId = authenticationService.getCurrentUser().getId();
-        boolean isMember = familyService.verifyMember(familyId,userId);
-        if(isMember){
-            throw new ControllerException(ResCode.ALREADY_IN_FAMILY.getMessage(), ResCode.ALREADY_IN_FAMILY.getCode());
-        }
-        InvitationDTO invitationDTO = invitationService.updateInvitation(isAccepted,invitationId,userId);
-        BaseResponse<InvitationDTO> response = ResponseFactory.createResponse(invitationDTO, ResCode.RESPONSE_INVITATION_SUCCESSFULLY.getMessage(), ResCode.RESPONSE_INVITATION_SUCCESSFULLY.getCode());
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+
+//    @GetMapping("/{familyId}/members/response-invitation")
+//    public ResponseEntity<BaseResponse<InvitationDTO>> responseInvitation(@PathVariable Long familyId,@RequestParam Long invitationId,@RequestParam Boolean isAccepted,@RequestParam Long userId) {
+//        boolean isMember = familyService.verifyMember(familyId,userId);
+//        if(isMember){
+//            throw new ControllerException(ResCode.ALREADY_IN_FAMILY.getMessage(), ResCode.ALREADY_IN_FAMILY.getCode());
+//        }
+//        InvitationDTO invitationDTO = invitationService.updateInvitation(isAccepted,invitationId,userId);
+//        BaseResponse<InvitationDTO> response = ResponseFactory.createResponse(invitationDTO, ResCode.RESPONSE_INVITATION_SUCCESSFULLY.getMessage(), ResCode.RESPONSE_INVITATION_SUCCESSFULLY.getCode());
+//        return new ResponseEntity<>(response, HttpStatus.OK);
+//    }
 
 }

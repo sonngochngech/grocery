@@ -21,9 +21,10 @@ public class UpdateUserDTO {
     @Size(min = 3, max = 50, message = "Last name must be between 3 and 50 characters")
     private  String lastName;
 
-
     private Date  birthday;
 
+    private String phoneNumber;
 
-    private String sexType;
+    private String sex;
+
 }
