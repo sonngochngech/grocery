@@ -1,8 +1,6 @@
 package com.grocery.app.entities;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.grocery.app.config.constant.StatusConfig;
-import com.grocery.app.mapper.LocalDateConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,7 +8,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Date;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -1,7 +1,6 @@
 package com.grocery.app.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.grocery.app.mapper.LocalDateConverter;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -35,6 +35,9 @@ public class Task {
     private Food food;
 
     private float quantity;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime dueDateTime;
 
     private String status;
 

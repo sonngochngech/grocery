@@ -95,6 +95,7 @@ public enum ResCode {
     DELETE_TASK_SUCCESSFULLY("00506", "Delete task successfully"),
     GET_TASK_SUCCESSFULLY("00507", "Get task successfully"),
     GET_TASKS_SUCCESSFULLY("00508", "Get tasks successfully"),
+    DUE_DATE_TIME_NOT_VALID("00509", "Due date time must be more than 5 minutes from now"),
 
     // Recipe code
     RECIPE_NOT_FOUND("00801", "Recipe is not found"),

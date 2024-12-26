@@ -44,25 +44,13 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public TaskDTO createTask(TaskDTO taskDTO) {
         // Map DTO to entity
-        System.out.println("task dto");
-        System.out.println(taskDTO);
         Task task = convertToTask(taskDTO);
-        System.out.println("converted task");
-        System.out.println(task.getFood().getId());
-        System.out.println(task.getAssignee().getId());
-        System.out.println(task.getShoppingList().getId());
 
         // Save the entity
         Task savedTask = taskRepository.save(task);
 
-        System.out.println("convert saved task to dto");
-        TaskDTO savedTaskDTO = convertToTaskDTO(savedTask);
-        System.out.println(savedTaskDTO.getFoodDTO().getId());
-        System.out.println(savedTaskDTO.getAssignee().getId());
-        System.out.println(savedTaskDTO.getShoppingListId());
-
         // Map entity back to DTO and return
-        return savedTaskDTO;
+        return convertToTaskDTO(savedTask);
     }
 
     @Override
@@ -160,6 +148,7 @@ public class TaskServiceImpl implements TaskService {
                 .shoppingListId(task.getShoppingList().getId())
                 .foodDTO(foodDTO)
                 .quantity(task.getQuantity())
+                .dueDateTime(task.getDueDateTime())
                 .createdAt(task.getCreatedAt())
                 .updatedAt(task.getUpdatedAt())
                 .status(task.getStatus())
@@ -177,6 +166,7 @@ public class TaskServiceImpl implements TaskService {
                 .shoppingList(shoppingList)
                 .food(food)
                 .quantity(taskDTO.getQuantity())
+                .dueDateTime(taskDTO.getDueDateTime())
                 .createdAt(taskDTO.getCreatedAt())
                 .updatedAt(taskDTO.getUpdatedAt())
                 .status(taskDTO.getStatus())
