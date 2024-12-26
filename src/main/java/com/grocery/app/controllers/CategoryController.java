@@ -17,14 +17,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/admin/categories")
+@RequestMapping("api")
 @SecurityRequirement(name = "bearerAuth")
 public class CategoryController {
 
     @Autowired
     private CategoryService categoryService;
 
-    @GetMapping("")
+    @GetMapping("/users/categories")
     public ResponseEntity<BaseResponse<List<CategoryDTO>>> getAllCategories(){
         List<CategoryDTO> categories = categoryService.getAllCategory();
         BaseResponse<List<CategoryDTO>> response = ResponseFactory.createResponse(categories, ResCode.GET_CATEGORY_SUCCESSFULLY.getMessage(), ResCode.GET_CATEGORY_SUCCESSFULLY.getCode());
@@ -32,22 +32,22 @@ public class CategoryController {
 
     }
 
-    @PostMapping("/create")
+    @PostMapping("/admin/categories/create")
     public ResponseEntity<BaseResponse<CategoryDTO>> createCategory(@RequestBody @Valid CategoryDTO categoryDTO){
         CategoryDTO category = categoryService.createCategory(categoryDTO);
         BaseResponse<CategoryDTO> response = ResponseFactory.createResponse(category, ResCode.CREATE_CATEGORY_SUCCESSFULLY.getMessage(), ResCode.CREATE_CATEGORY_SUCCESSFULLY.getCode());
         return new ResponseEntity<>(response, HttpStatus.OK);
 
     }
-    @PutMapping("/update")
+    @PutMapping("/admin/categories/update")
     public ResponseEntity<BaseResponse<CategoryDTO>> updateCategory(@RequestBody @Valid CategoryDTO categoryDTO){
         CategoryDTO category = categoryService.updateCategory(categoryDTO);
         BaseResponse<CategoryDTO> response = ResponseFactory.createResponse(category, ResCode.UPDATE_CATEGORY_SUCCESSFULLY.getMessage(), ResCode.UPDATE_CATEGORY_SUCCESSFULLY.getCode());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @DeleteMapping("/delete")
-    public ResponseEntity<BaseResponse<CategoryDTO>> deleteCategory(@RequestBody Long id){
+    @DeleteMapping("/admin/categories/delete/{id}")
+    public ResponseEntity<BaseResponse<CategoryDTO>> deleteCategory(@PathVariable Long id){
         CategoryDTO category = categoryService.deleteCategory(id);
         BaseResponse<CategoryDTO> response = ResponseFactory.createResponse(category, ResCode.DELETE_CATEGORY_SUCCESSFULLY.getMessage(), ResCode.DELETE_CATEGORY_SUCCESSFULLY.getCode());
         return new ResponseEntity<>(response, HttpStatus.OK);

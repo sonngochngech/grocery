@@ -1,11 +1,13 @@
 package com.grocery.app.controllers;
 
 import com.grocery.app.config.constant.ResCode;
+import com.grocery.app.dto.NotificationDTO;
 import com.grocery.app.dto.UserDetailDTO;
 import com.grocery.app.payloads.responses.BaseResponse;
 import com.grocery.app.payloads.responses.ResponseFactory;
 import com.grocery.app.payloads.users.UpdateUserDTO;
 import com.grocery.app.services.AuthenticationService;
+import com.grocery.app.services.NotificationService;
 import com.grocery.app.services.UserService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -17,6 +19,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("api/users")
 @Slf4j
@@ -27,6 +31,9 @@ public class UserController {
     private AuthenticationService authenticationService;
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -61,6 +68,21 @@ public class UserController {
         UserDetailDTO userDetailDTO=UserDetailDTO.builder().id(id).isActivated(false).build();
         UserDetailDTO user=userService.updateUser(userDetailDTO);
         BaseResponse<UserDetailDTO> response = ResponseFactory.createResponse(user, ResCode.LOCK_USER_SUCCESSFULLY.getMessage(),ResCode.LOCK_USER_SUCCESSFULLY.getCode());
+        return new  ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/notifications")
+    public ResponseEntity<BaseResponse<List<NotificationDTO>>> getNotifications(){
+        Long id=authenticationService.getCurrentUser().getId();
+        List<NotificationDTO> notificationDTO=notificationService.getNotifications(id);
+        BaseResponse<List<NotificationDTO>> response = ResponseFactory.createResponse(notificationDTO, ResCode.GET_NOTIFICATION_SUCCESSFULLY.getMessage(),ResCode.GET_NOTIFICATION_SUCCESSFULLY.getCode());
+        return new  ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/notifications/{id}")
+    public ResponseEntity<BaseResponse<Long>> deleteNotification(@PathVariable Long id){
+        Long notificationId=notificationService.deleteNotification(id);
+        BaseResponse<Long> response = ResponseFactory.createResponse(notificationId, ResCode.DELETE_NOTIFICATION_SUCCESSFULLY.getMessage(),ResCode.DELETE_NOTIFICATION_SUCCESSFULLY.getCode());
         return new  ResponseEntity<>(response, HttpStatus.OK);
     }
 

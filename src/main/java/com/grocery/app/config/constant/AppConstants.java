@@ -3,8 +3,8 @@ package com.grocery.app.config.constant;
 public class AppConstants {
 
     public static final  String[] ADMIN_URLS= { "/api/admin/**" };
-    public static final  String[] PUBLIC_URLS= {  "/api/auth/**","/v3/api-docs/**","/swagger-ui.html" ,"/swagger-ui/**"};
-    public static final  String[] USER_URLS= { "/api/user/**","/api/family/**","api/upload/**","api/users/" };
+    public static final  String[] PUBLIC_URLS= {  "/api/auth/**","/v3/api-docs/**","/swagger-ui.html" ,"/swagger-ui/**","api/response-invitation"};
+    public static final  String[] USER_URLS= { "/api/user/**","/api/family/**","api/upload/**","api/users/**" };
     public static final Long ADMIN_ID= 101L;
     public static final Long USER_ID= 102L;
     public static enum SexType {
@@ -30,6 +30,7 @@ public class AppConstants {
     public static final Long INVITATION_EXPIRED_TIME= 604800000L;
     public  static final Integer FILE_SIZE= 1048576;
     public static final String AVATAR_PATH="avatar";
+    public static final String EXTERNAL_DATA="externalData";
 
 
 

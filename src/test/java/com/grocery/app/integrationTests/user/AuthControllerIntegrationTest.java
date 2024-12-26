@@ -27,7 +27,6 @@ public class AuthControllerIntegrationTest extends ServicesTestSupport {
         String email="nguyenhongson159stk@gmail.com";
         HttpEntity<String> httpEntity=new HttpEntity<>(email,unAuthHeader());
         ResponseEntity<BaseResponse<String>> res=testRestTemplate.exchange("/api/auth/get-verify-code", HttpMethod.POST,httpEntity,new ParameterizedTypeReference<BaseResponse<String>>(){});
-        System.out.println("zozzo");
         System.out.println(res);
         assert res.getBody() != null;
         assert res.getBody().getData() != null;

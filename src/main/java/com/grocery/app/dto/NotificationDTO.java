@@ -5,17 +5,19 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class NotiContentDTO {
+public class NotificationDTO {
     private String title;
     private String message;
-    private String externalData;
     private String type;
+    private String externalData;
+    private Set<String> devices;
 
 }

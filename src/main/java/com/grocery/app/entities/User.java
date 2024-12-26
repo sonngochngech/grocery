@@ -5,15 +5,13 @@ import java.util.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.checkerframework.common.aliasing.qual.Unique;
 
 @Entity
 @Table(name="users")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -32,6 +30,7 @@ public  class User{
     @Size(min=3,max=20,message="Last name must be between 5 and 20 characters")
     private String lastName;
 
+    @Column(unique=true)
     private String email;
 
     private String phoneNumber;
@@ -63,16 +62,17 @@ public  class User{
     joinColumns = @JoinColumn(name="user_id"),
     inverseJoinColumns = @JoinColumn(name="device_id")
     )
-    private Set<Device> devices= new HashSet<>();
+    private Set<Device> devices;
 
     @OneToMany(mappedBy = "user")
     private List<UserNoti> notifications=new ArrayList<>();
 
+
+    @JsonIgnore
     @OneToMany(mappedBy = "sender")
     private List<Notification> sentNotifications=new ArrayList<>();
 
-    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL,orphanRemoval = true)
-    @JsonIgnore
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL,orphanRemoval = true,fetch=FetchType.EAGER)
     private List<Invitation> invitations=new ArrayList<>();
 
     @OneToOne(mappedBy = "user")

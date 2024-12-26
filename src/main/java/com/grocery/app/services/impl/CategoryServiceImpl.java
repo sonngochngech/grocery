@@ -11,6 +11,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -25,8 +26,10 @@ public class CategoryServiceImpl implements CategoryService {
     public List<CategoryDTO> getAllCategory() {
         List<Category> categories=categoryRepo.findAll();
         if (categories == null || categories.isEmpty()) {
-            throw new ServiceException(ResCode.NO_CATEGORY.getMessage(), ResCode.NO_CATEGORY.getCode());
+//            throw new ServiceException(ResCode.NO_CATEGORY.getMessage(), ResCode.NO_CATEGORY.getCode());
+            return new ArrayList<>();
         }
+
         return categories.stream().map(category -> modelMapper.map(category,CategoryDTO.class)).toList();
     }
 
