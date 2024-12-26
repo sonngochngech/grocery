@@ -287,12 +287,15 @@ public class RecipeControllerIntegrationTest extends ServicesTestSupport {
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonRequest = objectMapper.writeValueAsString(updateRecipeRequest);
 
-        // Tạo đối tượng MultipartFile giả
+        File imageFile = new File("src/test/java/com/grocery/app/integrationTests/recipe/WIN_20240705_21_34_13_Pro.jpg"); // Cập nhật đường dẫn đúng đến tệp hình ảnh
+        byte[] imageBytes = Files.readAllBytes(imageFile.toPath()); // Đọc dữ liệu tệp thành mảng byte
+
+        // Sử dụng ByteArrayInputStream để tạo MockMultipartFile
         MockMultipartFile mockImage = new MockMultipartFile(
                 "image",
-                "updated-recipe-image.jpg",
+                imageFile.getName(),
                 "image/jpeg",
-                "Updated Image Content".getBytes()
+                new ByteArrayInputStream(imageBytes) // Chuyển mảng byte thành InputStream
         );
 
         // Sử dụng MultiValueMap để gửi multipart/form-data

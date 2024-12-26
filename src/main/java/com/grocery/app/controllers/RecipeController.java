@@ -129,29 +129,37 @@ public class RecipeController {
     }
 
     @PostMapping("update")
-    public ResponseEntity<BaseResponse<RecipeDTO>> updateRecipe(@RequestBody UpdateRecipeRequest updateRecipeRequest) throws IOException {
+    public ResponseEntity<BaseResponse<RecipeDTO>> updateRecipe(@RequestParam("image") MultipartFile image,
+                                                                @RequestParam("request") String updateRecipeRequestJson) throws IOException {
         UserInfoConfig userInfoConfig = authenticationService.getCurrentUser();
+
+        // Chuyển đổi từ JSON String thành đối tượng UpdateRecipeRequest
+        ObjectMapper objectMapper = new ObjectMapper();
+        UpdateRecipeRequest updateRecipeRequest = objectMapper.readValue(updateRecipeRequestJson, UpdateRecipeRequest.class);
 
         // Lấy recipe
         RecipeDTO recipeDTO = recipeService.getRecipeById(userInfoConfig.getId(), updateRecipeRequest.getId());
 
         // Lấy Foods mới
         ArrayList<FoodDTO> foodDTOArrayList = new ArrayList<>();
-        for(Long id : updateRecipeRequest.getFoods()){
+        for (Long id : updateRecipeRequest.getFoods()) {
             // Kiểm tra quyền sở hữu
             FoodDTO foodDTO = foodService.getFoodById(userInfoConfig.getId(), id);
             foodDTOArrayList.add(foodDTO);
         }
 
-        String fileName = ImagePathUtil.setImagePath(AVATAR_PATH, updateRecipeRequest.getImage().getOriginalFilename(), System.currentTimeMillis());
-        String imageUrl = fileService.uploadImage(fileName, updateRecipeRequest.getImage().getBytes());
+        // Xử lý tệp hình ảnh
+        String fileName = ImagePathUtil.setImagePath(AVATAR_PATH, image.getOriginalFilename(), System.currentTimeMillis());
+        String imageUrl = fileService.uploadImage(fileName, image.getBytes());
 
+        // Cập nhật thông tin recipe
         recipeDTO.setDescription(updateRecipeRequest.getDescription());
         recipeDTO.setName(updateRecipeRequest.getName());
         recipeDTO.setFoods(foodDTOArrayList);
         recipeDTO.setImageUrl(imageUrl);
         recipeDTO.setUpdatedAt(Date.valueOf(LocalDate.now()));
 
+        // Cập nhật recipe
         RecipeDTO updatedRecipeDTO = recipeService.updateRecipe(recipeDTO);
 
         return ResponseEntity.status(HttpStatus.OK)
@@ -163,6 +171,7 @@ public class RecipeController {
                         )
                 );
     }
+
 
     @DeleteMapping("delete/{id}")
     public ResponseEntity<BaseResponse<RecipeDTO>> deleteRecipe(@PathVariable Long id) {

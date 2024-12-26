@@ -38,7 +38,7 @@ services:
 
   myapp:
     container_name: myapp
-    image:  'tungps0101/be'
+    image:  'nguyeson/grocery'
     depends_on:
       - mysql
       - rabbitmq
