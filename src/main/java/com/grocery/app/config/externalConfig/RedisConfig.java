@@ -15,11 +15,10 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Configuration
 public class RedisConfig {
 
-    @Autowired
-    private Dotenv dotenv;
 
 
-    @Value("${app.redis.host}")
+
+    @Value("${spring.redis.host}")
     private String REDIS_HOST;
 
     private Integer REDIS_PORT=6379;
