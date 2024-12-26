@@ -1,5 +1,6 @@
 package com.grocery.app.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.grocery.app.config.UserInfoConfig;
 import com.grocery.app.config.constant.ResCode;
 import com.grocery.app.config.constant.StatusConfig;
@@ -10,19 +11,22 @@ import com.grocery.app.dto.request.updateRequest.UpdateRecipeRequest;
 import com.grocery.app.exceptions.ServiceException;
 import com.grocery.app.payloads.responses.BaseResponse;
 import com.grocery.app.payloads.responses.ResponseFactory;
-import com.grocery.app.services.AuthenticationService;
-import com.grocery.app.services.FoodService;
-import com.grocery.app.services.RecipeService;
-import com.grocery.app.services.UserService;
+import com.grocery.app.services.*;
+import com.grocery.app.utils.ImagePathUtil;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
+
+import static com.grocery.app.config.constant.AppConstants.AVATAR_PATH;
 
 @RestController
 @RequestMapping("api/recipe")
@@ -36,44 +40,56 @@ public class RecipeController {
     private UserService userService;
     @Autowired
     private FoodService foodService;
+    @Autowired
+    private FileService fileService;
 
     // CRUD Recipe
 
-    @PostMapping("/create")
-    public ResponseEntity<BaseResponse<RecipeDTO>> createRecipe(@RequestBody CreateRecipeRequest createRecipeRequest) {
+    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<BaseResponse<RecipeDTO>> createRecipe(
+            @RequestParam("request") String requestJson,
+            @RequestParam("image") MultipartFile image) throws IOException {
         UserInfoConfig currentUser = authenticationService.getCurrentUser();
 
         // Kiểm tra người dùng
         UserDTO userDetailDTO = userService.getUserById(currentUser.getId());
-        if(userDetailDTO == null){
+        if (userDetailDTO == null) {
             throw new ServiceException(
                     ResCode.USER_NOT_FOUND.getMessage(),
                     ResCode.USER_NOT_FOUND.getCode()
             );
         }
 
-        ArrayList<FoodDTO> foodDTOArrayList = new ArrayList<>();
-        for(Long id : createRecipeRequest.getFoods()){
-            FoodDTO foodDTO = foodService.getFoodById(currentUser.getId(), id);
+        // Chuyển đổi requestJson thành đối tượng CreateRecipeRequest
+        CreateRecipeRequest createRecipeRequest = new ObjectMapper().readValue(requestJson, CreateRecipeRequest.class);
 
+        ArrayList<FoodDTO> foodDTOArrayList = new ArrayList<>();
+        for (Long id : createRecipeRequest.getFoods()) {
+            FoodDTO foodDTO = foodService.getFoodById(currentUser.getId(), id);
             foodDTOArrayList.add(foodDTO);
         }
 
+        // Xử lý ảnh
+        String fileName = ImagePathUtil.setImagePath(AVATAR_PATH, image.getOriginalFilename(), System.currentTimeMillis());
+        String imageUrl = fileService.uploadImage(fileName, image.getBytes());
+
+        // Tạo đối tượng RecipeDTO
         RecipeDTO recipeDTO = RecipeDTO.builder()
                 .user(userDetailDTO.getId())
                 .name(createRecipeRequest.getName())
                 .meals(new ArrayList<>())
                 .description(createRecipeRequest.getDescription())
-                .imageUrl(createRecipeRequest.getImageUrl())
+                .imageUrl(imageUrl)
                 .foods(foodDTOArrayList)
                 .createdAt(Date.valueOf(LocalDate.now()))
                 .updatedAt(Date.valueOf(LocalDate.now()))
                 .status(StatusConfig.AVAILABLE.getStatus())
                 .build();
 
+        // Tạo món ăn
         RecipeDTO createdRecipe = recipeService.createRecipe(recipeDTO);
 
-        if(createdRecipe == null){
+        if (createdRecipe == null) {
             throw new ServiceException(
                     ResCode.RECIPE_CREATION_FAILED.getMessage(),
                     ResCode.RECIPE_CREATION_FAILED.getCode()
@@ -89,6 +105,7 @@ public class RecipeController {
                         )
                 );
     }
+
 
     @GetMapping("get/{id}")
     public ResponseEntity<BaseResponse<RecipeDTO>> getRecipeById(@PathVariable Long id) {
@@ -112,7 +129,7 @@ public class RecipeController {
     }
 
     @PostMapping("update")
-    public ResponseEntity<BaseResponse<RecipeDTO>> updateRecipe(@RequestBody UpdateRecipeRequest updateRecipeRequest) {
+    public ResponseEntity<BaseResponse<RecipeDTO>> updateRecipe(@RequestBody UpdateRecipeRequest updateRecipeRequest) throws IOException {
         UserInfoConfig userInfoConfig = authenticationService.getCurrentUser();
 
         // Lấy recipe
@@ -126,10 +143,13 @@ public class RecipeController {
             foodDTOArrayList.add(foodDTO);
         }
 
+        String fileName = ImagePathUtil.setImagePath(AVATAR_PATH, updateRecipeRequest.getImage().getOriginalFilename(), System.currentTimeMillis());
+        String imageUrl = fileService.uploadImage(fileName, updateRecipeRequest.getImage().getBytes());
+
         recipeDTO.setDescription(updateRecipeRequest.getDescription());
         recipeDTO.setName(updateRecipeRequest.getName());
         recipeDTO.setFoods(foodDTOArrayList);
-        recipeDTO.setImageUrl(updateRecipeRequest.getImageUrl());
+        recipeDTO.setImageUrl(imageUrl);
         recipeDTO.setUpdatedAt(Date.valueOf(LocalDate.now()));
 
         RecipeDTO updatedRecipeDTO = recipeService.updateRecipe(recipeDTO);
