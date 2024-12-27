@@ -69,10 +69,14 @@ public class UserServiceImpl implements UserService {
         }
         Device device = modelMapper.map(credentials.getDevice(), Device.class);
 
-
-        if(deviceRepo.findByDeviceId(device.getDeviceId()).isEmpty()){
+        Device deviceExists = deviceRepo.findByDeviceId(device.getDeviceId()).orElse(null);
+        if(deviceExists==null ){
             user.getDevices().add(device);
             user= userRepo.save(user);
+        }else if( user.getDevices().stream().noneMatch(d -> d.getId().equals(deviceExists.getId()))){
+            user.getDevices().add(deviceExists);
+            user= userRepo.save(user);
+
         }
         return modelMapper.map(user, UserDetailDTO.class);
     }

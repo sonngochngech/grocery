@@ -3,6 +3,7 @@ package com.grocery.app.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+import org.checkerframework.common.aliasing.qual.Unique;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -19,6 +20,8 @@ public class Device {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private  Long id;
 
+
+    @Unique
     private String deviceId;
 
     private String deviceName;

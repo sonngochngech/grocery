@@ -34,6 +34,7 @@ public class NotificationProducerImpl implements NotificationProducer {
 
     @Override
     public void    sendMessage(NotiDTO notiDTO)  {
+        System.out.println("Sending message");
         if(!notiDTO.getMeanDTO().getEmails().isEmpty()){
             List<MailDetailsDTO> mailDetailsDTOS=modelMapper.map(notiDTO,new TypeToken<List<MailDetailsDTO>>(){}.getType());
             mailDetailsDTOS.forEach(this::sendEmailMessage);

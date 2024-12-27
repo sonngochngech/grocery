@@ -73,7 +73,8 @@ public class NotificationFactoryImpl implements NotificationFactory {
 
 
     @Override
-    public NotiDTO sendNotification(NotificationDTO notificationDTO){
+    public NotiDTO sendNotification(NotificationDTO notificationDTO) {
+        System.out.println("NotificationFactoryImpl.sendNotification");
         MeanDTO meanDTO= MeanDTO.builder()
                 .devices(new HashSet<>(notificationDTO.getDevices()))
                 .emails(new HashSet<>())

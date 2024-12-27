@@ -14,6 +14,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Builder
 public class NotificationDTO {
+    private String id;
     private String title;
     private String message;
     private String type;
