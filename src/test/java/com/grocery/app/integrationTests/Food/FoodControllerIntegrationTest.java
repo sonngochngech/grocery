@@ -72,7 +72,7 @@ public class FoodControllerIntegrationTest extends ServicesTestSupport {
                 .lastName("test1")
                 .username("test" + Math.floor(Math.random() * 10000000))
                 .password(passwordEncoder.encode("123456789"))
-                .email("test@example.com")
+                .email("clgtthangtung@gmail.com")
                 .role(Role.builder().id(102L).name("USER").build())
                 .build();
         userRepo.save(otherUser);

@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Timestamp;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,4 +17,5 @@ public class UpdateTaskRequest {
     private Long userId;
     private Long foodId;
     private float quantity;
+    private Timestamp timestamp;
 }

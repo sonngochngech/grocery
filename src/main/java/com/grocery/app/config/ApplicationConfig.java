@@ -25,12 +25,6 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public ObjectMapper objectMapper() {
-        return new ObjectMapper();
-    }
-
-
-    @Bean
     public Cloudinary cloudinary() {
         return new Cloudinary("cloudinary://574434112775762:8z64CpIpyOQ7s0oRq-6Vl7BFzJs@dzhjv29ho");
     }

@@ -29,7 +29,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -76,7 +78,7 @@ public class TaskControllerIntegrationTest extends ServicesTestSupport {
                 .lastName("test1")
                 .username("test" + Math.floor(Math.random() * 10000000))
                 .password(passwordEncoder.encode("123456789"))
-                .email("test@example.com")
+                .email("clgtthangtung@gmail.com")
                 .role(Role.builder().id(102L).name("USER").build())
                 .build();
         userRepo.save(otherUser);
@@ -141,6 +143,7 @@ public class TaskControllerIntegrationTest extends ServicesTestSupport {
                 .assignee(otherUser)
                 .food(food)
                 .quantity(1.2f)
+                .timestamp(Timestamp.valueOf(LocalDateTime.of(2024, 12, 30, 23, 50)))
                 .createdAt(Date.valueOf(LocalDate.now()))
                 .updatedAt(Date.valueOf(LocalDate.now()))
                 .status(StatusConfig.AVAILABLE.getStatus())
@@ -154,6 +157,7 @@ public class TaskControllerIntegrationTest extends ServicesTestSupport {
                 .quantity(1.2f)
                 .createdAt(Date.valueOf(LocalDate.now()))
                 .updatedAt(Date.valueOf(LocalDate.now()))
+                .timestamp(Timestamp.valueOf(LocalDateTime.of(2024, 12, 30, 23, 50)))
                 .status(StatusConfig.AVAILABLE.getStatus())
                 .build();
         otherTask = taskRepo.save(otherTask);
@@ -170,6 +174,7 @@ public class TaskControllerIntegrationTest extends ServicesTestSupport {
                 .shoppingListId(shoppingList.getId())
                 .foodId(food.getId())
                 .quantity(1.2f)
+                .timestamp(Timestamp.valueOf(LocalDateTime.of(2024, 12, 30, 23, 50)))
                 .build();
         System.out.println(createTaskRequest);
 
@@ -188,6 +193,7 @@ public class TaskControllerIntegrationTest extends ServicesTestSupport {
         assertThat(taskDTO.getAssignee().getId(), is(otherUser.getId()));
         assertThat(taskDTO.getShoppingListId(), is(shoppingList.getId()));
         assertThat(taskDTO.getFoodDTO().getId(), is(food.getId()));
+        assertThat(taskDTO.getTimestamp(), is(Timestamp.valueOf(LocalDateTime.of(2024, 12, 30, 23, 50))));
         assertThat(taskDTO.getQuantity(), is(1.2f));
     }
 
@@ -210,6 +216,7 @@ public class TaskControllerIntegrationTest extends ServicesTestSupport {
         assertThat(taskDTO.getAssignee().getId(), is(otherUser.getId()));
         assertThat(taskDTO.getShoppingListId(), is(shoppingList.getId()));
         assertThat(taskDTO.getFoodDTO().getId(), is(food.getId()));
+        assertThat(taskDTO.getTimestamp(), is(Timestamp.valueOf(LocalDateTime.of(2024, 12, 30, 23, 50))));
         assertThat(taskDTO.getQuantity(), is(1.2f));
     }
 
@@ -232,6 +239,7 @@ public class TaskControllerIntegrationTest extends ServicesTestSupport {
         assertThat(taskDTO.getAssignee().getId(), is(user.getId()));
         assertThat(taskDTO.getShoppingListId(), is(otherShoppingList.getId()));
         assertThat(taskDTO.getFoodDTO().getId(), is(food.getId()));
+        assertThat(taskDTO.getTimestamp(), is(Timestamp.valueOf(LocalDateTime.of(2024, 12, 30, 23, 50))));
         assertThat(taskDTO.getQuantity(), is(1.2f));
     }
 
@@ -258,6 +266,7 @@ public class TaskControllerIntegrationTest extends ServicesTestSupport {
         assertThat(taskDTO.getAssignee().getId(), is(user.getId()));
         assertThat(taskDTO.getShoppingListId(), is(otherShoppingList.getId()));
         assertThat(taskDTO.getFoodDTO().getId(), is(food.getId()));
+        assertThat(taskDTO.getTimestamp(), is(Timestamp.valueOf(LocalDateTime.of(2024, 12, 30, 23, 50))));
         assertThat(taskDTO.getQuantity(), is(1.2f));
     }
 
@@ -269,6 +278,7 @@ public class TaskControllerIntegrationTest extends ServicesTestSupport {
                 .taskId(task.getId())
                 .foodId(otherFood.getId())
                 .userId(otherUser.getId())
+                .timestamp(Timestamp.valueOf(LocalDateTime.of(2024, 12, 30, 23, 55)))
                 .quantity(1.3f)
                 .shoppingListId(shoppingList.getId())
                 .build();
@@ -288,6 +298,7 @@ public class TaskControllerIntegrationTest extends ServicesTestSupport {
         assertThat(taskDTO.getAssignee().getId(), is(updateTaskRequest.getUserId()));
         assertThat(taskDTO.getShoppingListId(), is(updateTaskRequest.getShoppingListId()));
         assertThat(taskDTO.getFoodDTO().getId(), is(updateTaskRequest.getFoodId()));
+        assertThat(taskDTO.getTimestamp(), is(Timestamp.valueOf(LocalDateTime.of(2024, 12, 30, 23, 55))));
         assertThat(taskDTO.getQuantity(), is(updateTaskRequest.getQuantity()));
     }
 

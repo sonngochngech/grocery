@@ -1,7 +1,7 @@
 package com.grocery.app.integrationTests.recipe;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.grocery.app.config.constant.StatusConfig;
-import com.grocery.app.dto.MealDTO;
 import com.grocery.app.dto.RecipeDTO;
 import com.grocery.app.dto.request.FavRequest;
 import com.grocery.app.dto.request.createRequest.CreateRecipeRequest;
@@ -15,11 +15,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.nio.file.Files;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -166,31 +169,60 @@ public class RecipeControllerIntegrationTest extends ServicesTestSupport {
     }
 
     @Test
-    void testCreateRecipe() throws Exception{
+    void testCreateRecipe() throws Exception {
         System.out.println("-----test create recipe-----");
+
+        // Tạo request JSON
         CreateRecipeRequest createRecipeRequest = CreateRecipeRequest.builder()
                 .name("Recipe")
                 .description("Recipeeeee")
                 .foods(new ArrayList<>(List.of(food.getId())))
-                .imageUrl("url")
                 .build();
 
+        // Chuyển JSON request thành chuỗi
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonRequest = objectMapper.writeValueAsString(createRecipeRequest);
+
+        // Tạo đối tượng MultipartFile giả
+        File imageFile = new File("src/test/java/com/grocery/app/integrationTests/recipe/WIN_20240705_21_34_08_Pro.jpg"); // Cập nhật đường dẫn đúng đến tệp hình ảnh
+        byte[] imageBytes = Files.readAllBytes(imageFile.toPath()); // Đọc dữ liệu tệp thành mảng byte
+
+        // Sử dụng ByteArrayInputStream để tạo MockMultipartFile
+        MockMultipartFile mockImage = new MockMultipartFile(
+                "image",
+                imageFile.getName(),
+                "image/jpeg",
+                new ByteArrayInputStream(imageBytes) // Chuyển mảng byte thành InputStream
+        );
+
+        // Sử dụng MultiValueMap để gửi multipart/form-data
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("request", jsonRequest); // Dữ liệu JSON dạng chuỗi
+        body.add("image", mockImage.getResource()); // Sử dụng resource của MockMultipartFile
+
+        // Định nghĩa headers
+        HttpHeaders headers = getHeader();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        // Tạo HttpEntity cho request
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+        // Gửi request
         ResponseEntity<BaseResponse<RecipeDTO>> response = testRestTemplate.exchange(
                 "/api/recipe/create",
                 HttpMethod.POST,
-                new HttpEntity<>(createRecipeRequest, getHeader()),
+                requestEntity,
                 new ParameterizedTypeReference<BaseResponse<RecipeDTO>>() {}
         );
 
+        // Kiểm tra kết quả
         assertThat(response.getStatusCode(), is(HttpStatus.CREATED));
 
         RecipeDTO recipeDTO = Objects.requireNonNull(response.getBody()).getData();
 
         assertThat(recipeDTO.getName(), is(createRecipeRequest.getName()));
         assertThat(recipeDTO.getDescription(), is(createRecipeRequest.getDescription()));
-        assertThat(recipeDTO.getImageUrl(), is(createRecipeRequest.getImageUrl()));
         assertThat(recipeDTO.getFoods().get(0).getId(), is(createRecipeRequest.getFoods().get(0)));
-
     }
 
     @Test
@@ -240,33 +272,64 @@ public class RecipeControllerIntegrationTest extends ServicesTestSupport {
     }
 
     @Test
-    void testUpdateRecipe() throws Exception{
+    void testUpdateRecipe() throws Exception {
         System.out.println("-----test update recipe-----");
+
+        // Tạo request JSON
         UpdateRecipeRequest updateRecipeRequest = UpdateRecipeRequest.builder()
                 .id(recipe.getId())
                 .name("Recipe++")
                 .description("Recipeeeee++")
                 .foods(new ArrayList<>(List.of(food.getId(), otherFood.getId())))
-                .imageUrl("url++")
                 .build();
 
+        // Chuyển JSON request thành chuỗi
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonRequest = objectMapper.writeValueAsString(updateRecipeRequest);
+
+        File imageFile = new File("src/test/java/com/grocery/app/integrationTests/recipe/WIN_20240705_21_34_13_Pro.jpg"); // Cập nhật đường dẫn đúng đến tệp hình ảnh
+        byte[] imageBytes = Files.readAllBytes(imageFile.toPath()); // Đọc dữ liệu tệp thành mảng byte
+
+        // Sử dụng ByteArrayInputStream để tạo MockMultipartFile
+        MockMultipartFile mockImage = new MockMultipartFile(
+                "image",
+                imageFile.getName(),
+                "image/jpeg",
+                new ByteArrayInputStream(imageBytes) // Chuyển mảng byte thành InputStream
+        );
+
+        // Sử dụng MultiValueMap để gửi multipart/form-data
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("request", jsonRequest); // Dữ liệu JSON dạng chuỗi
+        body.add("image", mockImage.getResource()); // Sử dụng resource của MockMultipartFile
+
+        // Định nghĩa headers
+        HttpHeaders headers = getHeader();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        // Tạo HttpEntity cho request
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+        // Gửi request
         ResponseEntity<BaseResponse<RecipeDTO>> response = testRestTemplate.exchange(
                 "/api/recipe/update",
                 HttpMethod.POST,
-                new HttpEntity<>(updateRecipeRequest, getHeader()),
+                requestEntity,
                 new ParameterizedTypeReference<BaseResponse<RecipeDTO>>() {}
         );
 
+        // Kiểm tra kết quả
         assertThat(response.getStatusCode(), is(HttpStatus.OK));
 
         RecipeDTO recipeDTO = Objects.requireNonNull(response.getBody()).getData();
 
         assertThat(recipeDTO.getName(), is(updateRecipeRequest.getName()));
         assertThat(recipeDTO.getDescription(), is(updateRecipeRequest.getDescription()));
-        assertThat(recipeDTO.getImageUrl(), is(updateRecipeRequest.getImageUrl()));
         assertThat(recipeDTO.getFoods().get(0).getId(), is(updateRecipeRequest.getFoods().get(0)));
         assertThat(recipeDTO.getFoods().get(1).getId(), is(updateRecipeRequest.getFoods().get(1)));
     }
+
+
 
     @Test
     void testDeleteRecipes() throws Exception{

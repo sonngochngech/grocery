@@ -53,6 +53,24 @@ public class NotificationFactoryImpl implements NotificationFactory {
         return notiDTO;
     }
 
+    public NotiDTO sendTaskAlert(String email,String content){
+        MeanDTO meanDTO= MeanDTO.builder()
+                .emails(Set.of(email))
+                .build();
+
+        NotiContentDTO notiContentDTO= NotiContentDTO.builder()
+                .title("Thông báo nhiệm vụ cho bạn")
+                .message(content)
+                .build();
+
+        NotiDTO notiDTO= NotiDTO.builder()
+                .notiContentDTO(notiContentDTO)
+                .meanDTO(meanDTO)
+                .build();
+
+        return notiDTO;
+    }
+
     public NotiDTO sendInvitationNoti(String email,String content){
         MeanDTO meanDTO= MeanDTO.builder()
                 .emails(Set.of(email))

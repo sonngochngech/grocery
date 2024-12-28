@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 
 @Data
 @AllArgsConstructor
@@ -16,6 +17,7 @@ public class TaskDTO {
     private Long shoppingListId;
     private UserDTO assignee;
     private FoodDTO foodDTO;
+    private Timestamp timestamp;
     private float quantity;
     private Date createdAt;
     private Date updatedAt;

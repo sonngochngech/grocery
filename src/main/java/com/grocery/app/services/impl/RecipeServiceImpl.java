@@ -8,6 +8,7 @@ import com.grocery.app.dto.RecipeDTO;
 import com.grocery.app.entities.*;
 import com.grocery.app.exceptions.ServiceException;
 import com.grocery.app.repositories.*;
+import com.grocery.app.services.FileService;
 import com.grocery.app.services.FoodService;
 import com.grocery.app.services.RecipeService;
 import org.modelmapper.ModelMapper;
@@ -38,6 +39,8 @@ public class RecipeServiceImpl implements RecipeService {
     private MealRepo mealRepo;
     @Autowired
     private FoodRepo foodRepo;
+    @Autowired
+    private FileService fileService;
 
     @Override
     public RecipeDTO createRecipe(RecipeDTO recipeDTO) {

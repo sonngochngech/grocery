@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 
@@ -15,6 +16,6 @@ public class UpdateRecipeRequest {
     private Long id;
     private String name;
     private String description;
-    private String imageUrl;
+    private MultipartFile image;
     private ArrayList<Long> foods;
 }

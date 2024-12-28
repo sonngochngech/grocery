@@ -9,6 +9,9 @@ import org.springframework.stereotype.Repository;
 import java.util.ArrayList;
 @Repository
 public interface TaskRepo extends JpaRepository<Task, Long> {
-    @Query("SELECT s FROM Task s WHERE s.assignee.id = :buyerId AND s.status <> 'deleted' ORDER BY s.createdAt DESC")
+    @Query("SELECT s FROM Task s WHERE s.assignee.id = :buyerId AND s.status <> 'deleted' ORDER BY s.timestamp DESC")
     ArrayList<Task> findAllByUserId(@Param("buyerId") Long buyerId);
+
+    @Query("SELECT s FROM Task s WHERE s.status <> 'deleted' ORDER BY s.timestamp DESC")
+    ArrayList<Task> findAllAndSortByTimestamp();
 }
