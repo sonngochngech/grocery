@@ -7,6 +7,8 @@ import com.grocery.app.dto.*;
 import com.grocery.app.dto.request.createRequest.CreateTaskRequest;
 import com.grocery.app.dto.request.updateRequest.UpdateTaskRequest;
 import com.grocery.app.exceptions.ServiceException;
+import com.grocery.app.notification.NotificationFactory;
+import com.grocery.app.notification.NotificationProducer;
 import com.grocery.app.payloads.responses.BaseResponse;
 import com.grocery.app.payloads.responses.ResponseFactory;
 import com.grocery.app.services.*;
@@ -18,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -48,6 +51,12 @@ public class TaskController {
     @Autowired
     private FamilyService familyService;
 
+    @Autowired
+    private NotificationFactory notificationFactory;
+
+    @Autowired
+    private NotificationProducer notificationProducer;
+
     @PostMapping("/add")
     public ResponseEntity<BaseResponse<TaskDTO>> createTask(@RequestBody CreateTaskRequest createTaskRequest) {
         // Tracing log: Nhận request tạo task
@@ -59,7 +68,8 @@ public class TaskController {
 
         // Kiểm tra sự tồn tại của người được giao (người dùng)
         UserDTO assignee = userService.getUserById(createTaskRequest.getAssignee());
-        if (assignee == null) {
+        UserDetailDTO assigneeInfo = userService.getUser(createTaskRequest.getAssignee());
+        if (assignee == null || assigneeInfo == null) {
             System.out.println("Assignee not found: " + createTaskRequest.getAssignee());
             throw new ServiceException(
                     ResCode.USER_NOT_FOUND.getMessage(),
@@ -105,18 +115,28 @@ public class TaskController {
         }
         System.out.println("Assignee is a member of the family.");
 
-        // Kiểm tra thời gian task có hợp lệ không
-        LocalDateTime now = LocalDateTime.now();
-        Duration duration = Duration.between(now, createTaskRequest.getDueDateTime());
-        System.out.println("Task due date: " + createTaskRequest.getDueDateTime() + ", current time: " + now);
-        if(duration.toMinutes() < 5){
-            System.out.println("Due date time is not valid, less than 5 minutes: " + duration.toMinutes());
+        // Lấy thời gian hiện tại
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+
+        // Lấy thời gian tác vụ từ yêu cầu
+        Timestamp taskTimestamp = createTaskRequest.getTimestamp();
+
+        // Tính toán độ dài thời gian giữa hiện tại và thời gian tác vụ
+        long durationInMillis = taskTimestamp.getTime() - now.getTime();
+        long durationInMinutes = durationInMillis / 1000 / 60;  // Chuyển đổi từ mili giây sang phút
+
+        System.out.println("Thời gian hết hạn tác vụ: " + taskTimestamp + ", thời gian hiện tại: " + now);
+
+        // Kiểm tra nếu thời gian còn lại ít hơn 60 phút
+        if (durationInMinutes < 60) {
+            System.out.println("Thời gian hết hạn không hợp lệ, ít hơn 60 phút: " + durationInMinutes);
             throw new ServiceException(
                     ResCode.DUE_DATE_TIME_NOT_VALID.getMessage(),
                     ResCode.DUE_DATE_TIME_NOT_VALID.getCode()
             );
         }
-        System.out.println("Due date time is valid.");
+
+        System.out.println("Thời gian hết hạn hợp lệ.");
 
         // Xây dựng TaskDTO với các thực thể đã được xác minh và các chi tiết khác
         TaskDTO taskDTO = TaskDTO.builder()
@@ -124,7 +144,7 @@ public class TaskController {
                 .foodDTO(foodDTO)
                 .shoppingListId(shoppingListDTO.getId())
                 .quantity(createTaskRequest.getQuantity())
-                .dueDateTime(createTaskRequest.getDueDateTime())
+                .timestamp(createTaskRequest.getTimestamp())
                 .createdAt(Date.valueOf(LocalDate.now()))
                 .updatedAt(Date.valueOf(LocalDate.now()))
                 .status(StatusConfig.AVAILABLE.getStatus())  // Đặt trạng thái mặc định nếu cần
@@ -134,6 +154,16 @@ public class TaskController {
         // Lưu nhiệm vụ và trả về phản hồi với nhiệm vụ đã tạo
         TaskDTO createdTask = taskService.createTask(taskDTO);
         System.out.println("Task created successfully: " + createdTask);
+
+        String content = "Bạn có một nhiệm vụ mới, mua "
+                + foodDTO.getName()
+                + " với số lượng "
+                + taskDTO.getQuantity()
+                + " thời hạn chót "
+                + taskDTO.getTimestamp();
+
+        NotiDTO noti = notificationFactory.sendTaskAlert(assigneeInfo.getEmail(), content);
+        notificationProducer.sendMessage(noti);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 ResponseFactory.createResponse(
@@ -243,19 +273,32 @@ public class TaskController {
             );
         }
 
-        // Kiểm tra thời gian task có hơp lẹ không
-        LocalDateTime now = LocalDateTime.now();
-        Duration duration = Duration.between(now, updateTaskRequest.getDueDateTime());
-        if(duration.toMinutes() < 5){
+        // Lấy thời gian hiện tại
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+
+        // Lấy thời gian tác vụ từ yêu cầu
+        Timestamp taskTimestamp = updateTaskRequest.getTimestamp();
+
+        // Tính toán độ dài thời gian giữa hiện tại và thời gian tác vụ
+        long durationInMillis = taskTimestamp.getTime() - now.getTime();
+        long durationInMinutes = durationInMillis / 1000 / 60;  // Chuyển đổi từ mili giây sang phút
+
+        System.out.println("Thời gian hết hạn tác vụ: " + taskTimestamp + ", thời gian hiện tại: " + now);
+
+        // Kiểm tra nếu thời gian còn lại ít hơn 5 phút
+        if (durationInMinutes < 5) {
+            System.out.println("Thời gian hết hạn không hợp lệ, ít hơn 5 phút: " + durationInMinutes);
             throw new ServiceException(
                     ResCode.DUE_DATE_TIME_NOT_VALID.getMessage(),
                     ResCode.DUE_DATE_TIME_NOT_VALID.getCode()
             );
         }
 
+        System.out.println("Thời gian hết hạn hợp lệ.");
+
         // Cập nhật ngày sửa đổi
         taskDTO.setUpdatedAt(Date.valueOf(LocalDate.now()));
-        taskDTO.setDueDateTime(updateTaskRequest.getDueDateTime());
+        taskDTO.setTimestamp(updateTaskRequest.getTimestamp());
 
         // Lưu nhiệm vụ đã cập nhật và trả về phản hồi
         TaskDTO updatedTaskDTO = taskService.updateTask(taskDTO);
