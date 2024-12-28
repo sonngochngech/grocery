@@ -2,13 +2,16 @@ package com.grocery.app.utils;
 
 import com.grocery.app.dto.NotiDTO;
 import com.grocery.app.dto.UserFridgeDTO;
+import com.grocery.app.entities.Task;
 import com.grocery.app.notification.NotificationFactory;
 import com.grocery.app.notification.NotificationProducer;
+import com.grocery.app.repositories.TaskRepo;
 import com.grocery.app.services.FridgeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +21,9 @@ public class CronJob {
 
     @Autowired
     private FridgeService fridgeService;
+
+    @Autowired
+    private TaskRepo taskRepo;
 
     @Autowired
     private NotificationFactory notificationFactory;
@@ -52,7 +58,32 @@ public class CronJob {
         return  null;
     }
 
+    @Scheduled(cron = "0 0/1 * * * ?") // Chạy mỗi 1 giờ
+    public Void sendTaskAlert() {
+        // Lấy danh sách các task sắp xếp theo timestamp
+        ArrayList<Task> availableTasks = taskRepo.findAllAndSortByTimestamp();
+        if (availableTasks == null) return null;
 
+        String headContent = "Bạn có nhiệm vụ sắp đến hạn (thời gian thực hiện nhỏ hơn 1 tiếng) - nhiệm vụ mua ";
 
+        // Lấy thời gian hiện tại và thời gian 1 tiếng sau
+        long now = System.currentTimeMillis();
+        long oneHourFromNow = now + 3600 * 1000; // Thêm 1 tiếng (3600 giây * 1000 mili giây)
+
+        for (Task task : availableTasks) {
+            // Kiểm tra nếu task.getTimestamp() nằm trong khoảng 1 tiếng từ bây giờ
+            if (task.getTimestamp().getTime() >= now && task.getTimestamp().getTime() <= oneHourFromNow) {
+                String foodName = task.getFood().getName() + " số lượng " + task.getQuantity();
+                NotiDTO notiDTO = notificationFactory.sendTaskAlert(
+                        task.getAssignee().getEmail(),
+                        headContent + foodName
+                );
+
+                // Gửi thông báo
+                notificationProducer.sendMessage(notiDTO);
+            }
+        }
+        return null;
+    }
 
 }
