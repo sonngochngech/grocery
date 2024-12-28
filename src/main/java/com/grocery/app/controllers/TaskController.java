@@ -25,6 +25,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @RestController
@@ -56,6 +57,9 @@ public class TaskController {
 
     @Autowired
     private NotificationProducer notificationProducer;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @PostMapping("/add")
     public ResponseEntity<BaseResponse<TaskDTO>> createTask(@RequestBody CreateTaskRequest createTaskRequest) {
@@ -162,7 +166,20 @@ public class TaskController {
                 + " thời hạn chót "
                 + taskDTO.getTimestamp();
 
-        NotiDTO noti = notificationFactory.sendTaskAlert(assigneeInfo.getEmail(), content);
+        NotiContentDTO notiContentDTO = NotiContentDTO.builder()
+                .title("Nhiệm vụ mới")
+                .type("task")
+                .message(content)
+                .externalData("nothing else")
+                .build();
+
+        NotificationDTO notificationDTO = notificationService.saveNotification(
+                assigner.getId(),
+                List.of(assignee.getId()),
+                notiContentDTO
+        );
+
+        NotiDTO noti = notificationFactory.sendNotification(notificationDTO);
         notificationProducer.sendMessage(noti);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
@@ -305,13 +322,26 @@ public class TaskController {
         TaskDTO updatedTaskDTO = taskService.updateTask(taskDTO);
 
         String content = "Bạn có một nhiệm vụ mới, mua "
-                + updatedTaskDTO.getFoodDTO().getName()
+                + foodDTO.getName()
                 + " với số lượng "
-                + updatedTaskDTO.getQuantity()
+                + taskDTO.getQuantity()
                 + " thời hạn chót "
-                + updatedTaskDTO.getTimestamp();
+                + taskDTO.getTimestamp();
 
-        NotiDTO noti = notificationFactory.sendTaskAlert(newAssigneeDTO.getEmail(), content);
+        NotiContentDTO notiContentDTO = NotiContentDTO.builder()
+                .title("Nhiệm vụ mới")
+                .type("task")
+                .message(content)
+                .externalData("nothing else")
+                .build();
+
+        NotificationDTO notificationDTO = notificationService.saveNotification(
+                assigner.getId(),
+                List.of(newAssignee.getId()),
+                notiContentDTO
+        );
+
+        NotiDTO noti = notificationFactory.sendNotification(notificationDTO);
         notificationProducer.sendMessage(noti);
 
         return ResponseEntity.status(HttpStatus.OK)

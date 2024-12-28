@@ -1,12 +1,15 @@
 package com.grocery.app.utils;
 
+import com.grocery.app.dto.NotiContentDTO;
 import com.grocery.app.dto.NotiDTO;
+import com.grocery.app.dto.NotificationDTO;
 import com.grocery.app.dto.UserFridgeDTO;
 import com.grocery.app.entities.Task;
 import com.grocery.app.notification.NotificationFactory;
 import com.grocery.app.notification.NotificationProducer;
 import com.grocery.app.repositories.TaskRepo;
 import com.grocery.app.services.FridgeService;
+import com.grocery.app.services.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -30,6 +33,9 @@ public class CronJob {
 
     @Autowired
     private NotificationProducer notificationProducer;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @Scheduled(cron = "0 * * * * *")
     public Void  sendExpriedFridgeItemsNoti(){
@@ -74,13 +80,23 @@ public class CronJob {
             // Kiểm tra nếu task.getTimestamp() nằm trong khoảng 1 tiếng từ bây giờ
             if (task.getTimestamp().getTime() >= now && task.getTimestamp().getTime() <= oneHourFromNow) {
                 String foodName = task.getFood().getName() + " số lượng " + task.getQuantity();
-                NotiDTO notiDTO = notificationFactory.sendTaskAlert(
-                        task.getAssignee().getEmail(),
-                        headContent + foodName
+
+                NotiContentDTO notiContentDTO = NotiContentDTO.builder()
+                        .title("Nhiệm vụ mới")
+                        .type("task")
+                        .message(headContent + foodName)
+                        .externalData("nothing else")
+                        .build();
+
+                NotificationDTO notificationDTO = notificationService.saveNotification(
+                        task.getShoppingList().getOwner().getId(),
+                        List.of(task.getAssignee().getId()),
+                        notiContentDTO
                 );
 
-                // Gửi thông báo
-                notificationProducer.sendMessage(notiDTO);
+                NotiDTO noti = notificationFactory.sendNotification(notificationDTO);
+                notificationProducer.sendMessage(noti);
+
             }
         }
         return null;
