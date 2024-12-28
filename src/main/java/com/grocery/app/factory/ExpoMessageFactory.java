@@ -17,9 +17,12 @@ import static com.grocery.app.config.constant.AppConstants.EXTERNAL_DATA;
 public class ExpoMessageFactory {
 
     public static ExpoPushMessage createExpoPushMessage(ExpoNotiDTO expoNotiDTO){
+        System.out.println("Creating Expo Push Message");
+        System.out.println(expoNotiDTO.getToken());
         ExpoPushMessage expoPushMessage = new ExpoPushMessage();
           expoPushMessage.setTo(expoNotiDTO.getToken());
           expoPushMessage.setBody(expoNotiDTO.getBody());
+            expoPushMessage.setTitle(expoNotiDTO.getTitle());
           expoPushMessage.setData(new HashMap<>(Map.of(EXTERNAL_DATA,expoNotiDTO.getExternalData())));
           return expoPushMessage;
     }

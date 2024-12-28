@@ -16,5 +16,6 @@ public class ExpoNotiDTO {
 
     private List<String> token=new ArrayList<>();
     private String body;
+    private String title;
     private String externalData;
 }

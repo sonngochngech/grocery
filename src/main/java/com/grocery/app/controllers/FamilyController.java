@@ -1,8 +1,12 @@
 package com.grocery.app.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.grocery.app.config.UserInfoConfig;
 import com.grocery.app.config.constant.ResCode;
 import com.grocery.app.dto.InvitationDTO;
+import com.grocery.app.dto.NotiContentDTO;
+import com.grocery.app.dto.NotificationDTO;
 import com.grocery.app.dto.UserDTO;
 import com.grocery.app.dto.family.FamilyDTO;
 import com.grocery.app.dto.family.FamilyDetailDTO;
@@ -12,10 +16,7 @@ import com.grocery.app.notification.NotificationProducer;
 import com.grocery.app.payloads.responses.BaseResponse;
 import com.grocery.app.payloads.responses.ErrorResponse;
 import com.grocery.app.payloads.responses.ResponseFactory;
-import com.grocery.app.services.AuthenticationService;
-import com.grocery.app.services.FamilyService;
-import com.grocery.app.services.InvitationService;
-import com.grocery.app.services.UserService;
+import com.grocery.app.services.*;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("api/users/families")
@@ -51,6 +53,14 @@ public class FamilyController {
 
     @Autowired
     private NotificationFactory notificationFactory;
+
+
+    @Autowired
+    private NotificationService notificationService;
+
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
 
 
@@ -127,7 +137,7 @@ public class FamilyController {
     }
 
     @PutMapping("/{familyId}/members/invite")
-    public ResponseEntity<BaseResponse<InvitationDTO>> invite(@PathVariable Long familyId,@RequestParam String username) {
+    public ResponseEntity<BaseResponse<InvitationDTO>> invite(@PathVariable Long familyId,@RequestParam String username) throws JsonProcessingException {
         Long ownerId = authenticationService.getCurrentUser().getId();
         boolean isOwner = familyService.verifyOwner(familyId,ownerId);
         UserInfoConfig user = (UserInfoConfig) userDetailsService.loadUserByUsername(username);
@@ -135,8 +145,11 @@ public class FamilyController {
             throw new ControllerException(ResCode.NOT_OWNER_OF_FAMILY.getMessage(), ResCode.NOT_OWNER_OF_FAMILY.getCode());
         }
         InvitationDTO invitationDTO = invitationService.createInvitation(familyId,user.getId());
-        String content="Nếu bạn đồng ý tham gia gia đình, hãy ấn vào link  và chấp nhận lời mời: "+ "http://10.13.28.161:8081/api/response-invitation?invitationId="+invitationDTO.getId()+"&isAccepted=true&userId="+user.getId()+"&familyId="+familyId;
-        notificationProducer.sendMessage(notificationFactory.sendInvitationNoti(user.getEmail(),content));
+//        String content="Nếu bạn đồng ý tham gia gia đình, hãy ấn vào link  và chấp nhận lời mời: "+ "http://10.13.28.161:8081/api/response-invitation?invitationId="+invitationDTO.getId()+"&isAccepted=true&userId="+user.getId()+"&familyId="+familyId;
+//        notificationProducer.sendMessage(notificationFactory.sendInvitationNoti(user.getEmail(),content));
+        Map<String,Object> externalData= Map.of("invitationId",invitationDTO.getId(),"userId",user.getId(),"familyId",familyId,"familyname",invitationDTO.getFamily().getName(),"username",user.getUsername());
+        NotificationDTO notificationDTO= notificationService.saveNotification(ownerId, List.of(user.getId()), NotiContentDTO.builder().title("Mời bạn tham gia đình").type("invitation").message("tuyệt vời").externalData(objectMapper.writeValueAsString(externalData)).build());
+        notificationProducer.sendMessage(notificationFactory.sendNotification(notificationDTO));
         BaseResponse<InvitationDTO> response = ResponseFactory.createResponse(invitationDTO, ResCode.INVITATION_SUCCESSFULLY.getMessage(), ResCode.INVITATION_SUCCESSFULLY.getCode());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

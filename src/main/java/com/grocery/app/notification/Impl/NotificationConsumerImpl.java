@@ -63,6 +63,7 @@ public class NotificationConsumerImpl implements NotificationConsumer {
             FcmDTO fcmDTO = objectMapper.readValue(message, FcmDTO.class);
             ExpoNotiDTO expoNotiDTO = ExpoNotiDTO.builder()
                     .body(fcmDTO.getNotiContentDTO().getMessage())
+                    .title(fcmDTO.getNotiContentDTO().getTitle())
                     .externalData(objectMapper.writeValueAsString(fcmDTO.getNotiContentDTO()))
                     .token(fcmDTO.getDevices().stream().toList())
                     .build();
