@@ -242,7 +242,8 @@ public class TaskController {
 
         // Cập nhật người nhận nếu đã thay đổi
         UserDTO newAssignee = userService.getUserById(updateTaskRequest.getUserId());
-        if (newAssignee == null) {
+        UserDetailDTO newAssigneeDTO = userService.getUser(updateTaskRequest.getUserId());
+        if (newAssignee == null || newAssigneeDTO == null) {
             throw new ServiceException(
                     ResCode.USER_NOT_FOUND.getMessage(),
                     ResCode.USER_NOT_FOUND.getCode()
@@ -302,6 +303,16 @@ public class TaskController {
 
         // Lưu nhiệm vụ đã cập nhật và trả về phản hồi
         TaskDTO updatedTaskDTO = taskService.updateTask(taskDTO);
+
+        String content = "Bạn có một nhiệm vụ mới, mua "
+                + updatedTaskDTO.getFoodDTO().getName()
+                + " với số lượng "
+                + updatedTaskDTO.getQuantity()
+                + " thời hạn chót "
+                + updatedTaskDTO.getTimestamp();
+
+        NotiDTO noti = notificationFactory.sendTaskAlert(newAssigneeDTO.getEmail(), content);
+        notificationProducer.sendMessage(noti);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(
